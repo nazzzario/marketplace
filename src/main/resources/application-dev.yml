@@ -1,0 +1,2 @@
+springdoc:
+  server.url: http://ec2-3-79-99-48.eu-central-1.compute.amazonaws.com

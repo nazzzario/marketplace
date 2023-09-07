@@ -1,0 +1,2 @@
+springdoc:
+  server.url: http://localhost:${server.port}
