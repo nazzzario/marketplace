@@ -36,7 +36,7 @@ jobs:
          uses: docker/build-push-action@v4
          with:
            push: true
-           tags:  ${{ secrets.DOCKERHUB_USERNAME }}/${{ secrets.IMAGE }}:latest
+           tags:  ${{ secrets.DOCKER_USERNAME }}/${{ secrets.IMAGE }}:latest
   deploy:
     needs: package
     runs-on: ubuntu-20.04
