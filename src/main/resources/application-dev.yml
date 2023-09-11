@@ -5,7 +5,7 @@ spring:
   datasource:
     hikari:
       maximum-pool-size: 10
-    url: jdbc:postgresql://marketplace.cqpznqxgmkio.eu-central-1.rds.amazonaws.com/marketplace
-    username: postgres
-    password: 9WBst4lg4udx5eS0VwPx
+    url: jdbc:postgresql://${DB_URL}/marketplace
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
     driver-class-name: org.postgresql.Driver
