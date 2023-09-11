@@ -8,5 +8,13 @@ spring:
     multipart:
       max-file-size: 10MB
       max-request-size: 10MB
-  profiles:
-    active: local
+
+  jpa:
+    show-sql: true
+    hibernate:
+      ddl-auto: none
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
+
+  liquibase:
+    enabled: true
+    change-log: classpath:/database/project-changelogs.xml

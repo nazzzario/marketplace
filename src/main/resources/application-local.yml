@@ -1,2 +1,11 @@
 springdoc:
   server.url: http://localhost:${server.port}
+
+spring:
+  datasource:
+    hikari:
+      maximum-pool-size: 10
+    url: jdbc:postgresql://localhost:5432/marketplace
+    username: postgres
+    password: root
+    driver-class-name: org.postgresql.Driver

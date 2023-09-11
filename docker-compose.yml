@@ -1,0 +1,16 @@
+version: '3.9'
+services:
+  marketplace-local-db:
+    image: postgres:15.3
+    container_name: marketplace-local-db
+    environment:
+      POSTGRES_DB: marketplace
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: root
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+
+volumes:
+  pgdata:

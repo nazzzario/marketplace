@@ -1,2 +1,11 @@
 springdoc:
   server.url: http://ec2-3-79-99-48.eu-central-1.compute.amazonaws.com
+
+spring:
+  datasource:
+    hikari:
+      maximum-pool-size: 10
+    url: jdbc:postgresql://${DB_URL}/marketplace
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
+    driver-class-name: org.postgresql.Driver
