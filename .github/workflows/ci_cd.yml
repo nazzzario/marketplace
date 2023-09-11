@@ -15,7 +15,7 @@ jobs:
           distribution: 'adopt'
           java-version: '17'
       - name: Build Project
-        run: mvn clean install -Pdev
+        run: mvn clean install -P test
   package:
     needs: build
     runs-on: ubuntu-20.04
