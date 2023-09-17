@@ -5,7 +5,7 @@ CREATE TABLE IF NOT EXISTS public.tbl_user
     first_name character varying(30) NOT NULL,
     last_name character varying(30) NOT NULL,
     phone_number character varying(30) UNIQUE NOT NULL,
-    create_date timestamp with time zone,
+    created_date timestamp with time zone,
     modified_date timestamp with time zone,
     CONSTRAINT pk_tbl_user PRIMARY KEY (id)
 );

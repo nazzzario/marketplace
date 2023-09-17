@@ -10,7 +10,7 @@ public interface ProductService {
 
     ProductResponseDto getProductByReference(UUID reference);
 
-    ProductResponseDto createProduct(ProductRequestDto requestDto);
+    ProductResponseDto createProduct(ProductRequestDto requestDto, UUID userReference);
 
     void deleteProduct(UUID productReference);
 

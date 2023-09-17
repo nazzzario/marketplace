@@ -25,9 +25,10 @@ public class ProductController {
 
     }
 
-    @PostMapping("/create")
-    public ResponseEntity<ProductResponseDto> createProduct(@RequestBody ProductRequestDto requestDto) {
-        ProductResponseDto productResponse = productService.createProduct(requestDto);
+    @PostMapping("/users/{reference}/create")
+    public ResponseEntity<ProductResponseDto> createProduct(@RequestBody ProductRequestDto requestDto,
+                                                            @PathVariable(name = "reference") UUID userReference) {
+        ProductResponseDto productResponse = productService.createProduct(requestDto, userReference);
 
         return new ResponseEntity<>(productResponse, HttpStatus.CREATED);
     }

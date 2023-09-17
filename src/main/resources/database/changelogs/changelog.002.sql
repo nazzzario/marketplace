@@ -7,7 +7,6 @@ CREATE TABLE IF NOT EXISTS public.tbl_product
     city character varying NOT NULL,
     product_title character varying(20) NOT NULL,
     product_description character varying(300) NOT NULL,
-    contact_number character varying(30) NOT NULL,
     state character varying(15) NOT NULL,
     status character varying(15) NOT NULL DEFAULT 'ACTIVE',
     created_date timestamp with time zone,

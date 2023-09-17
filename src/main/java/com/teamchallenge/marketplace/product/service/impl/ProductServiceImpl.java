@@ -7,6 +7,7 @@ import com.teamchallenge.marketplace.product.persisit.entity.ProductEntity;
 import com.teamchallenge.marketplace.product.persisit.repository.ProductRepository;
 import com.teamchallenge.marketplace.product.service.ProductService;
 import com.teamchallenge.marketplace.user.persisit.entity.UserEntity;
+import com.teamchallenge.marketplace.user.persisit.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -20,6 +21,7 @@ import java.util.UUID;
 public class ProductServiceImpl implements ProductService {
 
     private final ProductRepository productRepository;
+    private final UserRepository userRepository;
 
     private final ProductMapper productMapper;
 
@@ -27,14 +29,18 @@ public class ProductServiceImpl implements ProductService {
     public ProductResponseDto getProductByReference(UUID reference) {
         ProductEntity productEntity = productRepository.findByReference(reference).orElseThrow(IllegalArgumentException::new);
 
-        return productMapper.toResponseDto(productEntity, new UserEntity());
+        return productMapper.toResponseDto(productEntity, productEntity.getOwner());
     }
 
     @Override
-    public ProductResponseDto createProduct(ProductRequestDto requestDto) {
+    public ProductResponseDto createProduct(ProductRequestDto requestDto, UUID userReference) {
+        UserEntity userEntity = userRepository.findByReference(userReference).orElseThrow(IllegalArgumentException::new);
         ProductEntity entity = productMapper.toEntity(requestDto);
+
+        entity.setOwner(userEntity);
+
         ProductEntity savedEntity = productRepository.save(entity);
-        return productMapper.toResponseDto(savedEntity, new UserEntity());
+        return productMapper.toResponseDto(savedEntity, userEntity);
     }
 
     @Override

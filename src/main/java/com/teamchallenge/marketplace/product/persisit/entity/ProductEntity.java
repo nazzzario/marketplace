@@ -35,6 +35,6 @@ public class ProductEntity extends BaseEntity {
     private ProductStatusEnum status;
 
     @ManyToOne
-    @JoinColumn(name = "owner_id", insertable = false, updatable = false)
+    @JoinColumn(name = "owner_id")
     private UserEntity owner;
 }
