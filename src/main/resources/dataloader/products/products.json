@@ -1,0 +1,164 @@
+{
+  "products": [
+    {
+      "categoryName": "ELECTRONIC",
+      "city": "Kyiv",
+      "productTitle": "Smartphone",
+      "productDescription": "Brand new smartphone for sale",
+      "state": "NEW",
+      "status": "ACTIVE"
+    },
+    {
+      "categoryName": "OTHER",
+      "city": "Lviv",
+      "productTitle": "Gadget",
+      "productDescription": "Cool gadget available now",
+      "state": "USED",
+      "status": "ACTIVE"
+    },
+    {
+      "categoryName": "FURNITURE",
+      "city": "Kharkiv",
+      "productTitle": "Sofa",
+      "productDescription": "Comfortable sofa, gently used",
+      "state": "DAMAGED",
+      "status": "ACTIVE"
+    },
+    {
+      "categoryName": "ELECTRONIC",
+      "city": "Dnipro",
+      "productTitle": "Laptop",
+      "productDescription": "Powerful laptop, like new",
+      "state": "NEW",
+      "status": "ACTIVE"
+    },
+    {
+      "categoryName": "FURNITURE",
+      "city": "Odesa",
+      "productTitle": "Dining Table",
+      "productDescription": "Elegant dining table, good condition",
+      "state": "USED",
+      "status": "ACTIVE"
+    },
+    {
+      "categoryName": "OTHER",
+      "city": "Khmelnytskyi",
+      "productTitle": "Tool Kit",
+      "productDescription": "Complete tool kit, never used",
+      "state": "DAMAGED",
+      "status": "ACTIVE"
+    },
+    {
+      "categoryName": "ELECTRONIC",
+      "city": "Vinnytsia",
+      "productTitle": "Headphones",
+      "productDescription": "High-quality headphones, sealed",
+      "state": "USED",
+      "status": "ACTIVE"
+    },
+    {
+      "categoryName": "OTHER",
+      "city": "Zaporizhia",
+      "productTitle": "Home Appliance",
+      "productDescription": "Appliance for your home, great deal",
+      "state": "NEW",
+      "status": "ACTIVE"
+    },
+    {
+      "categoryName": "FURNITURE",
+      "city": "Chernivtsi",
+      "productTitle": "Wardrobe",
+      "productDescription": "Spacious wardrobe, slightly damaged",
+      "state": "USED",
+      "status": "ACTIVE"
+    },
+    {
+      "categoryName": "ELECTRONIC",
+      "city": "Rivne",
+      "productTitle": "Tablet",
+      "productDescription": "Tablet with a beautiful display",
+      "state": "NEW",
+      "status": "ACTIVE"
+    },
+    {
+      "categoryName": "FURNITURE",
+      "city": "Mykolaiv",
+      "productTitle": "Coffee Table",
+      "productDescription": "Stylish coffee table, like new",
+      "state": "DAMAGED",
+      "status": "ACTIVE"
+    },
+    {
+      "categoryName": "OTHER",
+      "city": "Poltava",
+      "productTitle": "Art Supplies",
+      "productDescription": "Art supplies for creative minds",
+      "state": "USED",
+      "status": "ACTIVE"
+    },
+    {
+      "categoryName": "FURNITURE",
+      "city": "Ivano-Frankivsk",
+      "productTitle": "Bed",
+      "productDescription": "Comfortable bed, good condition",
+      "state": "NEW",
+      "status": "ACTIVE"
+    },
+    {
+      "categoryName": "ELECTRONIC",
+      "city": "Ternopil",
+      "productTitle": "Camera",
+      "productDescription": "Professional camera for photographers",
+      "state": "USED",
+      "status": "ACTIVE"
+    },
+    {
+      "categoryName": "OTHER",
+      "city": "Lutsk",
+      "productTitle": "Sports Equipment",
+      "productDescription": "Sports equipment for fitness enthusiasts",
+      "state": "NEW",
+      "status": "ACTIVE"
+    },
+    {
+      "categoryName": "FURNITURE",
+      "city": "Sumy",
+      "productTitle": "Desk",
+      "productDescription": "Study desk for students",
+      "state": "DAMAGED",
+      "status": "ACTIVE"
+    },
+    {
+      "categoryName": "ELECTRONIC",
+      "city": "Kherson",
+      "productTitle": "Smartwatch",
+      "productDescription": "Smartwatch with health tracking",
+      "state": "NEW",
+      "status": "ACTIVE"
+    },
+    {
+      "categoryName": "OTHER",
+      "city": "Cherkasy",
+      "productTitle": "Kitchen Appliances",
+      "productDescription": "Essential kitchen appliances",
+      "state": "USED",
+      "status": "ACTIVE"
+    },
+    {
+      "categoryName": "ELECTRONIC",
+      "city": "Zhytomyr",
+      "productTitle": "Gaming Console",
+      "productDescription": "Gaming console for gamers",
+      "state": "DAMAGED",
+      "status": "ACTIVE"
+    },
+    {
+      "categoryName": "FURNITURE",
+      "city": "Kropyvnytskyi",
+      "productTitle": "Bookshelf",
+      "productDescription": "Sturdy bookshelf, excellent condition",
+      "state": "NEW",
+      "status": "ACTIVE"
+    }
+  ]
+}

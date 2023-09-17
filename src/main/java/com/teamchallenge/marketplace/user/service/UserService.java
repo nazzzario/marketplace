@@ -9,4 +9,6 @@ public interface UserService {
     UserResponseDto createUser(UserRequestDto requestDto);
 
     UserResponseDto getUserByReference(UUID reference);
+
+    UserResponseDto getUserByPhoneNumber(String phoneNumber);
 }

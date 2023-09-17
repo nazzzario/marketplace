@@ -30,8 +30,17 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public UserResponseDto getUserByReference(UUID reference) {
-        UserEntity userByReference = userRepository.findByReference(reference).orElseThrow(IllegalArgumentException::new);
+        UserEntity userByReference = userRepository.findByReference(reference)
+                .orElseThrow(IllegalArgumentException::new);
 
         return userMapper.toResponseDto(userByReference);
+    }
+
+    @Override
+    public UserResponseDto getUserByPhoneNumber(String phoneNumber) {
+        UserEntity userByPhoneNumber = userRepository.findByPhoneNumber(phoneNumber)
+                .orElseThrow(IllegalArgumentException::new);
+
+        return userMapper.toResponseDto(userByPhoneNumber);
     }
 }
