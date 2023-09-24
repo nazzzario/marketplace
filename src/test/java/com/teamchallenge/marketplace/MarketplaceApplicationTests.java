@@ -1,4 +1,5 @@
 package com.teamchallenge.marketplace;
 
-public class MarketplaceApplicationTests {
+class MarketplaceApplicationTests {
+
 }
