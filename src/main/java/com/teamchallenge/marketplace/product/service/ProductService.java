@@ -19,4 +19,6 @@ public interface ProductService {
     ProductResponseDto patchProduct(ProductRequestDto requestDto);
 
     List<ProductResponseDto> getAllProducts();
+
+    List<ProductResponseDto> getProductsByProductTitle(String productTitle);
 }

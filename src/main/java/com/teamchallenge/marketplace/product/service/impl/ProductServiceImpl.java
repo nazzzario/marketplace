@@ -11,9 +11,12 @@ import com.teamchallenge.marketplace.user.persisit.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -59,7 +62,20 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public List<ProductResponseDto> getAllProducts() {
-        return null;
+        return productRepository.findAll().stream()
+                .map(p -> productMapper.toResponseDto(p, p.getOwner()))
+                .toList();
+    }
+
+    @Override
+    public List<ProductResponseDto> getProductsByProductTitle(String productTitle) {
+        if (Objects.isNull(productTitle)) {
+            throw new IllegalArgumentException();
+        }
+        return productRepository.findByProductTitleLikeIgnoreCase("%" + productTitle + "%")
+                .stream().map(p -> productMapper.toResponseDto(p, p.getOwner()))
+                .toList();
     }
 }

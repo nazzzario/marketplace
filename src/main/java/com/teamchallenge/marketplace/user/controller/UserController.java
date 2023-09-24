@@ -17,6 +17,13 @@ public class UserController {
 
     private final UserService userService;
 
+    @GetMapping("/info")
+    public ResponseEntity<UserResponseDto> getCurrentUserInfo(){
+        UserResponseDto userResponseDto = new UserResponseDto(null, "Катерина Meow", "+ 093 83 65 121");
+
+        return new ResponseEntity<>(userResponseDto, HttpStatus.OK);
+    }
+
     @GetMapping("/{reference}")
     public ResponseEntity<UserResponseDto> getUserByReference(@RequestParam(name = "reference") UUID reference){
         UserResponseDto userByReference = userService.getUserByReference(reference);
