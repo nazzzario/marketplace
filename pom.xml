@@ -19,6 +19,7 @@
 		<springdoc.version>2.1.0</springdoc.version>
 		<liquibase.version>4.23.0</liquibase.version>
 		<jasypt.version>3.0.4</jasypt.version>
+		<mapstruct.version>1.5.5.Final</mapstruct.version>
 	</properties>
 
 	<dependencies>
@@ -73,6 +74,26 @@
 			<artifactId>h2</artifactId>
 		</dependency>
 
+		<dependency>
+			<groupId>org.mapstruct</groupId>
+			<artifactId>mapstruct</artifactId>
+			<version>${mapstruct.version}</version>
+		</dependency>
+
+		<dependency>
+			<groupId>com.github.rholder</groupId>
+			<artifactId>guava-retrying</artifactId>
+			<version>2.0.0</version>
+		</dependency>
+
+		<!-- https://mvnrepository.com/artifact/commons-io/commons-io -->
+		<dependency>
+			<groupId>commons-io</groupId>
+			<artifactId>commons-io</artifactId>
+			<version>2.11.0</version>
+		</dependency>
+
+
 	</dependencies>
 
 	<profiles>
@@ -116,6 +137,30 @@
 						</exclude>
 					</excludes>
 					<finalName>marketplace-0.0.1</finalName>
+				</configuration>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-compiler-plugin</artifactId>
+				<version>3.11.0</version>
+				<configuration>
+					<annotationProcessorPaths>
+						<path>
+							<groupId>org.mapstruct</groupId>
+							<artifactId>mapstruct-processor</artifactId>
+							<version>1.5.5.Final</version>
+						</path>
+						<path>
+							<groupId>org.projectlombok</groupId>
+							<artifactId>lombok</artifactId>
+							<version>${lombok.version}</version>
+						</path>
+						<path>
+							<groupId>org.projectlombok</groupId>
+							<artifactId>lombok-mapstruct-binding</artifactId>
+							<version>0.2.0</version>
+						</path>
+					</annotationProcessorPaths>
 				</configuration>
 			</plugin>
 		</plugins>
