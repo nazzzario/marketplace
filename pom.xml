@@ -20,10 +20,10 @@
 		<liquibase.version>4.23.0</liquibase.version>
 		<jasypt.version>3.0.4</jasypt.version>
 		<mapstruct.version>1.5.5.Final</mapstruct.version>
+		<cloudinary.version>1.33.0</cloudinary.version>
 	</properties>
 
 	<dependencies>
-
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-web</artifactId>
@@ -94,7 +94,12 @@
 			<version>2.11.0</version>
 		</dependency>
 
-
+        <!--Cloudinary-->
+		<dependency>
+			<groupId>com.cloudinary</groupId>
+			<artifactId>cloudinary-http44</artifactId>
+			<version>${cloudinary.version}</version>
+		</dependency>
 	</dependencies>
 
 	<profiles>
