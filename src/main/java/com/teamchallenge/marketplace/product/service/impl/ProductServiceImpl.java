@@ -10,13 +10,14 @@ import com.teamchallenge.marketplace.user.persisit.entity.UserEntity;
 import com.teamchallenge.marketplace.user.persisit.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Slice;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -36,6 +37,7 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
+    @Transactional
     public ProductResponseDto createProduct(ProductRequestDto requestDto, UUID userReference) {
         UserEntity userEntity = userRepository.findByReference(userReference).orElseThrow(IllegalArgumentException::new);
         ProductEntity entity = productMapper.toEntity(requestDto);
@@ -77,5 +79,15 @@ public class ProductServiceImpl implements ProductService {
         return productRepository.findByProductTitleLikeIgnoreCase("%" + productTitle + "%")
                 .stream().map(p -> productMapper.toResponseDto(p, p.getOwner()))
                 .toList();
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public Slice<ProductResponseDto> getNewestProducts(Integer page, Integer size) {
+        PageRequest pageRequest = PageRequest.of(page, size);
+
+        var productsSortedByCreatedDate = productRepository.findByOrderByCreatedDate(pageRequest);
+
+        return productsSortedByCreatedDate.map(p -> productMapper.toResponseDto(p, p.getOwner()));
     }
 }

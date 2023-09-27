@@ -1,10 +1,12 @@
 package com.teamchallenge.marketplace.product.controller;
 
+import com.teamchallenge.marketplace.common.util.ApiSlice;
 import com.teamchallenge.marketplace.product.dto.request.ProductRequestDto;
 import com.teamchallenge.marketplace.product.dto.response.ProductResponseDto;
 import com.teamchallenge.marketplace.product.service.ProductService;
 import io.swagger.v3.oas.annotations.Operation;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Slice;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -48,5 +50,13 @@ public class ProductController {
         List<ProductResponseDto> productsByProductTitle = productService.getProductsByProductTitle(productTitle);
 
         return new ResponseEntity<>(productsByProductTitle, HttpStatus.OK);
+    }
+
+    @ApiSlice
+    @GetMapping("/newest")
+    public ResponseEntity<Slice<ProductResponseDto>> getNewestProducts(Integer page, Integer size){
+        var newestProducts = productService.getNewestProducts(page, size);
+
+        return new ResponseEntity<>(newestProducts, HttpStatus.OK);
     }
 }
