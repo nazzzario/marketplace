@@ -12,6 +12,7 @@ import java.util.Optional;
 import java.util.UUID;
 
 public interface ProductRepository extends JpaRepository<ProductEntity, Long>, PagingAndSortingRepository<ProductEntity, Long> {
+    long deleteByReference(UUID reference);
 
     Optional<ProductEntity> findByReference(@NonNull UUID reference);
 

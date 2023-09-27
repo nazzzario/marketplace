@@ -59,4 +59,11 @@ public class ProductController {
 
         return new ResponseEntity<>(newestProducts, HttpStatus.OK);
     }
+
+    @DeleteMapping("/{reference}")
+    public ResponseEntity<Void> deleteProduct(@PathVariable UUID reference){
+        productService.deleteProduct(reference);
+
+        return ResponseEntity.noContent().build();
+    }
 }

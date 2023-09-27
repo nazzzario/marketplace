@@ -49,8 +49,9 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
+    @Transactional
     public void deleteProduct(UUID productReference) {
-
+        productRepository.deleteByReference(productReference);
     }
 
     @Override
