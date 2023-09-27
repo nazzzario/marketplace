@@ -25,7 +25,7 @@ public class UserController {
     }
 
     @GetMapping("/{reference}")
-    public ResponseEntity<UserResponseDto> getUserByReference(@RequestParam(name = "reference") UUID reference){
+    public ResponseEntity<UserResponseDto> getUserByReference(@PathVariable(name = "reference") UUID reference){
         UserResponseDto userByReference = userService.getUserByReference(reference);
 
         return ResponseEntity.ok(userByReference);
