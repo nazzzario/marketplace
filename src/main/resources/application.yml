@@ -6,7 +6,7 @@ server:
 spring:
   servlet:
     multipart:
-      max-file-size: 10MB
+      max-file-size: 2MB
       max-request-size: 10MB
 
   jpa:
@@ -18,3 +18,8 @@ spring:
   liquibase:
     enabled: true
     change-log: classpath:/database/project-changelogs.xml
+
+cloudinary:
+  name: ${CLOUD_NAME}
+  key: ${API_KEY}
+  secret: ${API_SECRET}

@@ -72,8 +72,11 @@ public class ProductController {
     }
 
     @SneakyThrows
-    @PostMapping("/image")
-    public ResponseEntity<String> uploadPhoto(@RequestParam(name = "image") MultipartFile file) {
+    @PostMapping(
+            value = "/image",
+            consumes = "multipart/form-data"
+    )
+    public ResponseEntity<String> uploadPhoto(@RequestBody MultipartFile file) {
         String url = fileUpload.uploadFile(file);
 
         return ResponseEntity.ok(url);

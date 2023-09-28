@@ -20,7 +20,8 @@ public class FileUploadImpl implements FileUpload {
 
     @Override
     public String uploadFile(MultipartFile file) throws IOException {
-         return cloudinary.uploader()
+         return cloudinary
+                 .uploader()
                  .upload(file.getBytes(), Map.of("public_id", UUID.randomUUID().toString()))
                  .get("url")
                  .toString();

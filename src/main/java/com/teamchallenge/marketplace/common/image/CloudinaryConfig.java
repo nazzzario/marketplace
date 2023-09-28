@@ -1,6 +1,7 @@
 package com.teamchallenge.marketplace.common.image;
 
 import com.cloudinary.Cloudinary;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -9,9 +10,15 @@ import java.util.Map;
 
 @Configuration
 public class CloudinaryConfig {
-    private final String CLOUD_NAME = "teamchallenge-marketplace";
-    private final String API_KEY = "519845717787162";
-    private final String API_SECRET = "tmE7PuZ2PuSrYtxin_cIZVPMgAA";
+
+    @Value("${cloudinary.name}")
+    private String CLOUD_NAME;
+
+    @Value("${cloudinary.key}")
+    private String API_KEY;
+
+    @Value("${cloudinary.secret}")
+    private String API_SECRET;
 
     @Bean
     public Cloudinary getCloudinary(){
