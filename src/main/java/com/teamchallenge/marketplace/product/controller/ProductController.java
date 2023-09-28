@@ -1,5 +1,7 @@
 package com.teamchallenge.marketplace.product.controller;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.teamchallenge.marketplace.common.file.FileUpload;
 import com.teamchallenge.marketplace.common.util.ApiSlice;
 import com.teamchallenge.marketplace.product.dto.request.ProductRequestDto;
@@ -10,11 +12,13 @@ import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import org.springframework.data.domain.Slice;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.UUID;
 
 @RestController
@@ -38,10 +42,19 @@ public class ProductController {
             produces = "application/json",
             consumes = "multipart/form-data"
     )
-    public ResponseEntity<ProductResponseDto> createProduct(@RequestPart ProductRequestDto requestDto,
+    public ResponseEntity<ProductResponseDto> createProduct(@RequestPart String requestDto,
                                                             @RequestPart List<MultipartFile> images,
                                                             @PathVariable(name = "userReference") UUID userReference) {
-        ProductResponseDto productResponse = productService.createProduct(requestDto, images, userReference);
+        ProductRequestDto productRequestDto;
+        try {
+            productRequestDto = new ObjectMapper().readValue(requestDto, ProductRequestDto.class);
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException(e);
+        }
+        if(Objects.isNull(productRequestDto)){
+            return new ResponseEntity<>(null, HttpStatus.NO_CONTENT);
+        }
+        ProductResponseDto productResponse = productService.createProduct(productRequestDto, images, userReference);
 
         return new ResponseEntity<>(productResponse, HttpStatus.CREATED);
     }
