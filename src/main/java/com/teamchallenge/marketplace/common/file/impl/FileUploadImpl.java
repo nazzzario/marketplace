@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
@@ -19,11 +20,23 @@ public class FileUploadImpl implements FileUpload {
     private final Cloudinary cloudinary;
 
     @Override
-    public String uploadFile(MultipartFile file) throws IOException {
-         return cloudinary
-                 .uploader()
-                 .upload(file.getBytes(), Map.of("public_id", UUID.randomUUID().toString()))
-                 .get("url")
-                 .toString();
+    public String uploadFile(MultipartFile file, UUID productReference) {
+        try {
+            return cloudinary
+                   .uploader()
+                   .upload(file.getBytes(), Map.of("public_id", UUID.randomUUID().toString()))
+                   .get("url")
+                   .toString();
+        } catch (IOException e) {
+            // TODO: 28.09.23 create custom exception
+            throw new IllegalArgumentException(e);
+        }
+    }
+
+    @Override
+    public List<String> uploadFiles(List<MultipartFile> multipartFiles, UUID productReference) {
+        return multipartFiles.parallelStream()
+                .map(mf -> uploadFile(mf, productReference))
+                .toList();
     }
 }

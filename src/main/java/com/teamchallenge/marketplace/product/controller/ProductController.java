@@ -34,10 +34,14 @@ public class ProductController {
 
     }
 
-    @PostMapping("/users/{reference}/create")
-    public ResponseEntity<ProductResponseDto> createProduct(@RequestBody ProductRequestDto requestDto,
-                                                            @PathVariable(name = "reference") UUID userReference) {
-        ProductResponseDto productResponse = productService.createProduct(requestDto, userReference);
+    @PostMapping(
+            value = "/{userReference}/create",
+            consumes = "multipart/form-data"
+    )
+    public ResponseEntity<ProductResponseDto> createProduct(@RequestPart ProductRequestDto requestDto,
+                                                            @RequestPart List<MultipartFile> images,
+                                                            @PathVariable(name = "userReference") UUID userReference) {
+        ProductResponseDto productResponse = productService.createProduct(requestDto, images, userReference);
 
         return new ResponseEntity<>(productResponse, HttpStatus.CREATED);
     }
@@ -76,8 +80,8 @@ public class ProductController {
             value = "/image",
             consumes = "multipart/form-data"
     )
-    public ResponseEntity<String> uploadPhoto(@RequestBody MultipartFile file) {
-        String url = fileUpload.uploadFile(file);
+    public ResponseEntity<String> uploadPhoto(@RequestBody List<MultipartFile> file) {
+        String url = fileUpload.uploadFile(file.get(0), null);
 
         return ResponseEntity.ok(url);
     }

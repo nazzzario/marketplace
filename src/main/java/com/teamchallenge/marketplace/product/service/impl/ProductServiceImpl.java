@@ -1,5 +1,6 @@
 package com.teamchallenge.marketplace.product.service.impl;
 
+import com.teamchallenge.marketplace.common.file.FileUpload;
 import com.teamchallenge.marketplace.product.dto.request.ProductRequestDto;
 import com.teamchallenge.marketplace.product.dto.response.ProductResponseDto;
 import com.teamchallenge.marketplace.product.mapper.ProductMapper;
@@ -14,6 +15,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Slice;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 import java.util.Objects;
@@ -26,6 +28,7 @@ public class ProductServiceImpl implements ProductService {
 
     private final ProductRepository productRepository;
     private final UserRepository userRepository;
+    private final FileUpload fileUpload;
 
     private final ProductMapper productMapper;
 
@@ -38,13 +41,20 @@ public class ProductServiceImpl implements ProductService {
 
     @Override
     @Transactional
-    public ProductResponseDto createProduct(ProductRequestDto requestDto, UUID userReference) {
+    public ProductResponseDto createProduct(ProductRequestDto requestDto, List<MultipartFile> images,  UUID userReference) {
         UserEntity userEntity = userRepository.findByReference(userReference).orElseThrow(IllegalArgumentException::new);
         ProductEntity entity = productMapper.toEntity(requestDto);
+        // TODO: 28.09.23 how to mark image as cover
 
         entity.setOwner(userEntity);
-
         ProductEntity savedEntity = productRepository.save(entity);
+
+        var productImages = fileUpload.uploadFiles(images, savedEntity.getReference())
+                .stream()
+                .map(productMapper::toProductImage)
+                .toList();
+        savedEntity.setImages(productImages);
+
         return productMapper.toResponseDto(savedEntity, userEntity);
     }
 

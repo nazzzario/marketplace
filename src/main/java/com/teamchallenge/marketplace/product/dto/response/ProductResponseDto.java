@@ -14,6 +14,7 @@ public record ProductResponseDto(UUID reference,
                                  String ownerFirstName,
                                  String ownerPhoneNumber,
                                  ProductStateEnum state,
-                                 ProductStatusEnum status) {
+                                 ProductStatusEnum status,
+                                 ProductImagesResponseDto images) {
 }
 
