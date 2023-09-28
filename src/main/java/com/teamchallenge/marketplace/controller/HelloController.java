@@ -24,6 +24,5 @@ public class HelloController {
     static class Message {
         private String key;
         private String value;
-
     }
 }

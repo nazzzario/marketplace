@@ -31,11 +31,11 @@ public class ProductController {
         ProductResponseDto productByReference = productService.getProductByReference(reference);
 
         return new ResponseEntity<>(productByReference, HttpStatus.OK);
-
     }
 
     @PostMapping(
             value = "/{userReference}/create",
+            produces = "application/json",
             consumes = "multipart/form-data"
     )
     public ResponseEntity<ProductResponseDto> createProduct(@RequestPart ProductRequestDto requestDto,
@@ -78,7 +78,7 @@ public class ProductController {
     @SneakyThrows
     @PostMapping(
             value = "/image",
-            consumes = "multipart/form-data"
+            consumes = "*/*"
     )
     public ResponseEntity<String> uploadPhoto(@RequestBody List<MultipartFile> file) {
         String url = fileUpload.uploadFile(file.get(0), null);
