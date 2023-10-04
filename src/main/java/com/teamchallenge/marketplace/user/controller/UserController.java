@@ -17,6 +17,7 @@ public class UserController {
 
     private final UserService userService;
 
+    @Deprecated(forRemoval = true)
     @GetMapping("/info")
     public ResponseEntity<UserResponseDto> getCurrentUserInfo(){
         UserResponseDto userResponseDto = new UserResponseDto(null, "Катерина Meow", "+ 093 83 65 121");
