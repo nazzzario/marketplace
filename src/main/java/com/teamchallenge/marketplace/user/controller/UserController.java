@@ -17,6 +17,7 @@ public class UserController {
 
     private final UserService userService;
 
+    @Deprecated(forRemoval = true)
     @GetMapping("/info")
     public ResponseEntity<UserResponseDto> getCurrentUserInfo(){
         UserResponseDto userResponseDto = new UserResponseDto(null, "Катерина Meow", "+ 093 83 65 121");
@@ -25,7 +26,7 @@ public class UserController {
     }
 
     @GetMapping("/{reference}")
-    public ResponseEntity<UserResponseDto> getUserByReference(@RequestParam(name = "reference") UUID reference){
+    public ResponseEntity<UserResponseDto> getUserByReference(@PathVariable(name = "reference") UUID reference){
         UserResponseDto userByReference = userService.getUserByReference(reference);
 
         return ResponseEntity.ok(userByReference);

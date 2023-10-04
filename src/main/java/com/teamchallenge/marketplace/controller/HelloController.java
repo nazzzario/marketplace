@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/api/v1/public")
 public class HelloController {
 
+    @Deprecated(forRemoval = true)
     @GetMapping("/hello")
     public ResponseEntity<Object> hello() {
         Message message = new Message();
@@ -24,6 +25,5 @@ public class HelloController {
     static class Message {
         private String key;
         private String value;
-
     }
 }

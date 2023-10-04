@@ -1,22 +1,27 @@
 package com.teamchallenge.marketplace.product.service.impl;
 
+import com.teamchallenge.marketplace.common.file.FileUpload;
 import com.teamchallenge.marketplace.product.dto.request.ProductRequestDto;
 import com.teamchallenge.marketplace.product.dto.response.ProductResponseDto;
 import com.teamchallenge.marketplace.product.mapper.ProductMapper;
 import com.teamchallenge.marketplace.product.persisit.entity.ProductEntity;
+import com.teamchallenge.marketplace.product.persisit.entity.ProductImageEntity;
+import com.teamchallenge.marketplace.product.persisit.repository.ProductImageRepository;
 import com.teamchallenge.marketplace.product.persisit.repository.ProductRepository;
 import com.teamchallenge.marketplace.product.service.ProductService;
 import com.teamchallenge.marketplace.user.persisit.entity.UserEntity;
 import com.teamchallenge.marketplace.user.persisit.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Slice;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -24,7 +29,9 @@ import java.util.stream.Collectors;
 public class ProductServiceImpl implements ProductService {
 
     private final ProductRepository productRepository;
+    private final ProductImageRepository productImageRepository;
     private final UserRepository userRepository;
+    private final FileUpload fileUpload;
 
     private final ProductMapper productMapper;
 
@@ -36,19 +43,21 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
-    public ProductResponseDto createProduct(ProductRequestDto requestDto, UUID userReference) {
+    @Transactional
+    public ProductResponseDto createProduct(ProductRequestDto requestDto,  UUID userReference) {
         UserEntity userEntity = userRepository.findByReference(userReference).orElseThrow(IllegalArgumentException::new);
         ProductEntity entity = productMapper.toEntity(requestDto);
 
         entity.setOwner(userEntity);
-
         ProductEntity savedEntity = productRepository.save(entity);
+
         return productMapper.toResponseDto(savedEntity, userEntity);
     }
 
     @Override
+    @Transactional
     public void deleteProduct(UUID productReference) {
-
+        productRepository.deleteByReference(productReference);
     }
 
     @Override
@@ -77,5 +86,31 @@ public class ProductServiceImpl implements ProductService {
         return productRepository.findByProductTitleLikeIgnoreCase("%" + productTitle + "%")
                 .stream().map(p -> productMapper.toResponseDto(p, p.getOwner()))
                 .toList();
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public Slice<ProductResponseDto> getNewestProducts(Integer page, Integer size) {
+        PageRequest pageRequest = PageRequest.of(page, size);
+
+        var productsSortedByCreatedDate = productRepository.findByOrderByCreatedDate(pageRequest);
+
+        return productsSortedByCreatedDate.map(p -> productMapper.toResponseDto(p, p.getOwner()));
+    }
+
+    @Transactional
+    @Override
+    public ProductResponseDto uploadImagesToProduct(UUID productReference, List<MultipartFile> images) {
+        ProductEntity productEntity = productRepository.findByReference(productReference).orElseThrow(IllegalArgumentException::new);
+
+        List<ProductImageEntity> productImagesUrlEntity = fileUpload.uploadFiles(images).stream()
+                .map(productMapper::toProductImage)
+                .toList();
+
+        productImagesUrlEntity.forEach(pi -> pi.setProduct(productEntity));
+        productImageRepository.saveAll(productImagesUrlEntity);
+        productEntity.setImages(productImagesUrlEntity);
+
+        return productMapper.toResponseDto(productEntity, productEntity.getOwner());
     }
 }

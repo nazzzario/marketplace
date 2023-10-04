@@ -10,6 +10,8 @@ import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.util.List;
+
 @Table(name = "tbl_product")
 @Entity
 @Getter
@@ -37,4 +39,8 @@ public class ProductEntity extends BaseEntity {
     @ManyToOne
     @JoinColumn(name = "owner_id")
     private UserEntity owner;
+
+    // TODO: 27.09.23 remove images when remove product 
+    @OneToMany(mappedBy = "product")
+    private List<ProductImageEntity> images;
 }
