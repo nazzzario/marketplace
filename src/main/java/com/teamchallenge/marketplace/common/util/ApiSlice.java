@@ -11,7 +11,7 @@ import java.lang.annotation.Target;
 
 @Target({ElementType.METHOD, ElementType.ANNOTATION_TYPE, ElementType.TYPE})
 @Retention(RetentionPolicy.RUNTIME)
-@Parameter(name = "page", in = ParameterIn.QUERY, schema = @Schema(defaultValue = "0"))
-@Parameter(name = "size", in = ParameterIn.QUERY, schema = @Schema(defaultValue = "10"))
+@Parameter(name = "page", in = ParameterIn.QUERY, schema = @Schema(defaultValue = "0"), description = "Page number")
+@Parameter(name = "size", in = ParameterIn.QUERY, schema = @Schema(defaultValue = "10"), description = "Number of items per page")
 public @interface ApiSlice {
 }

@@ -20,7 +20,7 @@ public class FileUploadImpl implements FileUpload {
     private final Cloudinary cloudinary;
 
     @Override
-    public String uploadFile(MultipartFile file, UUID productReference) {
+    public String uploadFile(MultipartFile file) {
         try {
             return cloudinary
                    .uploader()
@@ -34,9 +34,9 @@ public class FileUploadImpl implements FileUpload {
     }
 
     @Override
-    public List<String> uploadFiles(List<MultipartFile> multipartFiles, UUID productReference) {
+    public List<String> uploadFiles(List<MultipartFile> multipartFiles) {
         return multipartFiles.parallelStream()
-                .map(mf -> uploadFile(mf, productReference))
+                .map(this::uploadFile)
                 .toList();
     }
 }

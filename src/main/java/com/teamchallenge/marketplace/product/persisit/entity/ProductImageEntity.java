@@ -12,11 +12,11 @@ import lombok.Setter;
 @Entity
 @Getter
 @Setter
-public class ProductImage extends BaseEntity {
+public class ProductImageEntity extends BaseEntity {
 
     private String imageUrl;
 
-    private boolean isCover;
+    private boolean cover;
 
     @ManyToOne
     @JoinColumn(name = "product_id")

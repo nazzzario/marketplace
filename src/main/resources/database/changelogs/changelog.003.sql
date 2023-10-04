@@ -3,7 +3,7 @@ CREATE TABLE IF NOT EXISTS public.tbl_product_images
     id serial UNIQUE NOT NULL,
     reference uuid UNIQUE NOT NULL,
     product_id integer NOT NULL,
-    product_url character varying(255) NOT NULL,
+    image_url character varying(255) NOT NULL,
     cover boolean NOT NULL DEFAULT FALSE,
     created_date timestamp with time zone,
     modified_date timestamp with time zone,

@@ -5,6 +5,8 @@ import com.teamchallenge.marketplace.product.dto.request.ProductRequestDto;
 import com.teamchallenge.marketplace.product.dto.response.ProductResponseDto;
 import com.teamchallenge.marketplace.product.mapper.ProductMapper;
 import com.teamchallenge.marketplace.product.persisit.entity.ProductEntity;
+import com.teamchallenge.marketplace.product.persisit.entity.ProductImageEntity;
+import com.teamchallenge.marketplace.product.persisit.repository.ProductImageRepository;
 import com.teamchallenge.marketplace.product.persisit.repository.ProductRepository;
 import com.teamchallenge.marketplace.product.service.ProductService;
 import com.teamchallenge.marketplace.user.persisit.entity.UserEntity;
@@ -27,6 +29,7 @@ import java.util.UUID;
 public class ProductServiceImpl implements ProductService {
 
     private final ProductRepository productRepository;
+    private final ProductImageRepository productImageRepository;
     private final UserRepository userRepository;
     private final FileUpload fileUpload;
 
@@ -41,19 +44,12 @@ public class ProductServiceImpl implements ProductService {
 
     @Override
     @Transactional
-    public ProductResponseDto createProduct(ProductRequestDto requestDto, List<MultipartFile> images,  UUID userReference) {
+    public ProductResponseDto createProduct(ProductRequestDto requestDto,  UUID userReference) {
         UserEntity userEntity = userRepository.findByReference(userReference).orElseThrow(IllegalArgumentException::new);
         ProductEntity entity = productMapper.toEntity(requestDto);
-        // TODO: 28.09.23 how to mark image as cover
 
         entity.setOwner(userEntity);
         ProductEntity savedEntity = productRepository.save(entity);
-
-        var productImages = fileUpload.uploadFiles(images, savedEntity.getReference())
-                .stream()
-                .map(productMapper::toProductImage)
-                .toList();
-        savedEntity.setImages(productImages);
 
         return productMapper.toResponseDto(savedEntity, userEntity);
     }
@@ -100,5 +96,21 @@ public class ProductServiceImpl implements ProductService {
         var productsSortedByCreatedDate = productRepository.findByOrderByCreatedDate(pageRequest);
 
         return productsSortedByCreatedDate.map(p -> productMapper.toResponseDto(p, p.getOwner()));
+    }
+
+    @Transactional
+    @Override
+    public ProductResponseDto uploadImagesToProduct(UUID productReference, List<MultipartFile> images) {
+        ProductEntity productEntity = productRepository.findByReference(productReference).orElseThrow(IllegalArgumentException::new);
+
+        List<ProductImageEntity> productImagesUrlEntity = fileUpload.uploadFiles(images).stream()
+                .map(productMapper::toProductImage)
+                .toList();
+
+        productImagesUrlEntity.forEach(pi -> pi.setProduct(productEntity));
+        productImageRepository.saveAll(productImagesUrlEntity);
+        productEntity.setImages(productImagesUrlEntity);
+
+        return productMapper.toResponseDto(productEntity, productEntity.getOwner());
     }
 }

@@ -12,7 +12,7 @@ public interface ProductService {
 
     ProductResponseDto getProductByReference(UUID reference);
 
-    ProductResponseDto createProduct(ProductRequestDto requestDto, List<MultipartFile> images, UUID userReference);
+    ProductResponseDto createProduct(ProductRequestDto requestDto, UUID userReference);
 
     void deleteProduct(UUID productReference);
 
@@ -25,4 +25,6 @@ public interface ProductService {
     List<ProductResponseDto> getProductsByProductTitle(String productTitle);
 
     Slice<ProductResponseDto> getNewestProducts(Integer page, Integer size);
+
+    ProductResponseDto uploadImagesToProduct(UUID productReference, List<MultipartFile> images);
 }

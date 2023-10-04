@@ -34,7 +34,7 @@ public class ProductLoader implements Consumer<List<Map<String, Object>>> {
                             ProductRequestDto productRequestDto = mapper.convertValue(y, ProductRequestDto.class);
                             UUID reference = userService.getUserByPhoneNumber("+ 093 83 65 121").reference();
 
-                            productService.createProduct(productRequestDto, null, reference);
+                            productService.createProduct(productRequestDto, reference);
                         })
                 );
 

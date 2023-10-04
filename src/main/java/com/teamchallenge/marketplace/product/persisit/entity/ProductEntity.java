@@ -42,5 +42,5 @@ public class ProductEntity extends BaseEntity {
 
     // TODO: 27.09.23 remove images when remove product 
     @OneToMany(mappedBy = "product")
-    private List<ProductImage> images;
+    private List<ProductImageEntity> images;
 }
