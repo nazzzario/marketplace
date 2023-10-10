@@ -1,5 +1,7 @@
 package com.teamchallenge.marketplace.product.service.impl;
 
+import com.teamchallenge.marketplace.common.exception.ClientBackendException;
+import com.teamchallenge.marketplace.common.exception.ErrorCode;
 import com.teamchallenge.marketplace.common.file.FileUpload;
 import com.teamchallenge.marketplace.product.dto.request.ProductRequestDto;
 import com.teamchallenge.marketplace.product.dto.response.ProductResponseDto;
@@ -37,7 +39,8 @@ public class ProductServiceImpl implements ProductService {
 
     @Override
     public ProductResponseDto getProductByReference(UUID reference) {
-        ProductEntity productEntity = productRepository.findByReference(reference).orElseThrow(IllegalArgumentException::new);
+        ProductEntity productEntity = productRepository.findByReference(reference)
+                .orElseThrow(() -> new ClientBackendException(ErrorCode.PRODUCT_NOT_FOUND));
 
         return productMapper.toResponseDto(productEntity, productEntity.getOwner());
     }
@@ -45,7 +48,9 @@ public class ProductServiceImpl implements ProductService {
     @Override
     @Transactional
     public ProductResponseDto createProduct(ProductRequestDto requestDto,  UUID userReference) {
-        UserEntity userEntity = userRepository.findByReference(userReference).orElseThrow(IllegalArgumentException::new);
+        UserEntity userEntity = userRepository.findByReference(userReference)
+                .orElseThrow(() -> new ClientBackendException(ErrorCode.USER_NOT_FOUND));
+
         ProductEntity entity = productMapper.toEntity(requestDto);
 
         entity.setOwner(userEntity);
@@ -81,7 +86,7 @@ public class ProductServiceImpl implements ProductService {
     @Override
     public List<ProductResponseDto> getProductsByProductTitle(String productTitle) {
         if (Objects.isNull(productTitle)) {
-            throw new IllegalArgumentException();
+            throw new ClientBackendException(ErrorCode.INVALID_SEARCH_INPUT);
         }
         return productRepository.findByProductTitleLikeIgnoreCase("%" + productTitle + "%")
                 .stream().map(p -> productMapper.toResponseDto(p, p.getOwner()))
@@ -101,7 +106,8 @@ public class ProductServiceImpl implements ProductService {
     @Transactional
     @Override
     public ProductResponseDto uploadImagesToProduct(UUID productReference, List<MultipartFile> images) {
-        ProductEntity productEntity = productRepository.findByReference(productReference).orElseThrow(IllegalArgumentException::new);
+        ProductEntity productEntity = productRepository.findByReference(productReference)
+                .orElseThrow(() -> new ClientBackendException(ErrorCode.PRODUCT_NOT_FOUND));
 
         List<ProductImageEntity> productImagesUrlEntity = fileUpload.uploadFiles(images).stream()
                 .map(productMapper::toProductImage)
