@@ -49,7 +49,7 @@ public class ProductServiceImpl implements ProductService {
     @Transactional
     public ProductResponseDto createProduct(ProductRequestDto requestDto,  UUID userReference) {
         UserEntity userEntity = userRepository.findByReference(userReference)
-                .orElseThrow(IllegalArgumentException::new);
+                .orElseThrow(() -> new ClientBackendException(ErrorCode.USER_NOT_FOUND));
 
         ProductEntity entity = productMapper.toEntity(requestDto);
 
@@ -86,7 +86,7 @@ public class ProductServiceImpl implements ProductService {
     @Override
     public List<ProductResponseDto> getProductsByProductTitle(String productTitle) {
         if (Objects.isNull(productTitle)) {
-            throw new IllegalArgumentException();
+            throw new ClientBackendException(ErrorCode.INVALID_SEARCH_INPUT);
         }
         return productRepository.findByProductTitleLikeIgnoreCase("%" + productTitle + "%")
                 .stream().map(p -> productMapper.toResponseDto(p, p.getOwner()))
@@ -106,7 +106,8 @@ public class ProductServiceImpl implements ProductService {
     @Transactional
     @Override
     public ProductResponseDto uploadImagesToProduct(UUID productReference, List<MultipartFile> images) {
-        ProductEntity productEntity = productRepository.findByReference(productReference).orElseThrow(IllegalArgumentException::new);
+        ProductEntity productEntity = productRepository.findByReference(productReference)
+                .orElseThrow(() -> new ClientBackendException(ErrorCode.PRODUCT_NOT_FOUND));
 
         List<ProductImageEntity> productImagesUrlEntity = fileUpload.uploadFiles(images).stream()
                 .map(productMapper::toProductImage)

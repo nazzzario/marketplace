@@ -1,6 +1,8 @@
 package com.teamchallenge.marketplace.common.file.impl;
 
 import com.cloudinary.Cloudinary;
+import com.teamchallenge.marketplace.common.exception.ClientBackendException;
+import com.teamchallenge.marketplace.common.exception.ErrorCode;
 import com.teamchallenge.marketplace.common.file.FileUpload;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -28,8 +30,7 @@ public class FileUploadImpl implements FileUpload {
                    .get("url")
                    .toString();
         } catch (IOException e) {
-            // TODO: 28.09.23 create custom exception
-            throw new IllegalArgumentException(e);
+            throw new ClientBackendException(ErrorCode.UNABLE_TO_SAVE_FILE);
         }
     }
 

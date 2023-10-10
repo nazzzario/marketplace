@@ -6,13 +6,21 @@ import lombok.Setter;
 
 @Getter
 public enum ErrorCode {
+    INVALID_SEARCH_INPUT("400-001",
+            "Invalid search parameter",
+            400),
     PRODUCT_NOT_FOUND("404-001",
             "Cannot find product",
             404),
+    USER_NOT_FOUND("404-002",
+            "Cannot find user",
+            404),
     UNKNOWN_SERVER_ERROR("500-001",
             "Unknown server error",
-            500);
-
+            500),
+    UNABLE_TO_SAVE_FILE("503-001",
+            "Unable to save file",
+            503);
     private final ErrorData errorData;
 
     ErrorCode(String code, String description, Integer httpResponseCode) {
