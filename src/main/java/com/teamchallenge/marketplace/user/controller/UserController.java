@@ -17,14 +17,6 @@ public class UserController {
 
     private final UserService userService;
 
-    @Deprecated(forRemoval = true)
-    @GetMapping("/info")
-    public ResponseEntity<UserResponseDto> getCurrentUserInfo(){
-        UserResponseDto userResponseDto = new UserResponseDto(null, "Катерина Meow", "+ 093 83 65 121");
-
-        return new ResponseEntity<>(userResponseDto, HttpStatus.OK);
-    }
-
     @GetMapping("/{reference}")
     public ResponseEntity<UserResponseDto> getUserByReference(@PathVariable(name = "reference") UUID reference){
         UserResponseDto userByReference = userService.getUserByReference(reference);
@@ -32,9 +24,9 @@ public class UserController {
         return ResponseEntity.ok(userByReference);
     }
 
-    @PostMapping("/create")
-    public ResponseEntity<UserResponseDto> createUser(@RequestBody UserRequestDto requestDto){
-        UserResponseDto createdUser = userService.createUser(requestDto);
+    @PostMapping("/registration")
+    public ResponseEntity<UserResponseDto> userRegistration(@RequestBody UserRequestDto requestDto){
+        UserResponseDto createdUser = userService.userRegistration(requestDto);
 
         return new ResponseEntity<>(createdUser, HttpStatus.CREATED);
     }

@@ -19,13 +19,16 @@ import java.util.List;
 public class UserEntity extends BaseEntity {
 
     @NotNull
-    private String firstName;
+    private String username;
 
     @NotNull
-    private String lastName;
+    private String email;
 
     @NotNull
     private String phoneNumber;
+
+    @NotNull
+    private String password;
 
     @OneToMany(mappedBy = "owner", fetch = FetchType.LAZY)
     private List<ProductEntity> products;

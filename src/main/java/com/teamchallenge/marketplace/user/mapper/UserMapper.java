@@ -16,6 +16,5 @@ public interface UserMapper {
     @Mapping(target = "createdDate", ignore = true)
     UserEntity toEntity(UserRequestDto requestDto);
 
-    @Mapping(target = "fullName", source = "firstName")
     UserResponseDto toResponseDto(UserEntity userEntity);
 }

@@ -1,6 +1,7 @@
 package com.teamchallenge.marketplace.user.dto.request;
 
-public record UserRequestDto(String firstName,
-                             String lastName,
-                             String phoneNumber) {
+public record UserRequestDto(String username,
+                             String email,
+                             String phoneNumber,
+                             String password) {
 }
