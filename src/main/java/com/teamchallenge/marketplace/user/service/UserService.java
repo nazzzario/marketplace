@@ -11,4 +11,6 @@ public interface UserService {
     UserResponseDto getUserByReference(UUID reference);
 
     UserResponseDto getUserByPhoneNumber(String phoneNumber);
+
+    boolean existsByEmail(String email);
 }
