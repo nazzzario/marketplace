@@ -1,5 +1,6 @@
 package com.teamchallenge.marketplace.controller;
 
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import lombok.Getter;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -9,6 +10,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("/api/v1/public")
+@SecurityRequirement(name = "Bearer Authentication")
 public class HelloController {
 
     @GetMapping("/hello")
