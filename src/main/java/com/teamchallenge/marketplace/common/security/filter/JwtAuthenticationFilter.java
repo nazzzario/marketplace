@@ -34,13 +34,16 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         final String jwt;
         final String userEmail;
 
-        if (Objects.isNull(authHeader) || !authHeader.startsWith("Bearer ")) {
+        if (isPublicPath(request.getRequestURI()) || Objects.isNull(authHeader) || !authHeader.startsWith("Bearer ")) {
             filterChain.doFilter(request, response);
             return;
         }
+
+
         jwt = authHeader.substring(7);
         userEmail = jwtService.extractUsername(jwt);
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+
         if (Objects.nonNull(userEmail) && Objects.isNull(authentication)) {
             UserDetails userDetails = userDetailsService.loadUserByUsername(userEmail);
             if (jwtService.isTokenValid(jwt, userDetails)) {
@@ -55,6 +58,11 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 SecurityContextHolder.getContext().setAuthentication(authToken);
             }
         }
+
         filterChain.doFilter(request, response);
+    }
+
+    private boolean isPublicPath(String contextPath) {
+        return contextPath.contains("/public/");
     }
 }

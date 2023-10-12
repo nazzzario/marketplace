@@ -1,7 +1,6 @@
 package com.teamchallenge.marketplace.common.config.security;
 
 import com.teamchallenge.marketplace.common.security.filter.JwtAuthenticationFilter;
-import com.teamchallenge.marketplace.user.persisit.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -27,6 +26,8 @@ public class SecurityConfig {
                 .authorizeHttpRequests(ar -> ar
                         .requestMatchers("/api/v1/public/auth/**", "/swagger-ui/**", "/v3/api-docs/**")
                         .permitAll()
+                        .requestMatchers("/api/v1/public/**") // allow public authentication
+                        .permitAll()
                         .anyRequest()
                         .authenticated()
                 )
@@ -34,9 +35,7 @@ public class SecurityConfig {
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 )
                 .authenticationProvider(authenticationProvider)
-                .addFilterBefore(jwtAuthFilet, UsernamePasswordAuthenticationFilter.class)
-
-        ;
+                .addFilterBefore(jwtAuthFilet, UsernamePasswordAuthenticationFilter.class);
 
         return httpSecurity.build();
     }
