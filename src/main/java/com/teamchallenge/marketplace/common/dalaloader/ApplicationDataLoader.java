@@ -26,7 +26,6 @@ import static lombok.AccessLevel.PRIVATE;
 
 @Slf4j
 @Component
-@Profile({"!dev"})
 @AllArgsConstructor
 @FieldDefaults(level = PRIVATE, makeFinal = true)
 public class ApplicationDataLoader {

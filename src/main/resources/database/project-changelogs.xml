@@ -8,4 +8,5 @@
     <changeSet id="001" author="Nazar Krasnovoronka" context="create tbl_user"><sqlFile path="database/changelogs/changelog.001.sql"/></changeSet>
     <changeSet id="002" author="Nazar Krasnovoronka" context="create tbl_product and reference to tbl_user"><sqlFile path="database/changelogs/changelog.002.sql"/></changeSet>
     <changeSet id="003" author="Nazar Krasnovoronka" context="create tbl_product_images and reference to tbl_product"><sqlFile path="database/changelogs/changelog.003.sql"/></changeSet>
+    <changeSet id="004" author="Nazar Krasnovoronka" context="add email to user"><sqlFile path="database/changelogs/changelog.004.sql"/></changeSet>
 </databaseChangeLog>

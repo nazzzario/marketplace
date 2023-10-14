@@ -28,7 +28,7 @@ public interface ProductMapper {
 
 
     @Mapping(target = "ownerPhoneNumber", source = "userEntity.phoneNumber")
-    @Mapping(target = "ownerFirstName", source = "userEntity.firstName")
+    @Mapping(target = "ownerUsername", source = "userEntity.username")
     @Mapping(target = "reference", source = "productEntity.reference")
     ProductResponseDto toResponseDto(ProductEntity productEntity, UserEntity userEntity);
 

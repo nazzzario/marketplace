@@ -3,9 +3,7 @@ package com.teamchallenge.marketplace.common.dalaloader.consumer;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.teamchallenge.marketplace.user.dto.request.UserRequestDto;
-import com.teamchallenge.marketplace.user.dto.response.UserResponseDto;
 import com.teamchallenge.marketplace.user.mapper.UserMapper;
-import com.teamchallenge.marketplace.user.persisit.entity.UserEntity;
 import com.teamchallenge.marketplace.user.persisit.repository.UserRepository;
 import com.teamchallenge.marketplace.user.service.UserService;
 import lombok.RequiredArgsConstructor;
@@ -37,7 +35,7 @@ public class UserLoader implements Consumer<List<Map<String, Object>>> {
                         ((List<HashMap>) x.get("users")).forEach(y -> {
                             UserRequestDto userRequestDto = mapper.convertValue(y, UserRequestDto.class);
 
-                            userService.createUser(userRequestDto);
+                            userService.userRegistration(userRequestDto);
                         })
                 );
 

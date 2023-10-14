@@ -20,7 +20,6 @@ import java.util.concurrent.locks.ReentrantLock;
 import static lombok.AccessLevel.PRIVATE;
 
 @Slf4j
-@Profile({"!dev"})
 @Component
 @FieldDefaults(level = PRIVATE)
 public class ApplicationDataLoaderInitializerImpl implements ApplicationDataLoaderInitializer {

@@ -6,9 +6,11 @@ import com.teamchallenge.marketplace.user.dto.response.UserResponseDto;
 import java.util.UUID;
 
 public interface UserService {
-    UserResponseDto createUser(UserRequestDto requestDto);
+    UserResponseDto userRegistration(UserRequestDto requestDto);
 
     UserResponseDto getUserByReference(UUID reference);
 
     UserResponseDto getUserByPhoneNumber(String phoneNumber);
+
+    boolean existsByEmail(String email);
 }
