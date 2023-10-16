@@ -1,5 +1,7 @@
 package com.teamchallenge.marketplace.common.config.security;
 
+import com.teamchallenge.marketplace.common.exception.JwtAuthenticationEntryPoint;
+import com.teamchallenge.marketplace.common.exception.RestAccessDeniedHandler;
 import com.teamchallenge.marketplace.common.security.filter.JwtAuthenticationFilter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
@@ -18,6 +20,8 @@ public class SecurityConfig {
 
     private final JwtAuthenticationFilter jwtAuthFilet;
     private final AuthenticationProvider authenticationProvider;
+    private final JwtAuthenticationEntryPoint jwtAuthenticationEntryPoint;
+    private final RestAccessDeniedHandler restAccessDeniedHandler;
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity httpSecurity) throws Exception {
@@ -35,7 +39,11 @@ public class SecurityConfig {
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 )
                 .authenticationProvider(authenticationProvider)
-                .addFilterBefore(jwtAuthFilet, UsernamePasswordAuthenticationFilter.class);
+                .addFilterBefore(jwtAuthFilet, UsernamePasswordAuthenticationFilter.class)
+                .exceptionHandling(ex -> ex
+                        .authenticationEntryPoint(jwtAuthenticationEntryPoint)
+                        .accessDeniedHandler(restAccessDeniedHandler))
+        ;
 
         return httpSecurity.build();
     }

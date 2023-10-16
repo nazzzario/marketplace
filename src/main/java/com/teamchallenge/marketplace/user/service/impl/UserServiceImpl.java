@@ -6,6 +6,7 @@ import com.teamchallenge.marketplace.user.dto.request.UserRequestDto;
 import com.teamchallenge.marketplace.user.dto.response.UserResponseDto;
 import com.teamchallenge.marketplace.user.mapper.UserMapper;
 import com.teamchallenge.marketplace.user.persisit.entity.UserEntity;
+import com.teamchallenge.marketplace.user.persisit.entity.enums.RoleEnum;
 import com.teamchallenge.marketplace.user.persisit.repository.UserRepository;
 import com.teamchallenge.marketplace.user.service.UserService;
 import lombok.RequiredArgsConstructor;
@@ -24,11 +25,13 @@ public class UserServiceImpl implements UserService {
     private final UserMapper userMapper;
 
     @Override
+    @Transactional
     public UserResponseDto userRegistration(UserRequestDto requestDto) {
         if(existsByEmail(requestDto.email())){
             throw new ClientBackendException(ErrorCode.EMAIL_ALREADY_EXISTS);
         }
         UserEntity userEntity = userMapper.toEntity(requestDto);
+        userEntity.setRole(RoleEnum.USER);
         UserEntity savedUser = userRepository.save(userEntity);
 
         return userMapper.toResponseDto(savedUser);
