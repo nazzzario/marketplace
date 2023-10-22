@@ -9,3 +9,10 @@ spring:
     username: postgres
     password: root
     driver-class-name: org.postgresql.Driver
+  security:
+    jwt:
+      header: Authorization
+      secret: zPAWvmOTAxXaTKcGj8IzyITdYarTrAvazMw2YvJpkbw
+      expiration: 600000
+      token-time: 10
+      refresh-token-time: 1000

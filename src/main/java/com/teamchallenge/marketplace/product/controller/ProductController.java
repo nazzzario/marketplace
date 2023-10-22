@@ -21,13 +21,13 @@ import java.util.UUID;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/api/v1/public/products")
+@RequestMapping("/api/v1")
 public class ProductController {
 
     private final ProductService productService;
 
     @Operation(description = "Get product by its reference")
-    @GetMapping("/{productReference}")
+    @GetMapping("/public/products/{productReference}")
     public ResponseEntity<ProductResponseDto> getProduct(
             @Parameter(description = "Product reference", required = true)
             @PathVariable(name = "productReference") UUID productReference
@@ -38,7 +38,7 @@ public class ProductController {
     }
 
     @Operation(description = "Create a new product")
-    @PostMapping("/{userReference}/create")
+    @PostMapping("/private/products/{userReference}/create")
     public ResponseEntity<ProductResponseDto> createProduct(
             @Parameter(description = "User reference", required = true)
             @PathVariable(name = "userReference") UUID userReference,
@@ -50,7 +50,7 @@ public class ProductController {
     }
 
     @Operation(description = "Get all products")
-    @GetMapping
+    @GetMapping("/public/products")
     public ResponseEntity<List<ProductResponseDto>> getAllProducts() {
         List<ProductResponseDto> allProducts = productService.getAllProducts();
 
@@ -58,7 +58,7 @@ public class ProductController {
     }
 
     @Operation(description = "Search products by product title")
-    @GetMapping("/search")
+    @GetMapping("/public/products/search")
     public ResponseEntity<List<ProductResponseDto>> getProductsByProductTitle(
             @Parameter(description = "Product title for searching", required = true)
             @RequestParam(name = "product-title") String productTitle
@@ -70,7 +70,7 @@ public class ProductController {
 
     @ApiSlice
     @Operation(description = "Get the newest products with pagination")
-    @GetMapping("/newest")
+    @GetMapping("/public/products/newest")
     public ResponseEntity<Slice<ProductResponseDto>> getNewestProducts(
             Integer page,
             Integer size
@@ -80,12 +80,13 @@ public class ProductController {
         return new ResponseEntity<>(newestProducts, HttpStatus.OK);
     }
 
+    // TODO: 12.10.23 only owner can delete product
     @Operation(description = "Delete a product by its reference")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "204", description = "Product deleted successfully"),
             @ApiResponse(responseCode = "404", description = "Product not found")
     })
-    @DeleteMapping("/{productReference}")
+    @DeleteMapping("/private/products/{productReference}")
     public ResponseEntity<Void> deleteProduct(
             @Parameter(description = "Product reference", required = true)
             @PathVariable UUID productReference
@@ -96,7 +97,7 @@ public class ProductController {
     }
 
     @Operation(description = "Upload images to a product")
-    @PostMapping(path = "/{productReference}/images", consumes = {MediaType.MULTIPART_FORM_DATA_VALUE})
+    @PostMapping(path = "/private/products/{productReference}/images", consumes = {MediaType.MULTIPART_FORM_DATA_VALUE})
     public ResponseEntity<ProductResponseDto> uploadProductImages(
             @Parameter(description = "Product reference", required = true)
             @PathVariable(name = "productReference") UUID productReference,
