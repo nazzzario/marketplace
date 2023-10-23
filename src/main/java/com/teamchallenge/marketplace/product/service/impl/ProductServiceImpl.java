@@ -8,6 +8,7 @@ import com.teamchallenge.marketplace.product.dto.response.ProductResponseDto;
 import com.teamchallenge.marketplace.product.mapper.ProductMapper;
 import com.teamchallenge.marketplace.product.persisit.entity.ProductEntity;
 import com.teamchallenge.marketplace.product.persisit.entity.ProductImageEntity;
+import com.teamchallenge.marketplace.product.persisit.entity.enums.ProductStatusEnum;
 import com.teamchallenge.marketplace.product.persisit.repository.ProductImageRepository;
 import com.teamchallenge.marketplace.product.persisit.repository.ProductRepository;
 import com.teamchallenge.marketplace.product.service.ProductService;
@@ -62,6 +63,9 @@ public class ProductServiceImpl implements ProductService {
     @Override
     @Transactional
     public void deleteProduct(UUID productReference) {
+        ProductEntity productEntity = productRepository.findByReference(productReference)
+                .orElseThrow(() -> new ClientBackendException(ErrorCode.PRODUCT_NOT_FOUND));
+
         productRepository.deleteByReference(productReference);
     }
 
