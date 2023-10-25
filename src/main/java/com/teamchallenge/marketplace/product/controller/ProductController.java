@@ -41,13 +41,12 @@ public class ProductController {
     }
 
     @Operation(description = "Create a new product")
-    @PostMapping("/private/products/{userReference}/create")
+    @PostMapping("/private/products/create")
+    @PreAuthorize("isAuthenticated()")
     public ResponseEntity<ProductResponseDto> createProduct(
-            @Parameter(description = "User reference", required = true)
-            @PathVariable(name = "userReference") UUID userReference,
             @RequestBody ProductRequestDto requestDto
     ) {
-        ProductResponseDto productResponse = productService.createProduct(requestDto, userReference);
+        ProductResponseDto productResponse = productService.createProduct(requestDto);
 
         return new ResponseEntity<>(productResponse, HttpStatus.CREATED);
     }
@@ -110,5 +109,17 @@ public class ProductController {
         ProductResponseDto responseDto = productService.uploadImagesToProduct(productReference, images);
 
         return new ResponseEntity<>(responseDto, HttpStatus.OK);
+    }
+
+    @Operation(description = "Patch product")
+    @PatchMapping("/private/products/{productReference}")
+    public ResponseEntity<ProductResponseDto> patchProduct(
+            @Parameter(description = "Product reference", required = true)
+            @PathVariable(name = "productReference") UUID productReference,
+            @RequestBody ProductRequestDto requestDto
+    ) {
+        ProductResponseDto productResponse = productService.patchProduct(requestDto, productReference);
+
+        return new ResponseEntity<>(productResponse, HttpStatus.OK);
     }
 }

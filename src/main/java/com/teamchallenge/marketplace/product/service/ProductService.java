@@ -12,13 +12,16 @@ public interface ProductService {
 
     ProductResponseDto getProductByReference(UUID reference);
 
+    ProductResponseDto createProduct(ProductRequestDto requestDto);
+
+
     ProductResponseDto createProduct(ProductRequestDto requestDto, UUID userReference);
 
     void deleteProduct(UUID productReference);
 
     ProductResponseDto putProduct(ProductRequestDto requestDto);
 
-    ProductResponseDto patchProduct(ProductRequestDto requestDto);
+    ProductResponseDto patchProduct(ProductRequestDto requestDto, UUID productReference);
 
     List<ProductResponseDto> getAllProducts();
 
