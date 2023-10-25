@@ -16,8 +16,12 @@ import com.teamchallenge.marketplace.user.persisit.entity.UserEntity;
 import com.teamchallenge.marketplace.user.persisit.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.hibernate.annotations.BatchSize;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Slice;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -48,7 +52,22 @@ public class ProductServiceImpl implements ProductService {
 
     @Override
     @Transactional
-    public ProductResponseDto createProduct(ProductRequestDto requestDto,  UUID userReference) {
+    public ProductResponseDto createProduct(ProductRequestDto requestDto) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+
+        UserEntity userEntity = userRepository.findByEmail(authentication.getName())
+                .orElseThrow(() -> new ClientBackendException(ErrorCode.USER_NOT_FOUND));
+
+        ProductEntity entity = productMapper.toEntity(requestDto);
+
+        entity.setOwner(userEntity);
+        ProductEntity savedEntity = productRepository.save(entity);
+
+        return productMapper.toResponseDto(savedEntity, userEntity);
+    }
+
+    @Override
+    public ProductResponseDto createProduct(ProductRequestDto requestDto, UUID userReference) {
         UserEntity userEntity = userRepository.findByReference(userReference)
                 .orElseThrow(() -> new ClientBackendException(ErrorCode.USER_NOT_FOUND));
 
@@ -75,12 +94,19 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
-    public ProductResponseDto patchProduct(ProductRequestDto requestDto) {
-        return null;
+    @Transactional
+    public ProductResponseDto patchProduct(ProductRequestDto requestDto, UUID productReference) {
+        ProductEntity productEntity = productRepository.findByReference(productReference)
+                .orElseThrow(() -> new ClientBackendException(ErrorCode.PRODUCT_NOT_FOUND));
+
+        productMapper.patchMerge(requestDto, productEntity);
+
+        return productMapper.toResponseDto(productEntity, productEntity.getOwner());
     }
 
     @Override
     @Transactional(readOnly = true)
+    @BatchSize(size = 10)
     public List<ProductResponseDto> getAllProducts() {
         return productRepository.findAll().stream()
                 .map(p -> productMapper.toResponseDto(p, p.getOwner()))

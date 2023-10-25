@@ -30,7 +30,6 @@ public class RestAccessDeniedHandler implements AccessDeniedHandler {
         mapResponse.put("httpResponseCode", 403);
         mapResponse.put("path", request.getRequestURI());
 
-
         new ObjectMapper().writeValueAsString(mapResponse);
 
     }
