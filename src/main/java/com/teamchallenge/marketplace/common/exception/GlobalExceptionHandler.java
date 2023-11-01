@@ -53,7 +53,6 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(AuthenticationException.class)
     public ResponseEntity<Map<String, Object>> handleAuthException(AuthenticationException ex, HttpServletRequest request){
-        System.out.println("Authentication exception");
         Map<String, Object> response = new LinkedCaseInsensitiveMap<>();
         String errorData = ex.getMessage();
         response.put("time", LocalDateTime.now());
@@ -62,6 +61,19 @@ public class GlobalExceptionHandler {
         response.put("path", request.getRequestURI());
 
         return new ResponseEntity<>(response, HttpStatusCode.valueOf(401));
+    }
+
+    // TODO: 11/1/23 add more specific exception handling 
+    @ExceptionHandler(IllegalArgumentException.class)
+    public ResponseEntity<Map<String, Object>> handleIllegalArgumentException(IllegalArgumentException ex, HttpServletRequest request){
+        Map<String, Object> response = new LinkedCaseInsensitiveMap<>();
+        String errorData = ex.getMessage();
+        response.put("time", LocalDateTime.now());
+        response.put("code", 400);
+        response.put("description", errorData);
+        response.put("path", request.getRequestURI());
+
+        return new ResponseEntity<>(response, HttpStatusCode.valueOf(400));
     }
 
     @ExceptionHandler(Exception.class)
