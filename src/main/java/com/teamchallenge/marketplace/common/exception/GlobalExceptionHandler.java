@@ -70,6 +70,7 @@ public class GlobalExceptionHandler {
         response.put("time", LocalDateTime.now());
         response.put("code", 500);
         response.put("description", "Unhandled exception");
+        response.put("message", ex.getMessage());
         response.put("httpResponseCode", 500);
         response.put("path", request.getRequestURI());
 

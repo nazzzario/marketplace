@@ -13,6 +13,6 @@ spring:
     jwt:
       header: Authorization
       secret: ${JWT_SECRET}
-      expiration: 600000
+      expiration: 600000000
       token-time: 10
       refresh-token-time: 1000

@@ -1,0 +1,30 @@
+package com.teamchallenge.marketplace.product.persisit.entity.enums;
+
+public enum CitiesEnum {
+    KYIV,
+    KHARKIV,
+    LVIV,
+    ODESA,
+    DNIPRO,
+    DONETSK,
+    ZAPORIZHIA,
+    LUTSK,
+    IVANOFRANKIVSK,
+    CHERNIVTSI,
+    KHMELNYTSKYI,
+    UZHGOROD,
+    POLTAVA,
+    SIMFEROPOL,
+    VINNYTSIA,
+    MYKOLAIV,
+    RIVNE,
+    CHERKASY,
+    SUMY,
+    TERNOPIL,
+    ZHYTOMYR,
+    KROPYVNYTSKYI,
+    CHERNIHIV,
+    MARIUPOL,
+    KRYVYIRIH,
+    OTHER
+}
