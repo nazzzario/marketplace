@@ -1,6 +1,7 @@
 package com.teamchallenge.marketplace.product.persisit.entity;
 
 import com.teamchallenge.marketplace.common.entity.BaseEntity;
+import com.teamchallenge.marketplace.product.persisit.entity.enums.CitiesEnum;
 import com.teamchallenge.marketplace.product.persisit.entity.enums.ProductCategoriesEnum;
 import com.teamchallenge.marketplace.product.persisit.entity.enums.ProductStateEnum;
 import com.teamchallenge.marketplace.product.persisit.entity.enums.ProductStatusEnum;
@@ -22,7 +23,8 @@ public class ProductEntity extends BaseEntity {
     @Enumerated(EnumType.STRING)
     private ProductCategoriesEnum categoryName;
 
-    private String city;
+    @Enumerated(EnumType.STRING)
+    private CitiesEnum city;
 
     @NotNull
     private String productTitle;

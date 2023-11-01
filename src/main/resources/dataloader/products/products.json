@@ -2,7 +2,7 @@
   "products": [
     {
       "categoryName": "ELECTRONIC",
-      "city": "Kyiv",
+      "city": "KYIV",
       "productTitle": "Smartphone",
       "productDescription": "Brand new smartphone for sale",
       "state": "NEW",
@@ -10,7 +10,7 @@
     },
     {
       "categoryName": "OTHER",
-      "city": "Lviv",
+      "city": "LVIV",
       "productTitle": "Gadget",
       "productDescription": "Cool gadget available now",
       "state": "USED",
@@ -18,7 +18,7 @@
     },
     {
       "categoryName": "FURNITURE",
-      "city": "Kharkiv",
+      "city": "KHARKIV",
       "productTitle": "Sofa",
       "productDescription": "Comfortable sofa, gently used",
       "state": "DAMAGED",
@@ -26,7 +26,7 @@
     },
     {
       "categoryName": "ELECTRONIC",
-      "city": "Dnipro",
+      "city": "DNIPRO",
       "productTitle": "Laptop",
       "productDescription": "Powerful laptop, like new",
       "state": "NEW",
@@ -34,7 +34,7 @@
     },
     {
       "categoryName": "FURNITURE",
-      "city": "Odesa",
+      "city": "ODESA",
       "productTitle": "Dining Table",
       "productDescription": "Elegant dining table, good condition",
       "state": "USED",
@@ -42,7 +42,7 @@
     },
     {
       "categoryName": "OTHER",
-      "city": "Khmelnytskyi",
+      "city": "KHMELNYTSKYI",
       "productTitle": "Tool Kit",
       "productDescription": "Complete tool kit, never used",
       "state": "DAMAGED",
@@ -50,7 +50,7 @@
     },
     {
       "categoryName": "ELECTRONIC",
-      "city": "Vinnytsia",
+      "city": "VINNYTSIA",
       "productTitle": "Headphones",
       "productDescription": "High-quality headphones, sealed",
       "state": "USED",
@@ -58,7 +58,7 @@
     },
     {
       "categoryName": "OTHER",
-      "city": "Zaporizhia",
+      "city": "ZAPORIZHIA",
       "productTitle": "Home Appliance",
       "productDescription": "Appliance for your home, great deal",
       "state": "NEW",
@@ -66,7 +66,7 @@
     },
     {
       "categoryName": "FURNITURE",
-      "city": "Chernivtsi",
+      "city": "CHERNIVTSI",
       "productTitle": "Wardrobe",
       "productDescription": "Spacious wardrobe, slightly damaged",
       "state": "USED",
@@ -74,7 +74,7 @@
     },
     {
       "categoryName": "ELECTRONIC",
-      "city": "Rivne",
+      "city": "RIVNE",
       "productTitle": "Tablet",
       "productDescription": "Tablet with a beautiful display",
       "state": "NEW",
@@ -82,7 +82,7 @@
     },
     {
       "categoryName": "FURNITURE",
-      "city": "Mykolaiv",
+      "city": "MYKOLAIV",
       "productTitle": "Coffee Table",
       "productDescription": "Stylish coffee table, like new",
       "state": "DAMAGED",
@@ -90,7 +90,7 @@
     },
     {
       "categoryName": "OTHER",
-      "city": "Poltava",
+      "city": "POLTAVA",
       "productTitle": "Art Supplies",
       "productDescription": "Art supplies for creative minds",
       "state": "USED",
@@ -98,7 +98,7 @@
     },
     {
       "categoryName": "FURNITURE",
-      "city": "Ivano-Frankivsk",
+      "city": "IVANOFRANKIVSK",
       "productTitle": "Bed",
       "productDescription": "Comfortable bed, good condition",
       "state": "NEW",
@@ -106,7 +106,7 @@
     },
     {
       "categoryName": "ELECTRONIC",
-      "city": "Ternopil",
+      "city": "TERNOPIL",
       "productTitle": "Camera",
       "productDescription": "Professional camera for photographers",
       "state": "USED",
@@ -114,7 +114,7 @@
     },
     {
       "categoryName": "OTHER",
-      "city": "Lutsk",
+      "city": "LUTSK",
       "productTitle": "Sports Equipment",
       "productDescription": "Sports equipment for fitness enthusiasts",
       "state": "NEW",
@@ -122,7 +122,7 @@
     },
     {
       "categoryName": "FURNITURE",
-      "city": "Sumy",
+      "city": "SUMY",
       "productTitle": "Desk",
       "productDescription": "Study desk for students",
       "state": "DAMAGED",
@@ -130,7 +130,7 @@
     },
     {
       "categoryName": "ELECTRONIC",
-      "city": "Kherson",
+      "city": "KHERSON",
       "productTitle": "Smartwatch",
       "productDescription": "Smartwatch with health tracking",
       "state": "NEW",
@@ -138,7 +138,7 @@
     },
     {
       "categoryName": "OTHER",
-      "city": "Cherkasy",
+      "city": "CHERKASY",
       "productTitle": "Kitchen Appliances",
       "productDescription": "Essential kitchen appliances",
       "state": "USED",
@@ -146,7 +146,7 @@
     },
     {
       "categoryName": "ELECTRONIC",
-      "city": "Zhytomyr",
+      "city": "ZHYTOMYR",
       "productTitle": "Gaming Console",
       "productDescription": "Gaming console for gamers",
       "state": "DAMAGED",
@@ -154,7 +154,7 @@
     },
     {
       "categoryName": "FURNITURE",
-      "city": "Kropyvnytskyi",
+      "city": "KROPYVNYTSKYI",
       "productTitle": "Bookshelf",
       "productDescription": "Sturdy bookshelf, excellent condition",
       "state": "NEW",

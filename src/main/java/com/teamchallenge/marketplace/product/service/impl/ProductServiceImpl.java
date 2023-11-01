@@ -8,27 +8,31 @@ import com.teamchallenge.marketplace.product.dto.response.ProductResponseDto;
 import com.teamchallenge.marketplace.product.mapper.ProductMapper;
 import com.teamchallenge.marketplace.product.persisit.entity.ProductEntity;
 import com.teamchallenge.marketplace.product.persisit.entity.ProductImageEntity;
-import com.teamchallenge.marketplace.product.persisit.entity.enums.ProductStatusEnum;
+import com.teamchallenge.marketplace.product.persisit.entity.enums.*;
 import com.teamchallenge.marketplace.product.persisit.repository.ProductImageRepository;
 import com.teamchallenge.marketplace.product.persisit.repository.ProductRepository;
 import com.teamchallenge.marketplace.product.service.ProductService;
 import com.teamchallenge.marketplace.user.persisit.entity.UserEntity;
 import com.teamchallenge.marketplace.user.persisit.repository.UserRepository;
+import jakarta.persistence.criteria.Predicate;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.hibernate.annotations.BatchSize;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Slice;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.util.List;
-import java.util.Objects;
-import java.util.UUID;
+import java.util.*;
+
+import static com.teamchallenge.marketplace.common.specification.CustomSpecification.fieldEqual;
+import static com.teamchallenge.marketplace.common.specification.CustomSpecification.searchLikeString;
 
 @Slf4j
 @Service
@@ -114,13 +118,13 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
-    public List<ProductResponseDto> getProductsByProductTitle(String productTitle) {
+    public Page<ProductResponseDto> getProductsByProductTitle(String productTitle, CitiesEnum city, Integer page, Integer size) {
         if (Objects.isNull(productTitle)) {
             throw new ClientBackendException(ErrorCode.INVALID_SEARCH_INPUT);
         }
-        return productRepository.findByProductTitleLikeIgnoreCase("%" + productTitle + "%")
-                .stream().map(p -> productMapper.toResponseDto(p, p.getOwner()))
-                .toList();
+
+        return productRepository.findAll(searchProductsLikeTitleAndCity(productTitle, city), PageRequest.of(page, size))
+                .map(p -> productMapper.toResponseDto(p, p.getOwner()));
     }
 
     @Override
@@ -133,8 +137,8 @@ public class ProductServiceImpl implements ProductService {
         return productsSortedByCreatedDate.map(p -> productMapper.toResponseDto(p, p.getOwner()));
     }
 
-    @Transactional
     @Override
+    @Transactional
     public ProductResponseDto uploadImagesToProduct(UUID productReference, List<MultipartFile> images) {
         ProductEntity productEntity = productRepository.findByReference(productReference)
                 .orElseThrow(() -> new ClientBackendException(ErrorCode.PRODUCT_NOT_FOUND));
@@ -148,5 +152,38 @@ public class ProductServiceImpl implements ProductService {
         productEntity.setImages(productImagesUrlEntity);
 
         return productMapper.toResponseDto(productEntity, productEntity.getOwner());
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    @BatchSize(size = 10)
+    public Page<ProductResponseDto> getAllProductsByCategory(ProductCategoriesEnum category,
+                                                             CitiesEnum city,
+                                                             List<ProductStateEnum> states,
+                                                             Integer page,
+                                                             Integer size,
+                                                             SortingFieldEnum sortField) {
+
+        PageRequest pageRequest = PageRequest.of(page, size, Sort.by(sortField.getFiledName()).descending());
+
+        return productRepository.findAll(getProductByCategoryWithFilters(category, city, states), pageRequest)
+                .map(p -> productMapper.toResponseDto(p, p.getOwner()));
+    }
+
+    @SuppressWarnings(value = "unchecked")
+    private Specification<ProductEntity> searchProductsLikeTitleAndCity(String searchInput, CitiesEnum city) {
+        return Specification.where((Specification<ProductEntity>) searchLikeString("productTitle", searchInput))
+                .and((Specification<ProductEntity>) fieldEqual("status", ProductStatusEnum.ACTIVE))
+                .and((r, rq, cb) -> Optional.ofNullable(city).map(c -> cb.equal(r.get("city"), city)).orElse(null));
+    }
+
+    @SuppressWarnings(value = "unchecked")
+    private Specification<ProductEntity> getProductByCategoryWithFilters(ProductCategoriesEnum category,
+                                                                         CitiesEnum city,
+                                                                         List<ProductStateEnum> states) {
+        return Specification.where((Specification<ProductEntity>) fieldEqual("categoryName", category))
+                .and((Specification<ProductEntity>) fieldEqual("status", ProductStatusEnum.ACTIVE))
+                .and((Specification<ProductEntity>) fieldEqual("city", city))
+                .and((r, rq, cb) -> Optional.ofNullable(states).map(s -> r.get("state").in(states)).orElse(null));
     }
 }
