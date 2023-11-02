@@ -3,6 +3,7 @@ package com.teamchallenge.marketplace.user.controller;
 import com.teamchallenge.marketplace.user.dto.request.UserRequestDto;
 import com.teamchallenge.marketplace.user.dto.response.UserResponseDto;
 import com.teamchallenge.marketplace.user.service.UserService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -25,7 +26,7 @@ public class UserController {
     }
 
     @PostMapping("/registration")
-    public ResponseEntity<UserResponseDto> userRegistration(@RequestBody UserRequestDto requestDto){
+    public ResponseEntity<UserResponseDto> userRegistration(@Valid @RequestBody UserRequestDto requestDto){
         UserResponseDto createdUser = userService.userRegistration(requestDto);
 
         return new ResponseEntity<>(createdUser, HttpStatus.CREATED);

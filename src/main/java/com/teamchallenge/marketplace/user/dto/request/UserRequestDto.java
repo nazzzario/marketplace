@@ -1,7 +1,19 @@
 package com.teamchallenge.marketplace.user.dto.request;
 
-public record UserRequestDto(String username,
-                             String email,
-                             String phoneNumber,
-                             String password) {
+import com.teamchallenge.marketplace.common.validation.phone.ValidUkrainianPhoneNumber;
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
+
+public record UserRequestDto(
+        @NotBlank(message = "Username cannot be empty")
+        @Size(min = 4, max = 30, message = "Username must be between 4 and 30")
+        String username,
+        @NotBlank(message = "Email cannot be empty")
+        @Email(message = "Invalid email")
+        String email,
+        @ValidUkrainianPhoneNumber
+        String phoneNumber,
+        @Size(min = 4, message = "Password min length is 4")
+        String password) {
 }
