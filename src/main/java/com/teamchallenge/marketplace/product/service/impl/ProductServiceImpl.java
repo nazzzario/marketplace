@@ -63,6 +63,7 @@ public class ProductServiceImpl implements ProductService {
                 .orElseThrow(() -> new ClientBackendException(ErrorCode.USER_NOT_FOUND));
 
         ProductEntity entity = productMapper.toEntity(requestDto);
+        entity.setStatus(ProductStatusEnum.ACTIVE);
 
         entity.setOwner(userEntity);
         ProductEntity savedEntity = productRepository.save(entity);
@@ -71,16 +72,14 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
-    public ProductResponseDto createProduct(ProductRequestDto requestDto, UUID userReference) {
+    public void createProduct(ProductRequestDto requestDto, UUID userReference) {
         UserEntity userEntity = userRepository.findByReference(userReference)
                 .orElseThrow(() -> new ClientBackendException(ErrorCode.USER_NOT_FOUND));
 
         ProductEntity entity = productMapper.toEntity(requestDto);
 
         entity.setOwner(userEntity);
-        ProductEntity savedEntity = productRepository.save(entity);
-
-        return productMapper.toResponseDto(savedEntity, userEntity);
+        productRepository.save(entity);
     }
 
     @Override

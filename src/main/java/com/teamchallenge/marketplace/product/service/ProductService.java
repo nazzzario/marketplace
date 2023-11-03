@@ -20,7 +20,7 @@ public interface ProductService {
     ProductResponseDto createProduct(ProductRequestDto requestDto);
 
 
-    ProductResponseDto createProduct(ProductRequestDto requestDto, UUID userReference);
+    void createProduct(ProductRequestDto requestDto, UUID userReference);
 
     void deleteProduct(UUID productReference);
 

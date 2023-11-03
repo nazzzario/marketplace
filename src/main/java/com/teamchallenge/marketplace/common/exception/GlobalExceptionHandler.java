@@ -5,16 +5,20 @@ import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 
+import org.springframework.context.support.DefaultMessageSourceResolvable;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.util.LinkedCaseInsensitiveMap;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 import java.time.LocalDateTime;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 @Slf4j
 @RestControllerAdvice
@@ -64,8 +68,8 @@ public class GlobalExceptionHandler {
     }
 
     // TODO: 11/1/23 add more specific exception handling 
-    @ExceptionHandler(IllegalArgumentException.class)
-    public ResponseEntity<Map<String, Object>> handleIllegalArgumentException(IllegalArgumentException ex, HttpServletRequest request){
+    @ExceptionHandler({IllegalArgumentException.class, HttpMessageNotReadableException.class})
+    public ResponseEntity<Map<String, Object>> handleIllegalArgumentException(RuntimeException ex, HttpServletRequest request){
         Map<String, Object> response = new LinkedCaseInsensitiveMap<>();
         String errorData = ex.getMessage();
         response.put("time", LocalDateTime.now());
@@ -75,6 +79,7 @@ public class GlobalExceptionHandler {
 
         return new ResponseEntity<>(response, HttpStatusCode.valueOf(400));
     }
+
 
     @ExceptionHandler(Exception.class)
     public ResponseEntity<Map<String, Object>> handleExceptions(Exception ex, HttpServletRequest request) {
@@ -87,5 +92,25 @@ public class GlobalExceptionHandler {
         response.put("path", request.getRequestURI());
 
         return new ResponseEntity<>(response, HttpStatusCode.valueOf(500));
+    }
+
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    public ResponseEntity<Map<String, Object>> handleValidationExceptions(MethodArgumentNotValidException ex, HttpServletRequest request) {
+        String errorMessage = ex.getBindingResult()
+                .getFieldErrors()
+                .stream()
+                .map(DefaultMessageSourceResolvable::getDefaultMessage)
+                .collect(Collectors.joining("\n"));
+
+
+        Map<String, Object> response = new LinkedCaseInsensitiveMap<>();
+        response.put("time", LocalDateTime.now());
+        response.put("code", 400);
+        response.put("description", "Validation exception");
+        response.put("message", errorMessage);
+        response.put("httpResponseCode", 400);
+        response.put("path", request.getRequestURI());
+
+        return new ResponseEntity<>(response, HttpStatusCode.valueOf(400));
     }
 }
