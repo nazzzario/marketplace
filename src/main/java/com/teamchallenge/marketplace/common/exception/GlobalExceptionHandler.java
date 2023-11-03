@@ -8,6 +8,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.support.DefaultMessageSourceResolvable;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.util.LinkedCaseInsensitiveMap;
@@ -67,8 +68,8 @@ public class GlobalExceptionHandler {
     }
 
     // TODO: 11/1/23 add more specific exception handling 
-    @ExceptionHandler(IllegalArgumentException.class)
-    public ResponseEntity<Map<String, Object>> handleIllegalArgumentException(IllegalArgumentException ex, HttpServletRequest request){
+    @ExceptionHandler({IllegalArgumentException.class, HttpMessageNotReadableException.class})
+    public ResponseEntity<Map<String, Object>> handleIllegalArgumentException(RuntimeException ex, HttpServletRequest request){
         Map<String, Object> response = new LinkedCaseInsensitiveMap<>();
         String errorData = ex.getMessage();
         response.put("time", LocalDateTime.now());
@@ -78,6 +79,7 @@ public class GlobalExceptionHandler {
 
         return new ResponseEntity<>(response, HttpStatusCode.valueOf(400));
     }
+
 
     @ExceptionHandler(Exception.class)
     public ResponseEntity<Map<String, Object>> handleExceptions(Exception ex, HttpServletRequest request) {

@@ -14,6 +14,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Slice;
@@ -52,7 +53,7 @@ public class ProductController {
     @PostMapping("/private/products/create")
     @PreAuthorize("isAuthenticated()")
     public ResponseEntity<ProductResponseDto> createProduct(
-            @RequestBody ProductRequestDto requestDto
+            @Valid @RequestBody ProductRequestDto requestDto
     ) {
         ProductResponseDto productResponse = productService.createProduct(requestDto);
 
