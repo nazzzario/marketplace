@@ -5,7 +5,9 @@ import com.teamchallenge.marketplace.common.security.dto.response.Authentication
 import com.teamchallenge.marketplace.common.security.service.JwtService;
 import com.teamchallenge.marketplace.user.persisit.entity.UserEntity;
 import com.teamchallenge.marketplace.user.persisit.repository.UserRepository;
-import com.teamchallenge.marketplace.user.service.UserService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -20,6 +22,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/v1/public")
+@Tag(name = "Authentication")
 public class AuthenticationController {
 
     private final AuthenticationManager authenticationManager;
@@ -28,7 +31,12 @@ public class AuthenticationController {
 
 
     @PostMapping("/auth")
-    public ResponseEntity<AuthenticationResponse> authenticate(@Valid @RequestBody AuthenticationRequest request){
+    @Operation(summary = "Authenticate user", description = "Input user credentials to get JWT token", responses = {
+            @ApiResponse(responseCode = "200", description = "User authentication token returned"),
+            @ApiResponse(responseCode = "400", description = "Invalid input"),
+            @ApiResponse(responseCode = "401", description = "Invalid email or password")
+    })
+    public ResponseEntity<AuthenticationResponse> authenticate(@Valid @RequestBody AuthenticationRequest request) {
         authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(
                         request.email(),
