@@ -2,6 +2,7 @@ package com.teamchallenge.marketplace.common.validation.phone;
 
 import com.google.i18n.phonenumbers.NumberParseException;
 import com.google.i18n.phonenumbers.PhoneNumberUtil;
+import com.google.i18n.phonenumbers.Phonenumber;
 import jakarta.validation.ConstraintValidator;
 import jakarta.validation.ConstraintValidatorContext;
 import org.apache.commons.lang3.StringUtils;
@@ -21,8 +22,8 @@ public class UkrainianPhoneNumberValidator implements ConstraintValidator<ValidU
 
         PhoneNumberUtil phoneNumberUtil = PhoneNumberUtil.getInstance();
         try {
-            phoneNumberUtil.parse(phoneNumber, "UA");
-            return true;
+            Phonenumber.PhoneNumber uaPhoneNumber = phoneNumberUtil.parse(phoneNumber, "UA");
+            return phoneNumberUtil.isValidNumberForRegion(uaPhoneNumber, "UA");
         } catch (NumberParseException e) {
             return false;
         }

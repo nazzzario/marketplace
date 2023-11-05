@@ -14,6 +14,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -34,11 +35,16 @@ import java.util.UUID;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/v1")
+@Tag(name = "Product")
 public class ProductController {
 
     private final ProductService productService;
 
-    @Operation(description = "Get product by its reference")
+    @Operation(summary = "Get one product", description = "Get product by its reference UUID",responses = {
+            @ApiResponse(responseCode = "200", description = "Product returned"),
+            @ApiResponse(responseCode = "400", description = "Invalid input"),
+            @ApiResponse(responseCode = "404", description = "Product by UUID not found")
+    })
     @GetMapping("/public/products/{productReference}")
     public ResponseEntity<ProductResponseDto> getProduct(
             @Parameter(description = "Product reference", required = true)
@@ -49,7 +55,11 @@ public class ProductController {
         return new ResponseEntity<>(productByReference, HttpStatus.OK);
     }
 
-    @Operation(description = "Create a new product")
+    @Operation(summary = "Create product", description = "Create product entity without images",responses = {
+            @ApiResponse(responseCode = "201", description = "Product create"),
+            @ApiResponse(responseCode = "400", description = "Invalid input"),
+            @ApiResponse(responseCode = "401", description = "User is not authenticated")
+    })
     @PostMapping("/private/products/create")
     @PreAuthorize("isAuthenticated()")
     public ResponseEntity<ProductResponseDto> createProduct(
@@ -60,7 +70,9 @@ public class ProductController {
         return new ResponseEntity<>(productResponse, HttpStatus.CREATED);
     }
 
-    @Operation(description = "Get all products")
+    @Operation(summary = "Get all product", description = "Get list of all products",responses = {
+            @ApiResponse(responseCode = "200", description = "Product returned")
+    })
     @GetMapping("/public/products")
     public ResponseEntity<List<ProductResponseDto>> getAllProducts() {
         List<ProductResponseDto> allProducts = productService.getAllProducts();
@@ -69,7 +81,10 @@ public class ProductController {
     }
 
     @ApiPageable
-    @Operation(description = "Search products by product title")
+    @Operation(summary = "Search product by title and city", description = "Search product pages by title and city ",responses = {
+            @ApiResponse(responseCode = "200", description = "Products page returned"),
+            @ApiResponse(responseCode = "403", description = "Invalid search parameter input")
+    })
     @GetMapping("/public/products/search")
     public ResponseEntity<Page<ProductResponseDto>> getProductsByProductTitle(
             @Parameter(description = "Product title for searching", required = true)
@@ -84,7 +99,9 @@ public class ProductController {
     }
 
     @ApiSlice
-    @Operation(description = "Get the newest products with pagination")
+    @Operation(summary = "Get newest products", description = "Get slice of newest created products sorted",responses = {
+            @ApiResponse(responseCode = "200", description = "Slice of products"),
+    })
     @GetMapping("/public/products/newest")
     public ResponseEntity<Slice<ProductResponseDto>> getNewestProducts(
             Integer page,
@@ -95,9 +112,11 @@ public class ProductController {
         return new ResponseEntity<>(newestProducts, HttpStatus.OK);
     }
 
-    @Operation(description = "Delete a product by its reference")
+    @Operation(summary = "Delete product", description = "Product owner can delete product by its reference")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "204", description = "Product deleted successfully"),
+            @ApiResponse(responseCode = "401", description = "Unauthenticated"),
+            @ApiResponse(responseCode = "403", description = "Access denied"),
             @ApiResponse(responseCode = "404", description = "Product not found")
     })
     @PreAuthorize("@productSecurity.checkOwnership(#productReference, principal.username)")
@@ -110,7 +129,14 @@ public class ProductController {
         return ResponseEntity.noContent().build();
     }
 
-    @Operation(description = "Upload images to a product")
+    @Operation(summary = "Upload product images", description = "Upload product images by product UUID")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Images upload successfully"),
+            @ApiResponse(responseCode = "401", description = "Unauthenticated"),
+            @ApiResponse(responseCode = "403", description = "Access denied"),
+            @ApiResponse(responseCode = "404", description = "Product not found"),
+            @ApiResponse(responseCode = "503", description = "Unable to save images"),
+    })
     @PostMapping(path = "/private/products/{productReference}/images", consumes = {MediaType.MULTIPART_FORM_DATA_VALUE})
     public ResponseEntity<ProductResponseDto> uploadProductImages(
             @Parameter(description = "Product reference", required = true)
@@ -123,7 +149,13 @@ public class ProductController {
         return new ResponseEntity<>(responseDto, HttpStatus.OK);
     }
 
-    @Operation(description = "Patch product")
+    @Operation(summary = "Patch product", description = "Product owner can patch product by its reference")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "201", description = "Product patched successfully"),
+            @ApiResponse(responseCode = "401", description = "Unauthenticated"),
+            @ApiResponse(responseCode = "403", description = "Access denied"),
+            @ApiResponse(responseCode = "404", description = "Product not found")
+    })
     @PatchMapping("/private/products/{productReference}")
     public ResponseEntity<ProductResponseDto> patchProduct(
             @Parameter(description = "Product reference", required = true)
@@ -135,12 +167,12 @@ public class ProductController {
         return new ResponseEntity<>(productResponse, HttpStatus.OK);
     }
 
-    // TODO: 10/30/23 improve enum as request param
-    @Operation(description = "Search products by category")
     @ApiPageable
+    @Operation(summary = "Find products by category", description = "Find products by category, city, states by pages")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Get products by category"),
-            @ApiResponse(responseCode = "400", description = "Invalid user request request")
+            @ApiResponse(responseCode = "200", description = "Product pages"),
+            @ApiResponse(responseCode = "401", description = "Unauthenticated"),
+            @ApiResponse(responseCode = "403", description = "Invalid search parameters"),
     })
     @GetMapping("/public/products/listing")
     public ResponseEntity<Page<ProductResponseDto>> findProductByCategory(
