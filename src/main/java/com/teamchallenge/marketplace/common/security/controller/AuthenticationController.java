@@ -35,7 +35,7 @@ public class AuthenticationController {
     @Operation(summary = "Authenticate user", description = "Input user credentials to get JWT token", responses = {
             @ApiResponse(responseCode = "200", description = "User authentication token returned"),
             @ApiResponse(responseCode = "400", description = "Invalid input"),
-            @ApiResponse(responseCode = "401", description = "Invalid email or password")
+            @ApiResponse(responseCode = "401", description = "Invalid user credentials")
     })
     public ResponseEntity<AuthenticationResponse> authenticate(@Valid @RequestBody AuthenticationRequest request) {
         authenticationManager.authenticate(

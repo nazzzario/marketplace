@@ -50,7 +50,9 @@ public class UserController {
         return new ResponseEntity<>(createdUser, HttpStatus.CREATED);
     }
 
-    @Operation(summary = "Edit user information", description = "Change user data by it reference")
+    @Operation(summary = "Edit user information", description = "Change user data by it reference. " +
+            "1. GET user by reference\n2.Pass user data with updated fields")
+
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Patched user"),
             @ApiResponse(responseCode = "401", description = "Unauthenticated"),
