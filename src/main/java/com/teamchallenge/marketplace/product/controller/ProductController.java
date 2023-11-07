@@ -1,5 +1,6 @@
 package com.teamchallenge.marketplace.product.controller;
 
+import com.teamchallenge.marketplace.common.exception.dto.ExceptionResponseDto;
 import com.teamchallenge.marketplace.common.util.ApiPageable;
 import com.teamchallenge.marketplace.common.util.ApiSlice;
 import com.teamchallenge.marketplace.product.dto.request.ProductRequestDto;
@@ -12,6 +13,8 @@ import com.teamchallenge.marketplace.product.service.ProductService;
 import com.teamchallenge.marketplace.user.persisit.entity.UserEntity;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -41,9 +44,12 @@ public class ProductController {
     private final ProductService productService;
 
     @Operation(summary = "Get one product", description = "Get product by its reference UUID",responses = {
-            @ApiResponse(responseCode = "200", description = "Product returned"),
-            @ApiResponse(responseCode = "400", description = "Invalid input"),
-            @ApiResponse(responseCode = "404", description = "Product by UUID not found")
+            @ApiResponse(responseCode = "200", description = "Product returned",
+                    content = {@Content(mediaType = "application/json", schema = @Schema(implementation = ExceptionResponseDto.class))}),
+            @ApiResponse(responseCode = "400", description = "Invalid input",
+                    content = {@Content(mediaType = "application/json", schema = @Schema(implementation = ExceptionResponseDto.class))}),
+            @ApiResponse(responseCode = "404", description = "Product by UUID not found",
+                    content = {@Content(mediaType = "application/json", schema = @Schema(implementation = ExceptionResponseDto.class))})
     })
     @GetMapping("/public/products/{productReference}")
     public ResponseEntity<ProductResponseDto> getProduct(
@@ -56,9 +62,12 @@ public class ProductController {
     }
 
     @Operation(summary = "Create product", description = "Create product entity without images",responses = {
-            @ApiResponse(responseCode = "201", description = "Product create"),
-            @ApiResponse(responseCode = "400", description = "Invalid input"),
-            @ApiResponse(responseCode = "401", description = "User is not authenticated")
+            @ApiResponse(responseCode = "201", description = "Product create",
+                    content = {@Content(mediaType = "application/json", schema = @Schema(implementation = ExceptionResponseDto.class))}),
+            @ApiResponse(responseCode = "400", description = "Invalid input",
+                    content = {@Content(mediaType = "application/json", schema = @Schema(implementation = ExceptionResponseDto.class))}),
+            @ApiResponse(responseCode = "401", description = "User is not authenticated",
+                    content = {@Content(mediaType = "application/json", schema = @Schema(implementation = ExceptionResponseDto.class))})
     })
     @PostMapping("/private/products/create")
     @PreAuthorize("isAuthenticated()")
@@ -71,7 +80,8 @@ public class ProductController {
     }
 
     @Operation(summary = "Get all product", description = "Get list of all products",responses = {
-            @ApiResponse(responseCode = "200", description = "Product returned")
+            @ApiResponse(responseCode = "200", description = "Product returned",
+                    content = {@Content(mediaType = "application/json", schema = @Schema(implementation = ExceptionResponseDto.class))})
     })
     @GetMapping("/public/products")
     public ResponseEntity<List<ProductResponseDto>> getAllProducts() {
@@ -82,8 +92,10 @@ public class ProductController {
 
     @ApiPageable
     @Operation(summary = "Search product by title and city", description = "Search product pages by title and city ",responses = {
-            @ApiResponse(responseCode = "200", description = "Products page returned"),
-            @ApiResponse(responseCode = "403", description = "Invalid search parameter input")
+            @ApiResponse(responseCode = "200", description = "Products page returned",
+                    content = {@Content(mediaType = "application/json", schema = @Schema(implementation = ExceptionResponseDto.class))}),
+            @ApiResponse(responseCode = "403", description = "Invalid search parameter input",
+                    content = {@Content(mediaType = "application/json", schema = @Schema(implementation = ExceptionResponseDto.class))})
     })
     @GetMapping("/public/products/search")
     public ResponseEntity<Page<ProductResponseDto>> getProductsByProductTitle(
@@ -100,7 +112,8 @@ public class ProductController {
 
     @ApiSlice
     @Operation(summary = "Get newest products", description = "Get slice of newest created products sorted",responses = {
-            @ApiResponse(responseCode = "200", description = "Slice of products"),
+            @ApiResponse(responseCode = "200", description = "Slice of products",
+                    content = {@Content(mediaType = "application/json", schema = @Schema(implementation = ExceptionResponseDto.class))}),
     })
     @GetMapping("/public/products/newest")
     public ResponseEntity<Slice<ProductResponseDto>> getNewestProducts(
@@ -114,10 +127,14 @@ public class ProductController {
 
     @Operation(summary = "Delete product", description = "Product owner can delete product by its reference")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "204", description = "Product deleted successfully"),
-            @ApiResponse(responseCode = "401", description = "Unauthenticated"),
-            @ApiResponse(responseCode = "403", description = "Access denied"),
-            @ApiResponse(responseCode = "404", description = "Product not found")
+            @ApiResponse(responseCode = "204", description = "Product deleted successfully",
+                    content = {@Content(mediaType = "application/json", schema = @Schema(implementation = ExceptionResponseDto.class))}),
+            @ApiResponse(responseCode = "401", description = "Unauthenticated",
+                    content = {@Content(mediaType = "application/json", schema = @Schema(implementation = ExceptionResponseDto.class))}),
+            @ApiResponse(responseCode = "403", description = "Access denied",
+                    content = {@Content(mediaType = "application/json", schema = @Schema(implementation = ExceptionResponseDto.class))}),
+            @ApiResponse(responseCode = "404", description = "Product not found",
+                    content = {@Content(mediaType = "application/json", schema = @Schema(implementation = ExceptionResponseDto.class))})
     })
     @PreAuthorize("@productSecurity.checkOwnership(#productReference, principal.username)")
     @DeleteMapping("/private/products/{productReference}")
@@ -131,11 +148,16 @@ public class ProductController {
 
     @Operation(summary = "Upload product images", description = "Upload product images by product UUID")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Images upload successfully"),
-            @ApiResponse(responseCode = "401", description = "Unauthenticated"),
-            @ApiResponse(responseCode = "403", description = "Access denied"),
-            @ApiResponse(responseCode = "404", description = "Product not found"),
-            @ApiResponse(responseCode = "503", description = "Unable to save images"),
+            @ApiResponse(responseCode = "200", description = "Images upload successfully",
+                    content = {@Content(mediaType = "application/json", schema = @Schema(implementation = ExceptionResponseDto.class))}),
+            @ApiResponse(responseCode = "401", description = "Unauthenticated",
+                    content = {@Content(mediaType = "application/json", schema = @Schema(implementation = ExceptionResponseDto.class))}),
+            @ApiResponse(responseCode = "403", description = "Access denied",
+                    content = {@Content(mediaType = "application/json", schema = @Schema(implementation = ExceptionResponseDto.class))}),
+            @ApiResponse(responseCode = "404", description = "Product not found",
+                    content = {@Content(mediaType = "application/json", schema = @Schema(implementation = ExceptionResponseDto.class))}),
+            @ApiResponse(responseCode = "503", description = "Unable to save images",
+                    content = {@Content(mediaType = "application/json", schema = @Schema(implementation = ExceptionResponseDto.class))}),
     })
     @PostMapping(path = "/private/products/{productReference}/images", consumes = {MediaType.MULTIPART_FORM_DATA_VALUE})
     public ResponseEntity<ProductResponseDto> uploadProductImages(
@@ -151,10 +173,14 @@ public class ProductController {
 
     @Operation(summary = "Patch product", description = "Product owner can patch product by its reference")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "201", description = "Product patched successfully"),
-            @ApiResponse(responseCode = "401", description = "Unauthenticated"),
-            @ApiResponse(responseCode = "403", description = "Access denied"),
-            @ApiResponse(responseCode = "404", description = "Product not found")
+            @ApiResponse(responseCode = "201", description = "Product patched successfully",
+                    content = {@Content(mediaType = "application/json", schema = @Schema(implementation = ExceptionResponseDto.class))}),
+            @ApiResponse(responseCode = "401", description = "Unauthenticated",
+                    content = {@Content(mediaType = "application/json", schema = @Schema(implementation = ExceptionResponseDto.class))}),
+            @ApiResponse(responseCode = "403", description = "Access denied",
+                    content = {@Content(mediaType = "application/json", schema = @Schema(implementation = ExceptionResponseDto.class))}),
+            @ApiResponse(responseCode = "404", description = "Product not found",
+                    content = {@Content(mediaType = "application/json", schema = @Schema(implementation = ExceptionResponseDto.class))})
     })
     @PatchMapping("/private/products/{productReference}")
     public ResponseEntity<ProductResponseDto> patchProduct(
@@ -170,9 +196,12 @@ public class ProductController {
     @ApiPageable
     @Operation(summary = "Find products by category", description = "Find products by category, city, states by pages")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Product pages"),
-            @ApiResponse(responseCode = "401", description = "Unauthenticated"),
-            @ApiResponse(responseCode = "403", description = "Invalid search parameters"),
+            @ApiResponse(responseCode = "200", description = "Product pages",
+                    content = {@Content(mediaType = "application/json", schema = @Schema(implementation = ExceptionResponseDto.class))}),
+            @ApiResponse(responseCode = "401", description = "Unauthenticated",
+                    content = {@Content(mediaType = "application/json", schema = @Schema(implementation = ExceptionResponseDto.class))}),
+            @ApiResponse(responseCode = "403", description = "Invalid search parameters",
+                    content = {@Content(mediaType = "application/json", schema = @Schema(implementation = ExceptionResponseDto.class))}),
     })
     @GetMapping("/public/products/listing")
     public ResponseEntity<Page<ProductResponseDto>> findProductByCategory(

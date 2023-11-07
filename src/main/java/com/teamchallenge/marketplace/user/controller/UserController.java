@@ -1,10 +1,13 @@
 package com.teamchallenge.marketplace.user.controller;
 
+import com.teamchallenge.marketplace.common.exception.dto.ExceptionResponseDto;
 import com.teamchallenge.marketplace.user.dto.request.UserPatchRequestDto;
 import com.teamchallenge.marketplace.user.dto.request.UserRequestDto;
 import com.teamchallenge.marketplace.user.dto.response.UserResponseDto;
 import com.teamchallenge.marketplace.user.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -27,9 +30,12 @@ public class UserController {
 
     @Operation(summary = "Get user", description = "Get user by reference")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "User data"),
-            @ApiResponse(responseCode = "403", description = "Invalid data"),
-            @ApiResponse(responseCode = "404", description = "User not found")
+            @ApiResponse(responseCode = "200", description = "User data",
+                    content = {@Content(mediaType = "application/json", schema = @Schema(implementation = ExceptionResponseDto.class))}),
+            @ApiResponse(responseCode = "403", description = "Invalid data",
+                    content = {@Content(mediaType = "application/json", schema = @Schema(implementation = ExceptionResponseDto.class))}),
+            @ApiResponse(responseCode = "404", description = "User not found",
+                    content = {@Content(mediaType = "application/json", schema = @Schema(implementation = ExceptionResponseDto.class))})
     })
     @GetMapping("public/users/{reference}")
     public ResponseEntity<UserResponseDto> getUserByReference(@PathVariable(name = "reference") UUID reference){
@@ -40,8 +46,10 @@ public class UserController {
 
     @Operation(summary = "User registration", description = "Create new user")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "201", description = "User created"),
-            @ApiResponse(responseCode = "403", description = "Invalid user data"),
+            @ApiResponse(responseCode = "201", description = "User created",
+                    content = {@Content(mediaType = "application/json", schema = @Schema(implementation = ExceptionResponseDto.class))}),
+            @ApiResponse(responseCode = "403", description = "Invalid user data",
+                    content = {@Content(mediaType = "application/json", schema = @Schema(implementation = ExceptionResponseDto.class))}),
     })
     @PostMapping("public/users/registration")
     public ResponseEntity<UserResponseDto> userRegistration(@Valid @RequestBody UserRequestDto requestDto){
@@ -54,9 +62,12 @@ public class UserController {
             "1. GET user by reference\n2.Pass user data with updated fields")
 
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Patched user"),
-            @ApiResponse(responseCode = "401", description = "Unauthenticated"),
-            @ApiResponse(responseCode = "403", description = "Access denied")
+            @ApiResponse(responseCode = "200", description = "Patched user",
+                    content = {@Content(mediaType = "application/json", schema = @Schema(implementation = ExceptionResponseDto.class))}),
+            @ApiResponse(responseCode = "401", description = "Unauthenticated",
+                    content = {@Content(mediaType = "application/json", schema = @Schema(implementation = ExceptionResponseDto.class))}),
+            @ApiResponse(responseCode = "403", description = "Access denied",
+                    content = {@Content(mediaType = "application/json", schema = @Schema(implementation = ExceptionResponseDto.class))})
     })
     @PreAuthorize("@userSecurity.checkReference(#userReference)")
     @PatchMapping("private/users/{userReference}")

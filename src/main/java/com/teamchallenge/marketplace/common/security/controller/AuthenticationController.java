@@ -1,13 +1,18 @@
 package com.teamchallenge.marketplace.common.security.controller;
 
+import com.teamchallenge.marketplace.common.exception.dto.ExceptionResponseDto;
 import com.teamchallenge.marketplace.common.security.bean.UserAccount;
 import com.teamchallenge.marketplace.common.security.dto.request.AuthenticationRequest;
 import com.teamchallenge.marketplace.common.security.dto.response.AuthenticationResponse;
 import com.teamchallenge.marketplace.common.security.service.JwtService;
+import com.teamchallenge.marketplace.controller.HelloController;
 import com.teamchallenge.marketplace.user.persisit.entity.UserEntity;
 import com.teamchallenge.marketplace.user.persisit.repository.UserRepository;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -32,11 +37,14 @@ public class AuthenticationController {
 
 
     @PostMapping("/auth")
-    @Operation(summary = "Authenticate user", description = "Input user credentials to get JWT token", responses = {
-            @ApiResponse(responseCode = "200", description = "User authentication token returned"),
-            @ApiResponse(responseCode = "400", description = "Invalid input"),
-            @ApiResponse(responseCode = "401", description = "Invalid user credentials")
-    })
+    @Operation(summary = "Authenticate user", description = "Input user credentials to get JWT token")
+
+    @ApiResponse(responseCode = "200", description = "User authentication token returned",
+            content = {@Content(mediaType = "application/json", schema = @Schema(implementation = ExceptionResponseDto.class))})
+    @ApiResponse(responseCode = "400", description = "Invalid input",
+            content = {@Content(mediaType = "application/json", schema = @Schema(implementation = ExceptionResponseDto.class))})
+    @ApiResponse(responseCode = "401", description = "Invalid user credentials",
+            content = {@Content(mediaType = "application/json", schema = @Schema(implementation = ExceptionResponseDto.class))})
     public ResponseEntity<AuthenticationResponse> authenticate(@Valid @RequestBody AuthenticationRequest request) {
         authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(request.email(), request.password()
@@ -46,6 +54,6 @@ public class AuthenticationController {
         UserEntity userEntity = userRepository.findByEmail(request.email()).orElseThrow();
         String token = jwtService.generateToken(UserAccount.fromUserEntityToCustomUserDetails(userEntity));
 
-        return new ResponseEntity<>(new AuthenticationResponse(userEntity.getReference(),token), HttpStatus.OK);
+        return new ResponseEntity<>(new AuthenticationResponse(userEntity.getReference(), token), HttpStatus.OK);
     }
 }

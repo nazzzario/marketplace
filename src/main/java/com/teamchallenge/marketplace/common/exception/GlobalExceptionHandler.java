@@ -1,23 +1,21 @@
 package com.teamchallenge.marketplace.common.exception;
 
+import com.teamchallenge.marketplace.common.exception.dto.ExceptionResponseDto;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
-import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
-
 import org.springframework.context.support.DefaultMessageSourceResolvable;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.AuthenticationException;
-import org.springframework.util.LinkedCaseInsensitiveMap;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 import java.time.LocalDateTime;
-import java.util.Map;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -28,89 +26,96 @@ public class GlobalExceptionHandler {
     private final HttpServletRequest httpServletRequest;
 
     @ExceptionHandler(ClientBackendException.class)
-    public ResponseEntity<Map<String, Object>> handleClientException(ClientBackendException ex, HttpServletRequest request) {
-        Map<String, Object> response = new LinkedCaseInsensitiveMap<>();
+    public ResponseEntity<ExceptionResponseDto> handleClientException(ClientBackendException ex, HttpServletRequest request) {
         ErrorCode.ErrorData errorData = ex.getErrorCode().getErrorData();
-        response.put("time", LocalDateTime.now());
-        response.put("code", errorData.getCode());
-        response.put("description", errorData.getDescription());
-        response.put("httpResponseCode", errorData.getHttpResponseCode());
-        response.put("path", request.getRequestURI());
+        ExceptionResponseDto errorResponse = ExceptionResponseDto.builder()
+                .time(LocalDateTime.now().toString())
+                .errorCode(errorData.getCode())
+                .title(ex.getClass().getName())
+                .message(errorData.getDescription())
+                .httpResponseCode(errorData.getHttpResponseCode())
+                .path(request.getRequestURI())
+                .build();
 
-        return new ResponseEntity<>(response, HttpStatusCode.valueOf(errorData.getHttpResponseCode()));
+        return new ResponseEntity<>(errorResponse, HttpStatusCode.valueOf(errorData.getHttpResponseCode()));
 
     }
 
     @ExceptionHandler(AccessDeniedException.class)
-    public ResponseEntity<Map<String, Object>> handleAccessException(AccessDeniedException ex, HttpServletRequest request){
-        System.out.println("Access exception");
+    public ResponseEntity<ExceptionResponseDto> handleAccessException(AccessDeniedException ex, HttpServletRequest request){
+        ExceptionResponseDto errorResponse = ExceptionResponseDto.builder()
+                .time(LocalDateTime.now().toString())
+                .errorCode(null)
+                .title(ex.getClass().getName())
+                .message(ex.getMessage())
+                .httpResponseCode(403)
+                .path(request.getRequestURI())
+                .build();
 
-        Map<String, Object> response = new LinkedCaseInsensitiveMap<>();
-        String errorData = ex.getMessage();
-        response.put("time", LocalDateTime.now());
-        response.put("code", 403);
-        response.put("description", errorData);
-        response.put("path", request.getRequestURI());
-
-        return new ResponseEntity<>(response, HttpStatusCode.valueOf(403));
+        return new ResponseEntity<>(errorResponse, HttpStatus.FORBIDDEN);
     }
 
     @ExceptionHandler(AuthenticationException.class)
-    public ResponseEntity<Map<String, Object>> handleAuthException(AuthenticationException ex, HttpServletRequest request){
-        Map<String, Object> response = new LinkedCaseInsensitiveMap<>();
-        String errorData = ex.getMessage();
-        response.put("time", LocalDateTime.now());
-        response.put("code", 401);
-        response.put("description", errorData);
-        response.put("path", request.getRequestURI());
+    public ResponseEntity<ExceptionResponseDto> handleAuthException(AuthenticationException ex, HttpServletRequest request){
+        ExceptionResponseDto errorResponse = ExceptionResponseDto.builder()
+                .time(LocalDateTime.now().toString())
+                .errorCode(null)
+                .title(ex.getClass().getName())
+                .message(ex.getMessage())
+                .httpResponseCode(401)
+                .path(request.getRequestURI())
+                .build();
 
-        return new ResponseEntity<>(response, HttpStatusCode.valueOf(401));
+        return new ResponseEntity<>(errorResponse, HttpStatus.UNAUTHORIZED);
     }
 
     // TODO: 11/1/23 add more specific exception handling 
     @ExceptionHandler({IllegalArgumentException.class, HttpMessageNotReadableException.class})
-    public ResponseEntity<Map<String, Object>> handleIllegalArgumentException(RuntimeException ex, HttpServletRequest request){
-        Map<String, Object> response = new LinkedCaseInsensitiveMap<>();
-        String errorData = ex.getMessage();
-        response.put("time", LocalDateTime.now());
-        response.put("code", 400);
-        response.put("description", errorData);
-        response.put("path", request.getRequestURI());
+    public ResponseEntity<ExceptionResponseDto> handleIllegalArgumentException(RuntimeException ex, HttpServletRequest request){
+        ExceptionResponseDto errorResponse = ExceptionResponseDto.builder()
+                .time(LocalDateTime.now().toString())
+                .errorCode(null)
+                .title(ex.getClass().getName())
+                .message(ex.getMessage())
+                .httpResponseCode(400)
+                .path(request.getRequestURI())
+                .build();
 
-        return new ResponseEntity<>(response, HttpStatusCode.valueOf(400));
+        return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
     }
 
 
     @ExceptionHandler(Exception.class)
-    public ResponseEntity<Map<String, Object>> handleExceptions(Exception ex, HttpServletRequest request) {
-        Map<String, Object> response = new LinkedCaseInsensitiveMap<>();
-        response.put("time", LocalDateTime.now());
-        response.put("code", 500);
-        response.put("description", "Unhandled exception");
-        response.put("message", ex.getMessage());
-        response.put("httpResponseCode", 500);
-        response.put("path", request.getRequestURI());
+    public ResponseEntity<ExceptionResponseDto> handleExceptions(Exception ex, HttpServletRequest request) {
+        ExceptionResponseDto errorResponse = ExceptionResponseDto.builder()
+                .time(LocalDateTime.now().toString())
+                .errorCode(null)
+                .title(ex.getClass().getName())
+                .message("Unhandled exception")
+                .httpResponseCode(500)
+                .path(request.getRequestURI())
+                .build();
 
-        return new ResponseEntity<>(response, HttpStatusCode.valueOf(500));
+        return new ResponseEntity<>(errorResponse, HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ResponseEntity<Map<String, Object>> handleValidationExceptions(MethodArgumentNotValidException ex, HttpServletRequest request) {
+    public ResponseEntity<ExceptionResponseDto> handleValidationExceptions(MethodArgumentNotValidException ex, HttpServletRequest request) {
         String errorMessage = ex.getBindingResult()
                 .getFieldErrors()
                 .stream()
                 .map(DefaultMessageSourceResolvable::getDefaultMessage)
                 .collect(Collectors.joining("\n"));
 
+        ExceptionResponseDto errorResponse = ExceptionResponseDto.builder()
+                .time(LocalDateTime.now().toString())
+                .errorCode(null)
+                .title("Validation exception")
+                .message(errorMessage)
+                .httpResponseCode(400)
+                .path(request.getRequestURI())
+                .build();
 
-        Map<String, Object> response = new LinkedCaseInsensitiveMap<>();
-        response.put("time", LocalDateTime.now());
-        response.put("code", 400);
-        response.put("description", "Validation exception");
-        response.put("message", errorMessage);
-        response.put("httpResponseCode", 400);
-        response.put("path", request.getRequestURI());
-
-        return new ResponseEntity<>(response, HttpStatusCode.valueOf(400));
+        return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
     }
 }
