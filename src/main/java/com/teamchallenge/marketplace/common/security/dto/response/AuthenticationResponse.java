@@ -1,4 +1,7 @@
 package com.teamchallenge.marketplace.common.security.dto.response;
 
-public record AuthenticationResponse(String authenticationToken) {
+import java.util.UUID;
+
+public record AuthenticationResponse(UUID userReference,
+                                     String authenticationToken) {
 }

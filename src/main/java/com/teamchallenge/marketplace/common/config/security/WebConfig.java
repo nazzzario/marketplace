@@ -2,7 +2,9 @@ package com.teamchallenge.marketplace.common.config.security;
 
 import com.teamchallenge.marketplace.common.exception.ClientBackendException;
 import com.teamchallenge.marketplace.common.exception.ErrorCode;
+import com.teamchallenge.marketplace.common.security.bean.UserAccount;
 import com.teamchallenge.marketplace.user.persisit.repository.UserRepository;
+import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -26,7 +28,7 @@ public class WebConfig {
     public WebMvcConfigurer configureCors() {
         return new WebMvcConfigurer() {
             @Override
-            public void addCorsMappings(CorsRegistry registry) {
+            public void addCorsMappings(@NonNull CorsRegistry registry) {
                 registry.addMapping("/**")
                         .allowedOrigins("*")
                         .allowedMethods("GET", "POST", "PATCH", "OPTIONS", "HEAD", "PUT", "DELETE");
@@ -37,6 +39,7 @@ public class WebConfig {
     @Bean
     public UserDetailsService userDetailsService() {
         return username -> userRepository.findByEmail(username)
+                .map(UserAccount::fromUserEntityToCustomUserDetails)
                 .orElseThrow(() -> new ClientBackendException(ErrorCode.USER_NOT_FOUND));
     }
 

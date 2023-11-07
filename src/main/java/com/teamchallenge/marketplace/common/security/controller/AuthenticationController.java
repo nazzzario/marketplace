@@ -1,5 +1,6 @@
 package com.teamchallenge.marketplace.common.security.controller;
 
+import com.teamchallenge.marketplace.common.security.bean.UserAccount;
 import com.teamchallenge.marketplace.common.security.dto.request.AuthenticationRequest;
 import com.teamchallenge.marketplace.common.security.dto.response.AuthenticationResponse;
 import com.teamchallenge.marketplace.common.security.service.JwtService;
@@ -38,15 +39,13 @@ public class AuthenticationController {
     })
     public ResponseEntity<AuthenticationResponse> authenticate(@Valid @RequestBody AuthenticationRequest request) {
         authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(
-                        request.email(),
-                        request.password()
+                new UsernamePasswordAuthenticationToken(request.email(), request.password()
                 )
         );
 
         UserEntity userEntity = userRepository.findByEmail(request.email()).orElseThrow();
-        String token = jwtService.generateToken(userEntity);
+        String token = jwtService.generateToken(UserAccount.fromUserEntityToCustomUserDetails(userEntity));
 
-        return new ResponseEntity<>(new AuthenticationResponse(token), HttpStatus.OK);
+        return new ResponseEntity<>(new AuthenticationResponse(userEntity.getReference(),token), HttpStatus.OK);
     }
 }
