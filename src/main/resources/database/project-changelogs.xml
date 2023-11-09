@@ -10,4 +10,5 @@
     <changeSet id="003" author="Nazar Krasnovoronka" context="create tbl_product_images and reference to tbl_product"><sqlFile path="database/changelogs/changelog.003.sql"/></changeSet>
     <changeSet id="004" author="Nazar Krasnovoronka" context="add email to user"><sqlFile path="database/changelogs/changelog.004.sql"/></changeSet>
     <changeSet id="005" author="Nazar Krasnovoronka" context="add user role field"><sqlFile path="database/changelogs/changelog.005.sql"/></changeSet>
+    <changeSet id="006" author="Nazar Krasnovoronka" context="add publish_date and view_count too tbl_product"><sqlFile path="database/changelogs/changelog.006.sql"/></changeSet>
 </databaseChangeLog>

@@ -11,6 +11,7 @@ import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.time.LocalDate;
 import java.util.List;
 
 @Table(name = "tbl_product")
@@ -45,4 +46,14 @@ public class ProductEntity extends BaseEntity {
     // TODO: 27.09.23 remove images when remove product 
     @OneToMany(mappedBy = "product")
     private List<ProductImageEntity> images;
+
+    private LocalDate publishDate;
+
+    private Long viewCount;
+
+    @PrePersist
+    @PreUpdate
+    public void publishDate() {
+        publishDate = LocalDate.now();
+    }
 }

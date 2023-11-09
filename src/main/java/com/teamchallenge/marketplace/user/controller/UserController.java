@@ -30,8 +30,7 @@ public class UserController {
 
     @Operation(summary = "Get user", description = "Get user by reference")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "User data",
-                    content = {@Content(mediaType = "application/json", schema = @Schema(implementation = ExceptionResponseDto.class))}),
+            @ApiResponse(responseCode = "200", description = "User data"),
             @ApiResponse(responseCode = "403", description = "Invalid data",
                     content = {@Content(mediaType = "application/json", schema = @Schema(implementation = ExceptionResponseDto.class))}),
             @ApiResponse(responseCode = "404", description = "User not found",
@@ -46,8 +45,7 @@ public class UserController {
 
     @Operation(summary = "User registration", description = "Create new user")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "201", description = "User created",
-                    content = {@Content(mediaType = "application/json", schema = @Schema(implementation = ExceptionResponseDto.class))}),
+            @ApiResponse(responseCode = "201", description = "User created"),
             @ApiResponse(responseCode = "403", description = "Invalid user data",
                     content = {@Content(mediaType = "application/json", schema = @Schema(implementation = ExceptionResponseDto.class))}),
     })
@@ -62,8 +60,7 @@ public class UserController {
             "1. GET user by reference\n2.Pass user data with updated fields")
 
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Patched user",
-                    content = {@Content(mediaType = "application/json", schema = @Schema(implementation = ExceptionResponseDto.class))}),
+            @ApiResponse(responseCode = "200", description = "Patched user"),
             @ApiResponse(responseCode = "401", description = "Unauthenticated",
                     content = {@Content(mediaType = "application/json", schema = @Schema(implementation = ExceptionResponseDto.class))}),
             @ApiResponse(responseCode = "403", description = "Access denied",

@@ -46,11 +46,13 @@ public class ProductServiceImpl implements ProductService {
 
     private final ProductMapper productMapper;
 
+    // TODO: 11/8/23 Find better solution maybe Redis 
     @Override
+    @Transactional
     public ProductResponseDto getProductByReference(UUID reference) {
         ProductEntity productEntity = productRepository.findByReference(reference)
                 .orElseThrow(() -> new ClientBackendException(ErrorCode.PRODUCT_NOT_FOUND));
-
+        productEntity.setViewCount(productEntity.getViewCount() + 1);
         return productMapper.toResponseDto(productEntity, productEntity.getOwner());
     }
 
@@ -129,7 +131,7 @@ public class ProductServiceImpl implements ProductService {
     @Override
     @Transactional(readOnly = true)
     public Slice<ProductResponseDto> getNewestProducts(Integer page, Integer size) {
-        PageRequest pageRequest = PageRequest.of(page, size);
+        PageRequest pageRequest = PageRequest.of(page, size, Sort.by(SortingFieldEnum.DATE.getFiledName()).descending());
 
         var productsSortedByCreatedDate = productRepository.findByOrderByCreatedDate(pageRequest);
 
