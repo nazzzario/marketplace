@@ -16,3 +16,18 @@ spring:
       expiration: 600000000
       token-time: 10
       refresh-token-time: 1000
+  mail:
+    host: sandbox.smtp.mailtrap.io
+    port: 465
+    username: 8007a8def7dfcc
+    password: ae6ffc6d85c9cc
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+  data:
+    redis:
+      host: localhost
+      port: 6379
