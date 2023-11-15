@@ -23,6 +23,9 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Slice;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
+import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.core.ZSetOperations;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
@@ -30,6 +33,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.*;
+import java.util.concurrent.TimeUnit;
 
 import static com.teamchallenge.marketplace.common.specification.CustomSpecification.fieldEqual;
 import static com.teamchallenge.marketplace.common.specification.CustomSpecification.searchLikeString;
@@ -39,10 +43,12 @@ import static com.teamchallenge.marketplace.common.specification.CustomSpecifica
 @RequiredArgsConstructor
 public class ProductServiceImpl implements ProductService {
 
+    private static final String VIEWS_KEY = "productViews";
     private final ProductRepository productRepository;
     private final ProductImageRepository productImageRepository;
     private final UserRepository userRepository;
     private final FileUpload fileUpload;
+    private final RedisTemplate<String, String> redisTemplate;
 
     private final ProductMapper productMapper;
 
@@ -52,7 +58,7 @@ public class ProductServiceImpl implements ProductService {
     public ProductResponseDto getProductByReference(UUID reference) {
         ProductEntity productEntity = productRepository.findByReference(reference)
                 .orElseThrow(() -> new ClientBackendException(ErrorCode.PRODUCT_NOT_FOUND));
-        productEntity.setViewCount(productEntity.getViewCount() + 1);
+        incrementProductViews(reference);
         return productMapper.toResponseDto(productEntity, productEntity.getOwner());
     }
 
@@ -169,6 +175,31 @@ public class ProductServiceImpl implements ProductService {
 
         return productRepository.findAll(getProductByCategoryWithFilters(category, city, states), pageRequest)
                 .map(p -> productMapper.toResponseDto(p, p.getOwner()));
+    }
+
+    public void incrementProductViews(UUID productUUID) {
+        redisTemplate.opsForHash().increment(VIEWS_KEY, String.valueOf(productUUID), 1);
+    }
+
+    @Scheduled(fixedDelay = 30, timeUnit = TimeUnit.MINUTES)
+    @Transactional
+    public void updateDatabase() {
+        Map<Object, Object> viewsMap = redisTemplate.opsForHash().entries(VIEWS_KEY);
+
+        if (!viewsMap.isEmpty()) {
+            for (Map.Entry<Object, Object> entry : viewsMap.entrySet()) {
+                UUID productUUID = UUID.fromString((String) entry.getKey());
+                Integer views = Integer.parseInt((String) entry.getValue());
+
+                Optional<ProductEntity> byReference = productRepository.findByReference(productUUID);
+                if (byReference.isPresent()) {
+                    ProductEntity productEntity = byReference.get();
+                    productEntity.setViewCount(productEntity.getViewCount() + views);
+                }
+            }
+        }
+
+        redisTemplate.delete(VIEWS_KEY);
     }
 
     @SuppressWarnings(value = "unchecked")

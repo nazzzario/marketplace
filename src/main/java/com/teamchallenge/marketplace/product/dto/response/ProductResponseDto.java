@@ -18,6 +18,7 @@ public record ProductResponseDto(UUID reference,
                                  String ownerPhoneNumber,
                                  ProductStateEnum state,
                                  ProductStatusEnum status,
+                                 Long viewCount,
                                  List<String> images) {
 }
 
