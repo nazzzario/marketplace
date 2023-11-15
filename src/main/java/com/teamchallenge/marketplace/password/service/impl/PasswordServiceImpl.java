@@ -31,17 +31,17 @@ public class PasswordServiceImpl implements PasswordService {
     @Override
     @Transactional
     public void changeForgottenPassword(String resetToken, PasswordResetRequestDto requestDto) {
-        String userEmailFromCache = (String) Optional.ofNullable(redisTemplate.opsForValue().get(PASSWORD_RESET_TOKEN_PREFIX+resetToken))
+        String userEmailFromCache = (String) Optional.ofNullable(redisTemplate.opsForValue().get(PASSWORD_RESET_TOKEN_PREFIX + resetToken))
                 .orElseThrow(() -> new ClientBackendException(ErrorCode.PASSWORD_RESET_TOKEN_NOT_EXISTS));
 
         UserEntity userByReference = userRepository.findByEmail(userEmailFromCache)
                 .orElseThrow(() -> new ClientBackendException(ErrorCode.USER_NOT_FOUND));
 
-        if(userByReference.getPassword().equals(requestDto.newPassword())){
+        if (userByReference.getPassword().equals(requestDto.newPassword())) {
             throw new ClientBackendException(ErrorCode.NEW_PASSWORD_SAME_AS_OLD_PASSWORD);
         }
 
-        redisTemplate.delete(PASSWORD_RESET_TOKEN_PREFIX+resetToken);
+        redisTemplate.delete(PASSWORD_RESET_TOKEN_PREFIX + resetToken);
 
         userByReference.setPassword(requestDto.newPassword());
 
