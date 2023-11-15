@@ -13,7 +13,6 @@ public class EmailServiceImpl implements EmailService {
 
     private final JavaMailSender javaMailSender;
 
-    //TODO create dev email
     // TODO: 11/12/23 add html page
     @Override
     @Async

@@ -27,3 +27,10 @@ spring:
           auth: true
           starttls:
             enable: true
+  data:
+    redis:
+      host: redis-12897.c250.eu-central-1-1.ec2.cloud.redislabs.com
+      port: 12897
+      password: xPfKaafUOZzhIG3hwFM5mnGrFeFGkOA0
+      database: 0
+      timeout: 60000

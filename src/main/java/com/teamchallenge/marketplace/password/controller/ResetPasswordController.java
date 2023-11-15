@@ -25,7 +25,7 @@ public class ResetPasswordController {
     private final PasswordService passwordService;
 
     @Operation(summary = "Reset user forgotten password", description = "Send an email for changing password",responses = {
-            @ApiResponse(responseCode = "201", description = "Reset token has been send"),
+            @ApiResponse(responseCode = "204", description = "Reset token has been send"),
             @ApiResponse(responseCode = "400", description = "Invalid input",
                     content = {@Content(mediaType = "application/json", schema = @Schema(implementation = ExceptionResponseDto.class))})
     })
@@ -40,7 +40,7 @@ public class ResetPasswordController {
     }
 
     @Operation(summary = "Change forgotten password", description = "Change forgotten password by reset token",responses = {
-            @ApiResponse(responseCode = "201", description = "Password changed successfully"),
+            @ApiResponse(responseCode = "204", description = "Password changed successfully"),
             @ApiResponse(responseCode = "400", description = "Invalid input",
                     content = {@Content(mediaType = "application/json", schema = @Schema(implementation = ExceptionResponseDto.class))})
     })

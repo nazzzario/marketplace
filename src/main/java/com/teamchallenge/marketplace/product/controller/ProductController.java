@@ -10,7 +10,6 @@ import com.teamchallenge.marketplace.product.persisit.entity.enums.ProductCatego
 import com.teamchallenge.marketplace.product.persisit.entity.enums.ProductStateEnum;
 import com.teamchallenge.marketplace.product.persisit.entity.enums.SortingFieldEnum;
 import com.teamchallenge.marketplace.product.service.ProductService;
-import com.teamchallenge.marketplace.user.persisit.entity.UserEntity;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -22,16 +21,13 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Slice;
-import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 
