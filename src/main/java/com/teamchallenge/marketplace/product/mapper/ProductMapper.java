@@ -18,6 +18,8 @@ import static org.mapstruct.NullValuePropertyMappingStrategy.SET_TO_NULL;
 @Mapper(componentModel = "spring")
 public interface ProductMapper {
 
+    @Mapping(target = "viewCount", ignore = true)
+    @Mapping(target = "publishDate", ignore = true)
     @Mapping(target = "status", ignore = true)
     @Mapping(target = "reference", ignore = true)
     @Mapping(target = "owner", ignore = true)
