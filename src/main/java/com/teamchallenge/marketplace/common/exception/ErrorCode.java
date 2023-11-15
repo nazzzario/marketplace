@@ -35,6 +35,9 @@ public enum ErrorCode {
             500),
     UNABLE_TO_SAVE_FILE("503-001",
             "Unable to save file",
+            503),
+    UNABLE_TO_SEND_EMAIL("503-001",
+            "Unable send email",
             503);
     private final ErrorData errorData;
 
