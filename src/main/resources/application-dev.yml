@@ -27,6 +27,9 @@ spring:
           auth: true
           starttls:
             enable: true
+          ssl:
+            enable: true
+            trust: ${MAIL_HOST}
   data:
     redis:
       host: ${REDIS_HOST}
