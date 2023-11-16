@@ -32,7 +32,7 @@ public class ResetPasswordController {
     @PostMapping("/public/reset-password")
     public ResponseEntity<Void> sendResetToken(
             @Parameter(description = "Email to reset user password", required = true)
-            @RequestBody PasswordResetTokenRequestDto resetRequestDto) {
+            @Valid @RequestBody PasswordResetTokenRequestDto resetRequestDto) {
 
         passwordService.sendResetPasswordToken(resetRequestDto);
 
