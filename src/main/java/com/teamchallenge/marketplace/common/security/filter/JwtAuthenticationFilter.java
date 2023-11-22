@@ -35,16 +35,21 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                                     @NonNull FilterChain filterChain
     ) throws ServletException, IOException {
         final String authHeader = request.getHeader("Authorization");
-        final String jwt;
-        final String userEmail;
 
-        if (isPublicPath(request.getRequestURI()) || Objects.isNull(authHeader) || !authHeader.startsWith("Bearer ")) {
+        if(Objects.nonNull(authHeader) && authHeader.startsWith("Bearer ")){
+            authenticateUser(request, response, authHeader);
             filterChain.doFilter(request, response);
-            return;
+        }
+        else if(isPublicPath(request.getRequestURI())){
+            filterChain.doFilter(request, response);
         }
 
-        try {
+    }
 
+    private void authenticateUser(HttpServletRequest request, HttpServletResponse response, String authHeader) throws IOException {
+        final String userEmail;
+        final String jwt;
+        try {
             jwt = authHeader.substring(7);
             userEmail = jwtService.extractUsername(jwt);
             Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
@@ -63,14 +68,11 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                     SecurityContextHolder.getContext().setAuthentication(authToken);
                 }
             }
-        }catch (JwtAuthenticationException e){
+        } catch (JwtAuthenticationException e) {
             SecurityContextHolder.clearContext();
             log.error("JWT is expired or invalid");
             response.sendError(HttpServletResponse.SC_UNAUTHORIZED, e.getMessage());
         }
-
-
-        filterChain.doFilter(request, response);
     }
 
     private boolean isPublicPath(String contextPath) {
