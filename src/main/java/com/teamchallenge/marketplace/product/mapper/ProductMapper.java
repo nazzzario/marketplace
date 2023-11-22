@@ -1,5 +1,6 @@
 package com.teamchallenge.marketplace.product.mapper;
 
+import com.teamchallenge.marketplace.product.dto.response.ProductNewestResponseDto;
 import com.teamchallenge.marketplace.product.dto.request.ProductRequestDto;
 import com.teamchallenge.marketplace.product.dto.response.ProductResponseDto;
 import com.teamchallenge.marketplace.product.persisit.entity.ProductEntity;
@@ -34,6 +35,11 @@ public interface ProductMapper {
     @Mapping(target = "ownerUsername", source = "userEntity.username")
     @Mapping(target = "reference", source = "productEntity.reference")
     ProductResponseDto toResponseDto(ProductEntity productEntity, UserEntity userEntity);
+
+    @Mapping(target = "ownerPhoneNumber", source = "userEntity.phoneNumber")
+    @Mapping(target = "ownerUsername", source = "userEntity.username")
+    @Mapping(target = "reference", source = "productEntity.reference")
+    ProductNewestResponseDto toNewestResponseDto(ProductEntity productEntity, UserEntity userEntity, String titleImage);
 
     @Mapping(target = "status", ignore = true)
     @Mapping(target = "reference", ignore = true)

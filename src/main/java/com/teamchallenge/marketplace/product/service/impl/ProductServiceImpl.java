@@ -4,6 +4,7 @@ import com.teamchallenge.marketplace.common.exception.ClientBackendException;
 import com.teamchallenge.marketplace.common.exception.ErrorCode;
 import com.teamchallenge.marketplace.common.file.FileUpload;
 import com.teamchallenge.marketplace.product.dto.request.ProductRequestDto;
+import com.teamchallenge.marketplace.product.dto.response.ProductNewestResponseDto;
 import com.teamchallenge.marketplace.product.dto.response.ProductResponseDto;
 import com.teamchallenge.marketplace.product.mapper.ProductMapper;
 import com.teamchallenge.marketplace.product.persisit.entity.ProductEntity;
@@ -14,7 +15,6 @@ import com.teamchallenge.marketplace.product.persisit.repository.ProductReposito
 import com.teamchallenge.marketplace.product.service.ProductService;
 import com.teamchallenge.marketplace.user.persisit.entity.UserEntity;
 import com.teamchallenge.marketplace.user.persisit.repository.UserRepository;
-import jakarta.persistence.criteria.Predicate;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.hibernate.annotations.BatchSize;
@@ -24,7 +24,6 @@ import org.springframework.data.domain.Slice;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.data.redis.core.RedisTemplate;
-import org.springframework.data.redis.core.ZSetOperations;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -134,14 +133,16 @@ public class ProductServiceImpl implements ProductService {
                 .map(p -> productMapper.toResponseDto(p, p.getOwner()));
     }
 
+    // TODO: 11/22/23 cover image
     @Override
     @Transactional(readOnly = true)
-    public Slice<ProductResponseDto> getNewestProducts(Integer page, Integer size) {
+    public Slice<ProductNewestResponseDto> getNewestProducts(Integer page, Integer size) {
         PageRequest pageRequest = PageRequest.of(page, size, Sort.by(SortingFieldEnum.DATE.getFiledName()).descending());
 
         var productsSortedByCreatedDate = productRepository.findByOrderByCreatedDate(pageRequest);
 
-        return productsSortedByCreatedDate.map(p -> productMapper.toResponseDto(p, p.getOwner()));
+        return productsSortedByCreatedDate.map(p -> productMapper.toNewestResponseDto(p, p.getOwner(),
+                "https://res.cloudinary.com/teamchallenge-marketplace/image/upload/v1700688145/ebhoewptmxbynarrqhqw.jpg"));
     }
 
     @Override

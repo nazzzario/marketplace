@@ -4,6 +4,7 @@ import com.teamchallenge.marketplace.common.exception.dto.ExceptionResponseDto;
 import com.teamchallenge.marketplace.common.util.ApiPageable;
 import com.teamchallenge.marketplace.common.util.ApiSlice;
 import com.teamchallenge.marketplace.product.dto.request.ProductRequestDto;
+import com.teamchallenge.marketplace.product.dto.response.ProductNewestResponseDto;
 import com.teamchallenge.marketplace.product.dto.response.ProductResponseDto;
 import com.teamchallenge.marketplace.product.persisit.entity.enums.CitiesEnum;
 import com.teamchallenge.marketplace.product.persisit.entity.enums.ProductCategoriesEnum;
@@ -107,11 +108,11 @@ public class ProductController {
             @ApiResponse(responseCode = "200", description = "Slice of products"),
     })
     @GetMapping("/public/products/newest")
-    public ResponseEntity<Slice<ProductResponseDto>> getNewestProducts(
+    public ResponseEntity<Slice<ProductNewestResponseDto>> getNewestProducts(
             Integer page,
             Integer size
     ) {
-        Slice<ProductResponseDto> newestProducts = productService.getNewestProducts(page, size);
+        Slice<ProductNewestResponseDto> newestProducts = productService.getNewestProducts(page, size);
 
         return new ResponseEntity<>(newestProducts, HttpStatus.OK);
     }
