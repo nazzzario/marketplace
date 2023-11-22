@@ -1,6 +1,7 @@
 package com.teamchallenge.marketplace.product.service;
 
 import com.teamchallenge.marketplace.product.dto.request.ProductRequestDto;
+import com.teamchallenge.marketplace.product.dto.response.ProductNewestResponseDto;
 import com.teamchallenge.marketplace.product.dto.response.ProductResponseDto;
 import com.teamchallenge.marketplace.product.persisit.entity.enums.CitiesEnum;
 import com.teamchallenge.marketplace.product.persisit.entity.enums.ProductCategoriesEnum;
@@ -32,7 +33,7 @@ public interface ProductService {
 
     Page<ProductResponseDto> getProductsByProductTitle(String productTitle, CitiesEnum city, Integer page, Integer size);
 
-    Slice<ProductResponseDto> getNewestProducts(Integer page, Integer size);
+    Slice<ProductNewestResponseDto> getNewestProducts(Integer page, Integer size);
 
     ProductResponseDto uploadImagesToProduct(UUID productReference, List<MultipartFile> images);
 
