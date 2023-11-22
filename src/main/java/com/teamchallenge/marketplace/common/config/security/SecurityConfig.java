@@ -32,12 +32,9 @@ public class SecurityConfig {
         httpSecurity
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(ar -> ar
-                        .requestMatchers("/api/v1/public/auth/**", "/swagger-ui/**", "/v3/api-docs/**")
-                        .permitAll()
-                        .requestMatchers("/api/v1/public/**") // allow public authentication
-                        .permitAll()
-                        .anyRequest()
-                        .authenticated()
+                        .requestMatchers("/api/v1/public/auth/**", "/swagger-ui/**", "/v3/api-docs/**").permitAll()
+                        .requestMatchers("/api/v1/public/**").permitAll()
+                        .anyRequest().authenticated()
                 )
                 .sessionManagement(sm -> sm
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
