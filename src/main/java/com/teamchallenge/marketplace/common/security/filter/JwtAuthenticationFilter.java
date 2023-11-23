@@ -40,7 +40,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             authenticateUser(request, response, authHeader);
             filterChain.doFilter(request, response);
         }
-        else if(isPublicPath(request.getRequestURI())){
+        else if(!isPrivatePath(request.getRequestURI())) {
             filterChain.doFilter(request, response);
         }
 
@@ -75,7 +75,51 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         }
     }
 
-    private boolean isPublicPath(String contextPath) {
-        return contextPath.contains("/public/");
+//    @Override
+//    protected void doFilterInternal(HttpServletRequest request,
+//                                    @NonNull HttpServletResponse response,
+//                                    @NonNull FilterChain filterChain
+//    ) throws ServletException, IOException {
+//        final String authHeader = request.getHeader("Authorization");
+//        final String jwt;
+//        final String userEmail;
+//
+//        if (isPublicPath(request.getRequestURI()) || Objects.isNull(authHeader) || !authHeader.startsWith("Bearer ")) {
+//            filterChain.doFilter(request, response);
+//            return;
+//        }
+//
+//        try {
+//
+//            jwt = authHeader.substring(7);
+//            userEmail = jwtService.extractUsername(jwt);
+//            Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+//
+//            if (Objects.nonNull(userEmail) && Objects.isNull(authentication)) {
+//                UserDetails userDetails = userDetailsService.loadUserByUsername(userEmail);
+//                if (jwtService.isTokenValid(jwt, userDetails)) {
+//                    UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
+//                            userDetails,
+//                            null,
+//                            userDetails.getAuthorities()
+//                    );
+//                    authToken.setDetails(
+//                            new WebAuthenticationDetailsSource().buildDetails(request)
+//                    );
+//                    SecurityContextHolder.getContext().setAuthentication(authToken);
+//                }
+//            }
+//        }catch (JwtAuthenticationException e){
+//            SecurityContextHolder.clearContext();
+//            log.error("JWT is expired or invalid");
+//            response.sendError(HttpServletResponse.SC_UNAUTHORIZED, e.getMessage());
+//        }
+//
+//
+//        filterChain.doFilter(request, response);
+//    }
+
+    private boolean isPrivatePath(String contextPath) {
+        return contextPath.contains("/private/");
     }
 }
