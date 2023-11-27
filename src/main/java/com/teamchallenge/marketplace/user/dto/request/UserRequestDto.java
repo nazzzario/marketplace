@@ -17,6 +17,6 @@ public record UserRequestDto(
         String email,
         @ValidUkrainianPhoneNumber
         String phoneNumber,
-        @Size(min = 4, message = "Password min length is 4")
+        @Size(min = 8, message = "Password min length is 8")
         String password) {
 }
