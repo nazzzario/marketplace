@@ -84,6 +84,7 @@ public class ProductServiceImpl implements ProductService {
                 .orElseThrow(() -> new ClientBackendException(ErrorCode.USER_NOT_FOUND));
 
         ProductEntity entity = productMapper.toEntity(requestDto);
+        entity.setStatus(ProductStatusEnum.ACTIVE);
 
         entity.setOwner(userEntity);
         productRepository.save(entity);

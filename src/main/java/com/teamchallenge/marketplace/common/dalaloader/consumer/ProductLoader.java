@@ -32,7 +32,7 @@ public class ProductLoader implements Consumer<List<Map<String, Object>>> {
                 .forEach(x ->
                         ((List<HashMap>) x.get("products")).forEach(y -> {
                             ProductRequestDto productRequestDto = mapper.convertValue(y, ProductRequestDto.class);
-                            UUID reference = userService.getUserByPhoneNumber("+ 093 83 65 121").reference();
+                            UUID reference = userService.getUserByPhoneNumber("+380987654321").reference();
 
                             productService.createProduct(productRequestDto, reference);
                         })

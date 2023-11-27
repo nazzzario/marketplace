@@ -3,162 +3,128 @@
     {
       "categoryName": "ELECTRONIC",
       "city": "KYIV",
-      "productTitle": "Smartphone",
-      "productDescription": "Brand new smartphone for sale",
-      "state": "NEW",
-      "status": "ACTIVE"
+      "productTitle": "Бездротові навушники з потужним звуком",
+      "productDescription": "Зануртеся у світ музики за допомогою цих передових бездротових навушників. Кришталево чистий звук, комфортна посадка та технологія активного шумозаглушення.",
+      "state": "NEW"
     },
     {
-      "categoryName": "OTHER",
+      "categoryName": "FURNITURE",
       "city": "LVIV",
-      "productTitle": "Gadget",
-      "productDescription": "Cool gadget available now",
-      "state": "USED",
-      "status": "ACTIVE"
+      "productTitle": "Столик для обіду в стилі вінтаж",
+      "productDescription": "Оновіть свій обідній простір цим чудово виготовленим вінтажним обіднім столиком. Ідеальне поєднання елегантності та функціональності для вашого дому.",
+      "state": "USED"
     },
     {
-      "categoryName": "FURNITURE",
-      "city": "KHARKIV",
-      "productTitle": "Sofa",
-      "productDescription": "Comfortable sofa, gently used",
-      "state": "DAMAGED",
-      "status": "ACTIVE"
-    },
-    {
-      "categoryName": "ELECTRONIC",
-      "city": "DNIPRO",
-      "productTitle": "Laptop",
-      "productDescription": "Powerful laptop, like new",
-      "state": "NEW",
-      "status": "ACTIVE"
-    },
-    {
-      "categoryName": "FURNITURE",
+      "categoryName": "HOSE",
       "city": "ODESA",
-      "productTitle": "Dining Table",
-      "productDescription": "Elegant dining table, good condition",
-      "state": "USED",
-      "status": "ACTIVE"
+      "productTitle": "Набір для поливу 'Садовий рай'",
+      "productDescription": "Перетворіть свій сад у рай з цим повним комплектом для поливу. Простий у використанні, міцний та розроблений для ефективного поливу рослин.",
+      "state": "DAMAGED"
     },
     {
-      "categoryName": "OTHER",
-      "city": "KHMELNYTSKYI",
-      "productTitle": "Tool Kit",
-      "productDescription": "Complete tool kit, never used",
-      "state": "DAMAGED",
-      "status": "ACTIVE"
+      "categoryName": "CLOTHE",
+      "city": "KHARKIV",
+      "productTitle": "Шикарна урбанська куртка",
+      "productDescription": "Виходьте на вулицю в стилі з цією шикарною урбанською курткою. Модний дизайн, комфортна посадка та ідеальна для будь-якого сезону.",
+      "state": "NEW"
     },
     {
-      "categoryName": "ELECTRONIC",
-      "city": "VINNYTSIA",
-      "productTitle": "Headphones",
-      "productDescription": "High-quality headphones, sealed",
-      "state": "USED",
-      "status": "ACTIVE"
+      "categoryName": "PETS",
+      "city": "DNIPRO",
+      "productTitle": "Кондомініум для кішок 'Вигідна Вусатість'",
+      "productDescription": "Побалуйте свого котика останнім словом у вигідній вусатій квартирці. Кілька рівнів, затишні укриття та стовбури для точіння включені.",
+      "state": "USED"
     },
     {
-      "categoryName": "OTHER",
+      "categoryName": "CHILDREN",
       "city": "ZAPORIZHIA",
-      "productTitle": "Home Appliance",
-      "productDescription": "Appliance for your home, great deal",
-      "state": "NEW",
-      "status": "ACTIVE"
-    },
-    {
-      "categoryName": "FURNITURE",
-      "city": "CHERNIVTSI",
-      "productTitle": "Wardrobe",
-      "productDescription": "Spacious wardrobe, slightly damaged",
-      "state": "USED",
-      "status": "ACTIVE"
-    },
-    {
-      "categoryName": "ELECTRONIC",
-      "city": "RIVNE",
-      "productTitle": "Tablet",
-      "productDescription": "Tablet with a beautiful display",
-      "state": "NEW",
-      "status": "ACTIVE"
-    },
-    {
-      "categoryName": "FURNITURE",
-      "city": "MYKOLAIV",
-      "productTitle": "Coffee Table",
-      "productDescription": "Stylish coffee table, like new",
-      "state": "DAMAGED",
-      "status": "ACTIVE"
-    },
-    {
-      "categoryName": "OTHER",
-      "city": "POLTAVA",
-      "productTitle": "Art Supplies",
-      "productDescription": "Art supplies for creative minds",
-      "state": "USED",
-      "status": "ACTIVE"
-    },
-    {
-      "categoryName": "FURNITURE",
-      "city": "IVANOFRANKIVSK",
-      "productTitle": "Bed",
-      "productDescription": "Comfortable bed, good condition",
-      "state": "NEW",
-      "status": "ACTIVE"
-    },
-    {
-      "categoryName": "ELECTRONIC",
-      "city": "TERNOPIL",
-      "productTitle": "Camera",
-      "productDescription": "Professional camera for photographers",
-      "state": "USED",
-      "status": "ACTIVE"
+      "productTitle": "Набір для гри 'Експлоратор пригод'",
+      "productDescription": "Заохочуйте уяву дитини з цим набором для гри 'Експлоратор пригод'. Включає в себе міні-джунглі, піратський корабель та секретні сховища для нескінченного веселощів.",
+      "state": "NEW"
     },
     {
       "categoryName": "OTHER",
       "city": "LUTSK",
-      "productTitle": "Sports Equipment",
-      "productDescription": "Sports equipment for fitness enthusiasts",
-      "state": "NEW",
-      "status": "ACTIVE"
-    },
-    {
-      "categoryName": "FURNITURE",
-      "city": "SUMY",
-      "productTitle": "Desk",
-      "productDescription": "Study desk for students",
-      "state": "DAMAGED",
-      "status": "ACTIVE"
+      "productTitle": "Інноваційний багатофункціональний гаджет",
+      "productDescription": "Відкрийте для себе унікальні можливості цього інноваційного багатофункціонального гаджету. Обов'язковий аксесуар для любителів активного відпочинку та шанувальників ремесла.",
+      "state": "DAMAGED"
     },
     {
       "categoryName": "ELECTRONIC",
-      "city": "KHERSON",
-      "productTitle": "Smartwatch",
-      "productDescription": "Smartwatch with health tracking",
-      "state": "NEW",
-      "status": "ACTIVE"
+      "city": "IVANOFRANKIVSK",
+      "productTitle": "УльтраHD Смарт-телевізор",
+      "productDescription": "Відчуйте кінематографічні візуали вдома за допомогою цього УльтраHD смарт-телевізора. Розумні функції, стильний дизайн та ідеальний для вашого розвагового досвіду.",
+      "state": "NEW"
+    },
+    {
+      "categoryName": "FURNITURE",
+      "city": "CHERNIVTSI",
+      "productTitle": "Затишний кутовий диван",
+      "productDescription": "Трансформуйте свій вітальний простір у затишну лаьн з цим комфортабельним кутовим диваном. Ідеально для відпочинку та родинних зустрічей.",
+      "state": "USED"
+    },
+    {
+      "categoryName": "HOSE",
+      "city": "KHMELNYTSKYI",
+      "productTitle": "Радужний розпилювач для саду",
+      "productDescription": "Зробіть полив вашого саду кольоровим за допомогою цього радужного розпилювача. Веселий для дітей та ефективний для рослин.",
+      "state": "NEW"
+    },
+    {
+      "categoryName": "CLOTHE",
+      "city": "UZHGOROD",
+      "productTitle": "Шикарна літня сукня в стилі бохо-шик",
+      "productDescription": "Запрошуємо вас долучитися до бохо-шик атмосфери за допомогою цієї стильної літньої сукні. Легка, модна та ідеальна для сонячних днів.",
+      "state": "USED"
+    },
+    {
+      "categoryName": "PETS",
+      "city": "POLTAVA",
+      "productTitle": "Ліжко-гамак для кота",
+      "productDescription": "Побалуйте свого кота цим комфортабельним ліжком-гамаком. Стильний дизайн, зручно та ідеально для відпочинку кота.",
+      "state": "DAMAGED"
+    },
+    {
+      "categoryName": "CHILDREN",
+      "city": "SIMFEROPOL",
+      "productTitle": "Інтерактивний навчальний робот",
+      "productDescription": "Збагачуйте навчання вашої дитини за допомогою цього інтерактивного робота. Вчить алфавіт, числа та основи програмування у веселий спосіб.",
+      "state": "NEW"
     },
     {
       "categoryName": "OTHER",
-      "city": "CHERKASY",
-      "productTitle": "Kitchen Appliances",
-      "productDescription": "Essential kitchen appliances",
-      "state": "USED",
-      "status": "ACTIVE"
+      "city": "VINNYTSIA",
+      "productTitle": "Унікальна ручна робота",
+      "productDescription": "Додайте елемент унікальності до свого простору за допомогою цієї унікальної ручної роботи. Кожен екземпляр - неповторний шедевр.",
+      "state": "USED"
     },
     {
       "categoryName": "ELECTRONIC",
-      "city": "ZHYTOMYR",
-      "productTitle": "Gaming Console",
-      "productDescription": "Gaming console for gamers",
-      "state": "DAMAGED",
-      "status": "ACTIVE"
+      "city": "MYKOLAIV",
+      "productTitle": "Система смарт-безпеки для дому",
+      "productDescription": "Захистіть свій будинок за допомогою останньої системи смарт-безпеки для дому. Моніторинг та керування безпекою з будь-якого місця легко.",
+      "state": "NEW"
     },
     {
       "categoryName": "FURNITURE",
-      "city": "KROPYVNYTSKYI",
-      "productTitle": "Bookshelf",
-      "productDescription": "Sturdy bookshelf, excellent condition",
-      "state": "NEW",
-      "status": "ACTIVE"
+      "city": "RIVNE",
+      "productTitle": "Стіл для медитації в стилі Зен",
+      "productDescription": "Створіть спокійний простір для медитації з цим столом в стилі Зен. Зручний, ергономічний та ідеальний для майстерності.",
+      "state": "USED"
+    },
+    {
+      "categoryName": "HOSE",
+      "city": "CHERKASY",
+      "productTitle": "Таємничий розпилювач для саду",
+      "productDescription": "Перетворіть свій сад в таємничий оазис за допомогою цього розпилювача для саду. Додає чарівну нотку до вашого зовнішнього простору.",
+      "state": "DAMAGED"
+    },
+    {
+      "categoryName": "CLOTHE",
+      "city": "SUMY",
+      "productTitle": "Денімові джинси з акцентами на моді",
+      "productDescription": "Будьте в тренді з цими модними денімовими джинсами.",
+      "state": "NEW"
     }
   ]
 }

@@ -1,10 +1,11 @@
 {
   "users": [
     {
-      "username" : "Катерина",
-      "email" : "meow@email.com",
-      "phoneNumber" : "+ 093 83 65 121",
-      "password" : "test"
+      "username": "Ivan Petrov",
+      "email": "ivan.petrov@example.ua",
+      "phoneNumber": "+380987654321",
+      "password": "bezpechnyParol456"
     }
+
   ]
 }
