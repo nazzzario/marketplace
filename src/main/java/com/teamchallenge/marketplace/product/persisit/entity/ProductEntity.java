@@ -49,7 +49,7 @@ public class ProductEntity extends BaseEntity {
 
     private LocalDate publishDate;
 
-    private Long viewCount;
+    private long viewCount;
 
     @PrePersist
     @PreUpdate

@@ -16,7 +16,7 @@ public record ProductNewestResponseDto(UUID reference,
                                        String ownerPhoneNumber,
                                        ProductStateEnum state,
                                        ProductStatusEnum status,
-                                       Long viewCount,
+                                       long viewCount,
                                        LocalDate publishDate,
                                        String titleImage) {
 }
