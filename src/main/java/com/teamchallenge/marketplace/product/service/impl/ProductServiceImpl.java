@@ -179,6 +179,53 @@ public class ProductServiceImpl implements ProductService {
                 .map(p -> productMapper.toResponseDto(p, p.getOwner()));
     }
 
+    @Override
+    @Transactional
+    public void addProductToFavorites(Authentication authentication, UUID productReference) {
+        ProductEntity productEntity = productRepository.findByReference(productReference)
+                .orElseThrow(() -> new ClientBackendException(ErrorCode.PRODUCT_NOT_FOUND));
+
+        if (Objects.nonNull(authentication) && authentication.isAuthenticated()) {
+            String email = authentication.getName();
+            UserEntity userEntity = userRepository.findByEmail(email)
+                    .orElseThrow(() -> new ClientBackendException(ErrorCode.USER_NOT_FOUND));
+            userEntity.getFavoriteProducts().add(productEntity);
+        } else {
+            throw new ClientBackendException(ErrorCode.CANNOT_ADD_PRODUCT_TO_FAVORITE);
+        }
+    }
+
+    @Override
+    @Transactional
+    public void removeProductFromFavorites(Authentication authentication, UUID productReference) {
+        ProductEntity productEntity = productRepository.findByReference(productReference)
+                .orElseThrow(() -> new ClientBackendException(ErrorCode.PRODUCT_NOT_FOUND));
+
+        if (Objects.nonNull(authentication) && authentication.isAuthenticated()) {
+            String email = authentication.getName();
+            UserEntity userEntity = userRepository.findByEmail(email)
+                    .orElseThrow(() -> new ClientBackendException(ErrorCode.USER_NOT_FOUND));
+            userEntity.getFavoriteProducts().remove(productEntity);
+        } else {
+            throw new ClientBackendException(ErrorCode.CANNOT_ADD_PRODUCT_TO_FAVORITE);
+        }
+    }
+
+    @Override
+    public List<ProductResponseDto> getUserFavoriteProducts(Authentication authentication) {
+        if (Objects.nonNull(authentication) && authentication.isAuthenticated()) {
+            String email = authentication.getName();
+            UserEntity userEntity = userRepository.findByEmail(email)
+                    .orElseThrow(() -> new ClientBackendException(ErrorCode.USER_NOT_FOUND));
+            return userEntity.getFavoriteProducts()
+                    .stream()
+                    .map(p -> productMapper.toResponseDto(p, userEntity))
+                    .toList();
+        } else {
+            throw new ClientBackendException(ErrorCode.UNKNOWN_SERVER_ERROR);
+        }
+    }
+
     public void incrementProductViews(UUID productUUID) {
         redisTemplate.opsForHash().increment(VIEWS_KEY, String.valueOf(productUUID), 1);
     }
