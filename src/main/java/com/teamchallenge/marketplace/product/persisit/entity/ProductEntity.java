@@ -43,6 +43,9 @@ public class ProductEntity extends BaseEntity {
     @JoinColumn(name = "owner_id")
     private UserEntity owner;
 
+    @ManyToMany(mappedBy = "favoriteProducts")
+    private List<UserEntity> favoritism;
+
     // TODO: 27.09.23 remove images when remove product 
     @OneToMany(mappedBy = "product")
     private List<ProductImageEntity> images;
