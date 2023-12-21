@@ -85,19 +85,19 @@ public class GlobalExceptionHandler {
     }
 
 
-//    @ExceptionHandler(Exception.class)
-//    public ResponseEntity<ExceptionResponseDto> handleExceptions(Exception ex, HttpServletRequest request) {
-//        ExceptionResponseDto errorResponse = ExceptionResponseDto.builder()
-//                .time(LocalDateTime.now().toString())
-//                .errorCode(null)
-//                .title(ex.getClass().getName())
-//                .message("Unhandled exception")
-//                .httpResponseCode(500)
-//                .path(request.getRequestURI())
-//                .build();
-//
-//        return new ResponseEntity<>(errorResponse, HttpStatus.INTERNAL_SERVER_ERROR);
-//    }
+    @ExceptionHandler(Exception.class)
+    public ResponseEntity<ExceptionResponseDto> handleExceptions(Exception ex, HttpServletRequest request) {
+        ExceptionResponseDto errorResponse = ExceptionResponseDto.builder()
+                .time(LocalDateTime.now().toString())
+                .errorCode(null)
+                .title(ex.getClass().getName())
+                .message("Unhandled exception")
+                .httpResponseCode(500)
+                .path(request.getRequestURI())
+                .build();
+
+        return new ResponseEntity<>(errorResponse, HttpStatus.INTERNAL_SERVER_ERROR);
+    }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<ExceptionResponseDto> handleValidationExceptions(MethodArgumentNotValidException ex, HttpServletRequest request) {

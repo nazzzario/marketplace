@@ -26,6 +26,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -203,5 +204,59 @@ public class ProductController {
         Page<ProductResponseDto> productsByCategory = productService.getAllProductsByCategory(categories, city, states, page, size, sortField);
 
         return new ResponseEntity<>(productsByCategory, HttpStatus.OK);
+    }
+
+    @Operation(summary = "Set product to user favorites", description = "An authenticated user can add product to his favorite product list", tags = "favorites")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "204", description = "Product add to favorites list successfully"),
+            @ApiResponse(responseCode = "401", description = "Unauthenticated",
+                    content = {@Content(mediaType = "application/json", schema = @Schema(implementation = ExceptionResponseDto.class))}),
+            @ApiResponse(responseCode = "403", description = "Invalid product reference",
+                    content = {@Content(mediaType = "application/json", schema = @Schema(implementation = ExceptionResponseDto.class))}),
+            @ApiResponse(responseCode = "404", description = "Product not found",
+                    content = {@Content(mediaType = "application/json", schema = @Schema(implementation = ExceptionResponseDto.class))}),
+            @ApiResponse(responseCode = "400", description = "Cannot add product to favorites",
+                    content = {@Content(mediaType = "application/json", schema = @Schema(implementation = ExceptionResponseDto.class))})
+
+    })
+    @PostMapping("/private/products/{productReference}/favorites")
+    public ResponseEntity<Void> addProductToFavorites(@PathVariable("productReference") UUID productReference,
+                                                      Authentication authentication){
+        productService.addProductToFavorites(authentication, productReference);
+        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+    }
+
+    @Operation(summary = "Remove product from user favorites", description = "An authenticated user can remove product from his favorite product list", tags = "favorites")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "204", description = "Product removed from favorites list successfully"),
+            @ApiResponse(responseCode = "401", description = "Unauthenticated",
+                    content = {@Content(mediaType = "application/json", schema = @Schema(implementation = ExceptionResponseDto.class))}),
+            @ApiResponse(responseCode = "403", description = "Invalid product reference",
+                    content = {@Content(mediaType = "application/json", schema = @Schema(implementation = ExceptionResponseDto.class))}),
+            @ApiResponse(responseCode = "404", description = "Product not found",
+                    content = {@Content(mediaType = "application/json", schema = @Schema(implementation = ExceptionResponseDto.class))}),
+            @ApiResponse(responseCode = "400", description = "Cannot add product to favorites",
+                    content = {@Content(mediaType = "application/json", schema = @Schema(implementation = ExceptionResponseDto.class))})
+    })
+    @DeleteMapping("/private/products/{productReference}/favorites")
+    public ResponseEntity<Void> removeProductFromFavorites(@PathVariable("productReference") UUID productReference,
+                                                           Authentication authentication){
+        productService.removeProductFromFavorites(authentication, productReference);
+        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+    }
+
+    @Operation(summary = "List of user favorites products", description = "An authenticated user can get a list of his favorite products", tags = "favorites")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "User favorite product list"),
+            @ApiResponse(responseCode = "401", description = "Unauthenticated",
+                    content = {@Content(mediaType = "application/json", schema = @Schema(implementation = ExceptionResponseDto.class))}),
+            @ApiResponse(responseCode = "403", description = "Invalid product reference",
+                    content = {@Content(mediaType = "application/json", schema = @Schema(implementation = ExceptionResponseDto.class))}),
+    })
+    @GetMapping("/private/products/favorites")
+    public ResponseEntity<List<ProductResponseDto>> getUserFavoritesProducts(Authentication authentication){
+        List<ProductResponseDto> favoriteProducts = productService.getUserFavoriteProducts(authentication);
+
+        return new ResponseEntity<>(favoriteProducts, HttpStatus.OK);
     }
 }
