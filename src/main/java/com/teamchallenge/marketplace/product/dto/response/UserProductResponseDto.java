@@ -17,5 +17,5 @@ public record UserProductResponseDto(UUID reference,
                                      ProductStateEnum state,
                                      ProductStatusEnum status,
                                      long viewCount,
-                                     List<String> images) {
+                                     List<UserProductResponseDto> images) {
 }
