@@ -2,6 +2,7 @@ package com.teamchallenge.marketplace.user.service.impl;
 
 import com.teamchallenge.marketplace.common.exception.ClientBackendException;
 import com.teamchallenge.marketplace.common.exception.ErrorCode;
+import com.teamchallenge.marketplace.product.persisit.entity.enums.ProductStatusEnum;
 import com.teamchallenge.marketplace.user.dto.request.UserPatchRequestDto;
 import com.teamchallenge.marketplace.user.dto.request.UserRequestDto;
 import com.teamchallenge.marketplace.user.dto.response.UserResponseDto;
@@ -10,12 +11,14 @@ import com.teamchallenge.marketplace.user.persisit.entity.UserEntity;
 import com.teamchallenge.marketplace.user.persisit.entity.enums.RoleEnum;
 import com.teamchallenge.marketplace.user.persisit.repository.UserRepository;
 import com.teamchallenge.marketplace.user.service.UserService;
+import jakarta.annotation.Resource;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
 import java.util.UUID;
 
 @Slf4j
@@ -26,10 +29,13 @@ public class UserServiceImpl implements UserService {
 
     private final UserMapper userMapper;
 
+    @Resource
+    private UserServiceImpl userService;
+
     @Override
     @Transactional
     public UserResponseDto userRegistration(UserRequestDto requestDto) {
-        if(existsByEmail(requestDto.email())){
+        if(userService.existsByEmail(requestDto.email())){
             throw new ClientBackendException(ErrorCode.EMAIL_ALREADY_EXISTS);
         }
         UserEntity userEntity = userMapper.toEntity(requestDto);
@@ -69,5 +75,11 @@ public class UserServiceImpl implements UserService {
         userMapper.patchMerge(requestDto, userByReference);
 
         return userMapper.toResponseDto(userByReference);
+    }
+
+    @Override
+    public List<UserResponseDto> getUsersByProductStatus(ProductStatusEnum status) {
+        return userMapper.toListOfResponseDto(
+                userRepository.findDistinctByProductsStatus(status));
     }
 }

@@ -13,14 +13,10 @@ import java.util.List;
 public interface UserProductMapper {
     @Mapping(target = "reference", source = "productEntity.reference")
     @Mapping(target = "images",
-            expression = "java(getListImageToString(productEntity.getImages()))")
+            expression = "java(toListOfImageDto(productEntity.getImages()))")
     UserProductResponseDto toResponseDto(ProductEntity productEntity);
 
-    default List<UserProductImageDto> getListImageToString(
-            List<ProductImageEntity> productImageEntities){
-        return productImageEntities.stream().map(image ->
-                new UserProductImageDto(image.getImageUrl(), image.isCover(),
-                        image.getReference().toString())).toList();
-    }
+    UserProductImageDto toImageDto(ProductImageEntity imageEntity);
 
+    List<UserProductImageDto> toListOfImageDto(List<ProductImageEntity> imageEntities);
 }

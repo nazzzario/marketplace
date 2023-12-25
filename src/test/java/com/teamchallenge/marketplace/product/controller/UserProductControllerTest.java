@@ -38,7 +38,7 @@ class UserProductControllerTest {
     @Test
     void getActiveProductsByUser() {
         when(productService.getProductsWithStatusByUser(ProductStatusEnum.ACTIVE,
-                PageRequest.of(0, 6, Sort.by("id").descending())))
+                PageRequest.of(0, 6, Sort.by("id"))))
                 .thenReturn(new PageImpl<UserProductResponseDto>(List.of()));
 
         mockMvc.perform(get("/api/v1/private/products/active").
@@ -52,7 +52,7 @@ class UserProductControllerTest {
     @Test
     void getFavoriteProductsByUser() {
         when(productService.getFavoriteProductsByUser(PageRequest
-                .of(0, 6, Sort.by("id").descending())))
+                .of(0, 6, Sort.by("id"))))
                 .thenReturn(new PageImpl<UserProductResponseDto>(List.of()));
 
         mockMvc.perform(get("/api/v1/private/products/favorite").
@@ -66,7 +66,7 @@ class UserProductControllerTest {
     @Test
     void getProductsByUserAndProductDisabled() {
         when(productService.getProductsWithStatusByUser(ProductStatusEnum.ACTIVE,
-                PageRequest.of(0, 6, Sort.by("id").descending())))
+                PageRequest.of(0, 6, Sort.by("id"))))
                 .thenReturn(new PageImpl<UserProductResponseDto>(List.of()));
 
         mockMvc.perform(get("/api/v1/private/products/disabled").
@@ -74,5 +74,43 @@ class UserProductControllerTest {
                                 .of(0, 6, Sort.by("id")))
                         .with(jwt().authorities(new SimpleGrantedAuthority("ROLE_AUTHORIZED_PERSONNEL"))))
                 .andDo(print()).andExpect(status().isOk());
+    }
+
+    @SneakyThrows
+    @Test
+    void getActiveProductsByUserNotAuthorizeUser() {
+        when(productService.getProductsWithStatusByUser(ProductStatusEnum.ACTIVE,
+                PageRequest.of(0, 6, Sort.by("id"))))
+                .thenReturn(new PageImpl<UserProductResponseDto>(List.of()));
+
+        mockMvc.perform(get("/api/v1/private/products/active").
+                        requestAttr("pageable", PageRequest
+                                .of(0, 6, Sort.by("id"))))
+                .andDo(print()).andExpect(status().isUnauthorized());
+    }
+
+    @SneakyThrows
+    @Test
+    void getFavoriteProductsByUserNotAuthorizeUser() {
+        when(productService.getFavoriteProductsByUser(PageRequest
+                .of(0, 6, Sort.by("id"))))
+                .thenReturn(new PageImpl<UserProductResponseDto>(List.of()));
+
+        mockMvc.perform(get("/api/v1/private/products/favorite").
+                        requestAttr("pageable", PageRequest
+                                .of(0, 6, Sort.by("id"))))
+                .andDo(print()).andExpect(status().isUnauthorized());
+    }
+    @SneakyThrows
+    @Test
+    void getProductsByUserAndProductDisabledNotAuthorizeUser() {
+        when(productService.getProductsWithStatusByUser(ProductStatusEnum.ACTIVE,
+                PageRequest.of(0, 6, Sort.by("id"))))
+                .thenReturn(new PageImpl<UserProductResponseDto>(List.of()));
+
+        mockMvc.perform(get("/api/v1/private/products/disabled").
+                        requestAttr("pageable", PageRequest
+                                .of(0, 6, Sort.by("id"))))
+                .andDo(print()).andExpect(status().isUnauthorized());
     }
 }

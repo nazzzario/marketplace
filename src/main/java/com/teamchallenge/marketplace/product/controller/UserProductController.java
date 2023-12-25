@@ -19,7 +19,6 @@ import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -60,9 +59,7 @@ public class UserProductController {
     @GetMapping("/products/favorite")
     public ResponseEntity<Page<UserProductResponseDto>> getFavoriteProductsByUser(
             @Parameter(hidden = true) @PageableDefault(sort = { "id" }, size = 6,
-                    direction = Sort.Direction.DESC) Pageable pageable,
-            Authentication authentication
-    ) {
+                    direction = Sort.Direction.DESC) Pageable pageable) {
         Page<UserProductResponseDto> productsByUserAndProductActive = productService
                 .getFavoriteProductsByUser(pageable);
 
