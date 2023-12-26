@@ -25,7 +25,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/api/v1/private")
+@RequestMapping("/api/v1/private/products")
 @Tag(name = "Product")
 public class UserProductController {
     private final UserProductService productService;
@@ -33,12 +33,16 @@ public class UserProductController {
     @ApiPageable
     @Operation(summary = "Get page of product with active status by user", description = "Get product with active status by user",responses = {
             @ApiResponse(responseCode = "200", description = "Products page returned"),
-            @ApiResponse(responseCode = "403", description = "Invalid search parameter input",
+            @ApiResponse(responseCode = "401", description = "Unauthenticated",
+                    content = {@Content(mediaType = "application/json", schema = @Schema(implementation = ExceptionResponseDto.class))}),
+            @ApiResponse(responseCode = "403", description = "Access denied",
+                    content = {@Content(mediaType = "application/json", schema = @Schema(implementation = ExceptionResponseDto.class))}),
+            @ApiResponse(responseCode = "404", description = "Product not found",
                     content = {@Content(mediaType = "application/json", schema = @Schema(implementation = ExceptionResponseDto.class))})
 
     })
     @PageableAsQueryParam
-    @GetMapping("/products/active")
+    @GetMapping("/active")
     public ResponseEntity<Page<UserProductResponseDto>> getActiveProductsByUser(
             @Parameter(hidden = true) @PageableDefault(sort = { "id" }, size = 6,
                     direction = Sort.Direction.DESC) Pageable pageable) {
@@ -51,12 +55,16 @@ public class UserProductController {
     @ApiPageable
     @Operation(summary = "Get page of favorite product by user", description = "Get page of favorite product by user ",responses = {
             @ApiResponse(responseCode = "200", description = "Products page returned"),
-            @ApiResponse(responseCode = "403", description = "Invalid search parameter input",
+            @ApiResponse(responseCode = "401", description = "Unauthenticated",
+                    content = {@Content(mediaType = "application/json", schema = @Schema(implementation = ExceptionResponseDto.class))}),
+            @ApiResponse(responseCode = "403", description = "Access denied",
+                    content = {@Content(mediaType = "application/json", schema = @Schema(implementation = ExceptionResponseDto.class))}),
+            @ApiResponse(responseCode = "404", description = "Product not found",
                     content = {@Content(mediaType = "application/json", schema = @Schema(implementation = ExceptionResponseDto.class))})
 
     })
     @PageableAsQueryParam
-    @GetMapping("/products/favorite")
+    @GetMapping("/favorite")
     public ResponseEntity<Page<UserProductResponseDto>> getFavoriteProductsByUser(
             @Parameter(hidden = true) @PageableDefault(sort = { "id" }, size = 6,
                     direction = Sort.Direction.DESC) Pageable pageable) {
@@ -69,12 +77,15 @@ public class UserProductController {
     @ApiPageable
     @Operation(summary = "Get page of product with disabled status by user", description = "Get page of product with disable status by user",responses = {
             @ApiResponse(responseCode = "200", description = "Products page returned"),
-            @ApiResponse(responseCode = "403", description = "Invalid search parameter input",
+            @ApiResponse(responseCode = "401", description = "Unauthenticated",
+                    content = {@Content(mediaType = "application/json", schema = @Schema(implementation = ExceptionResponseDto.class))}),
+            @ApiResponse(responseCode = "403", description = "Access denied",
+                    content = {@Content(mediaType = "application/json", schema = @Schema(implementation = ExceptionResponseDto.class))}),
+            @ApiResponse(responseCode = "404", description = "Product not found",
                     content = {@Content(mediaType = "application/json", schema = @Schema(implementation = ExceptionResponseDto.class))})
-
     })
     @PageableAsQueryParam
-    @GetMapping("/products/disabled")
+    @GetMapping("/disabled")
     public ResponseEntity<Page<UserProductResponseDto>> getProductsByUserAndProductDisabled(
             @Parameter(hidden = true) @PageableDefault(sort = { "id" }, size = 6,
                     direction = Sort.Direction.DESC) Pageable pageable

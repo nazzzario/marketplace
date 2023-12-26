@@ -9,6 +9,7 @@ public interface UserProductService {
     /**
      * Get all products with status by user within pageable.
      *
+     * @param status Status product
      * @param pageable  page, size and sort .
      */
 

@@ -1,4 +1,4 @@
 package com.teamchallenge.marketplace.product.dto.response;
 
-public record UserProductImageDto(String imageUrl, boolean cover, String reference) {
+public record UserProductImageDto(String imageUrl, String reference) {
 }
