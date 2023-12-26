@@ -46,7 +46,7 @@ public class UserProductServiceImpl implements UserProductService {
             String email = authentication.getName();
             UserEntity userEntity = userRepository.findByEmail(email)
                     .orElseThrow(() -> new ClientBackendException(ErrorCode.USER_NOT_FOUND));
-            return productRepository.findByFavoritismId(userEntity.getId())
+            return productRepository.findByFavoritismId(userEntity.getId(), pageable)
                     .map(productMapper::toResponseDto);
         } else {
             throw new ClientBackendException(ErrorCode.UNKNOWN_SERVER_ERROR);
