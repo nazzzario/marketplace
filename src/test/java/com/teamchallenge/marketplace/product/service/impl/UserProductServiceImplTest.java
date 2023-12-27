@@ -21,6 +21,7 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.security.test.context.support.WithMockUser;
+import org.springframework.test.context.ActiveProfiles;
 
 import java.util.List;
 import java.util.Optional;
@@ -34,6 +35,7 @@ import static org.mockito.Mockito.when;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.NONE)
 @WithMockUser
+@ActiveProfiles("test")
 class UserProductServiceImplTest {
     @Autowired
     private UserProductService productService;
@@ -49,7 +51,7 @@ class UserProductServiceImplTest {
     PageRequest pageable = PageRequest.of(0, 6, Sort.by("id"));
     PageImpl<ProductEntity> pageEntity = new PageImpl<>(List.of(new ProductEntity()), pageable, 1);
     UUID reference = UUID.randomUUID();
-    UserProductImageDto imageDto = new UserProductImageDto("url", true, "reference");
+    UserProductImageDto imageDto = new UserProductImageDto("url", "reference");
     UserProductResponseDto responseDto = new UserProductResponseDto(reference,
             ProductCategoriesEnum.CLOTHE, "Kiev","Clothe", "Clothe",
             ProductStateEnum.USED, ProductStatusEnum.ACTIVE, 1, List.of(imageDto));
