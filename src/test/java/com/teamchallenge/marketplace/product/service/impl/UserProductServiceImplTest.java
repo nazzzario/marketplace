@@ -93,6 +93,10 @@ class UserProductServiceImplTest {
         assertThat(products.stream().count()).isEqualTo(1);
         assertThat(products.stream().toList()).contains(responseDto);
         assertEquals(products.stream().toList().get(0).reference(), reference);
+        assertThat(products.stream().toList().get(0).status()).isEqualTo(ProductStatusEnum.ACTIVE);
+        assertThat(products.stream().toList().get(0).categoryName()).isEqualTo(ProductCategoriesEnum.CLOTHE);
+        assertThat(products.stream().toList().get(0).city()).isEqualTo("Kiev");
+        assertThat(products.stream().toList().get(0).state()).isEqualTo(ProductStateEnum.USED);
         assertThat(products.stream().toList().get(0).images()).contains(imageDto);
     }
 
@@ -106,6 +110,10 @@ class UserProductServiceImplTest {
         assertThat(products.stream().count()).isEqualTo(1);
         assertThat(products.stream().toList()).contains(responseDto);
         assertEquals(products.stream().toList().get(0).reference(), reference);
+        assertThat(products.stream().toList().get(0).status()).isEqualTo(ProductStatusEnum.ACTIVE);
+        assertThat(products.stream().toList().get(0).categoryName()).isEqualTo(ProductCategoriesEnum.CLOTHE);
+        assertThat(products.stream().toList().get(0).city()).isEqualTo("Kiev");
+        assertThat(products.stream().toList().get(0).state()).isEqualTo(ProductStateEnum.USED);
         assertThat(products.stream().toList().get(0).images()).contains(imageDto);
     }
 }
