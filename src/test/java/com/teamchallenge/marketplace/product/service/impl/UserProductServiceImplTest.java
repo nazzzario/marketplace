@@ -12,6 +12,7 @@ import com.teamchallenge.marketplace.product.service.UserProductService;
 import com.teamchallenge.marketplace.user.persisit.entity.UserEntity;
 import com.teamchallenge.marketplace.user.persisit.repository.UserRepository;
 import lombok.SneakyThrows;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -20,7 +21,12 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContext;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.TestPropertySource;
 
 import java.util.List;
 import java.util.Optional;
@@ -32,7 +38,11 @@ import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.when;
 
 
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.NONE)
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.NONE,
+        classes = UserProductServiceImpl.class)
+@WithMockUser
+@TestPropertySource(properties = {"spring.security.jwt.secret=testSecretKey",
+        "spring.security.jwt.expiration=1"})
 @ActiveProfiles("test")
 class UserProductServiceImplTest {
     @Autowired
@@ -44,6 +54,8 @@ class UserProductServiceImplTest {
     private UserRepository userRepository;
     @MockBean
     private UserProductMapper productMapper;
+    @MockBean
+    private Authentication authenticationMock;
 
     UserEntity userEntity = new UserEntity();
     PageRequest pageable = PageRequest.of(0, 6, Sort.by("id"));
@@ -54,16 +66,26 @@ class UserProductServiceImplTest {
             ProductCategoriesEnum.CLOTHE, "Kiev","Clothe", "Clothe",
             ProductStateEnum.USED, ProductStatusEnum.ACTIVE, 1, List.of(imageDto));
     PageImpl<UserProductResponseDto> pageDto = new PageImpl<>(List.of(responseDto), pageable, 1);
+    SecurityContext securityContext;
+
+    @BeforeEach
+    void init(){
+        userEntity.setId(1L);
+        securityContext = SecurityContextHolder.createEmptyContext();
+        securityContext.setAuthentication(authenticationMock);
+        SecurityContextHolder.setContext(securityContext);
+
+        when(authenticationMock.isAuthenticated()).thenReturn(true);
+        when(authenticationMock.getName()).thenReturn("fucke@user");
+        when(userRepository.findByEmail(anyString())).thenReturn(Optional.of(userEntity));
+        when(productMapper.toResponseDto(any(ProductEntity.class))).thenReturn(responseDto);
+    }
 
     @SneakyThrows
     @Test
     void getProductsWithStatusByUser() {
-
-
-        when(userRepository.findByEmail(anyString())).thenReturn(Optional.of(userEntity));
         when(productRepository.findByOwnerAndStatus(userEntity, ProductStatusEnum.ACTIVE, pageable))
                 .thenReturn(pageEntity);
-        when(productMapper.toResponseDto(any())).thenReturn(responseDto);
 
         Page<UserProductResponseDto> products = productService.getProductsWithStatusByUser(
                 ProductStatusEnum.ACTIVE, pageable);
@@ -76,10 +98,8 @@ class UserProductServiceImplTest {
 
     @Test
     void getFavoriteProductsByUser() {
-        when(userRepository.findByEmail(anyString())).thenReturn(Optional.of(userEntity));
-        when(productRepository.findByFavoritismId(anyLong(), pageable))
+        when(productRepository.findByFavoritismId(anyLong(), eq(pageable)))
                 .thenReturn(pageEntity);
-        when(productMapper.toResponseDto(any())).thenReturn(responseDto);
 
         Page<UserProductResponseDto> products = productService.getFavoriteProductsByUser(pageable);
 
