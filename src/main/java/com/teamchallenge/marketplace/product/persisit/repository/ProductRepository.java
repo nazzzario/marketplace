@@ -3,6 +3,7 @@ package com.teamchallenge.marketplace.product.persisit.repository;
 import com.teamchallenge.marketplace.product.persisit.entity.ProductEntity;
 import com.teamchallenge.marketplace.product.persisit.entity.enums.ProductCategoriesEnum;
 import com.teamchallenge.marketplace.product.persisit.entity.enums.ProductStatusEnum;
+import com.teamchallenge.marketplace.user.persisit.entity.UserEntity;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
@@ -30,6 +31,9 @@ public interface ProductRepository extends JpaRepository<ProductEntity, Long>,
     @Query("select (count(p) > 0) from ProductEntity p where p.reference = :reference and p.owner.email = :email")
     boolean existsByReferenceAndOwnerEmail(@Param("reference") UUID reference,
                                            @Param("email") String email);
+
+    @EntityGraph(attributePaths = "images")
+    Page<ProductEntity> findByOwnerAndStatus(UserEntity owner, ProductStatusEnum status, Pageable pageable);
 
     @Query("select p from ProductEntity p where p.categoryName = :category and p.status = :status")
     Page<ProductEntity> findByCategoryNameAndStatus(@Param("category") ProductCategoriesEnum categoryName,

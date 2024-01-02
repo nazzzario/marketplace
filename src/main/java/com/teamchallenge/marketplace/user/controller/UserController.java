@@ -1,6 +1,7 @@
 package com.teamchallenge.marketplace.user.controller;
 
 import com.teamchallenge.marketplace.common.exception.dto.ExceptionResponseDto;
+import com.teamchallenge.marketplace.product.persisit.entity.enums.ProductStatusEnum;
 import com.teamchallenge.marketplace.user.dto.request.UserPatchRequestDto;
 import com.teamchallenge.marketplace.user.dto.request.UserRequestDto;
 import com.teamchallenge.marketplace.user.dto.response.UserResponseDto;
@@ -13,6 +14,9 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -39,6 +43,29 @@ public class UserController {
     @GetMapping("public/users/{reference}")
     public ResponseEntity<UserResponseDto> getUserByReference(@PathVariable(name = "reference") UUID reference){
         UserResponseDto userByReference = userService.getUserByReference(reference);
+
+        return ResponseEntity.ok(userByReference);
+    }
+
+    @Operation(summary = "Get user", description = "Get user by active product")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "User data"),
+            @ApiResponse(responseCode = "403", description = "Invalid data",
+                    content = {@Content(mediaType = "application/json", schema = @Schema(implementation = ExceptionResponseDto.class))}),
+            @ApiResponse(responseCode = "404", description = "User not found",
+                    content = {@Content(mediaType = "application/json", schema = @Schema(implementation = ExceptionResponseDto.class))})
+    })
+    @GetMapping("public/users/products/active")
+    public ResponseEntity<Page<UserResponseDto>> getUserByActiveProduct(
+            @RequestParam(defaultValue = "0") Integer page,
+            @RequestParam(defaultValue = "6") Integer size,
+            @RequestParam(defaultValue = "id") String sort,
+            @RequestParam(defaultValue = "desc") String direction
+    ){
+        Page<UserResponseDto> userByReference = userService.getUserByStatusProduct(
+                ProductStatusEnum.ACTIVE,
+                PageRequest.of(page, size, Sort.Direction.fromString(direction), sort)
+        );
 
         return ResponseEntity.ok(userByReference);
     }

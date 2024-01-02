@@ -2,6 +2,7 @@ package com.teamchallenge.marketplace.user.service.impl;
 
 import com.teamchallenge.marketplace.common.exception.ClientBackendException;
 import com.teamchallenge.marketplace.common.exception.ErrorCode;
+import com.teamchallenge.marketplace.product.persisit.entity.enums.ProductStatusEnum;
 import com.teamchallenge.marketplace.user.dto.request.UserPatchRequestDto;
 import com.teamchallenge.marketplace.user.dto.request.UserRequestDto;
 import com.teamchallenge.marketplace.user.dto.response.UserResponseDto;
@@ -13,6 +14,8 @@ import com.teamchallenge.marketplace.user.service.UserService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -29,7 +32,7 @@ public class UserServiceImpl implements UserService {
     @Override
     @Transactional
     public UserResponseDto userRegistration(UserRequestDto requestDto) {
-        if(existsByEmail(requestDto.email())){
+        if(userRepository.existsByEmail(requestDto.email())){
             throw new ClientBackendException(ErrorCode.EMAIL_ALREADY_EXISTS);
         }
         UserEntity userEntity = userMapper.toEntity(requestDto);
@@ -69,5 +72,11 @@ public class UserServiceImpl implements UserService {
         userMapper.patchMerge(requestDto, userByReference);
 
         return userMapper.toResponseDto(userByReference);
+    }
+
+    @Override
+    public Page<UserResponseDto> getUserByStatusProduct(ProductStatusEnum status, Pageable pageable) {
+        return userRepository.findDistinctByProductsStatus(status, pageable)
+                .map(userMapper::toResponseDto);
     }
 }

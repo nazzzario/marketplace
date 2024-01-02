@@ -12,12 +12,11 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.UUID;
 
@@ -38,10 +37,15 @@ public class ActiveProductController {
     @GetMapping("/{referenceUser}")
     public ResponseEntity<Page<ProductResponseDto>> getProduct(
             @Parameter(description = "User reference", required = true)
-            @PathVariable(name = "referenceUser") UUID referenceUser
+            @PathVariable(name = "referenceUser") UUID referenceUser,
+            @RequestParam(defaultValue = "0") Integer page,
+            @RequestParam(defaultValue = "6") Integer size,
+            @RequestParam(defaultValue = "id") String sort,
+            @RequestParam(defaultValue = "desc") String direction
     ) {
         Page<ProductResponseDto> productByReference = activeProductService
-                .getProductByReferenceUser(ProductStatusEnum.ACTIVE, referenceUser);
+                .getProductByReferenceUser(ProductStatusEnum.ACTIVE, referenceUser,
+                        PageRequest.of(page, size, Sort.Direction.fromString(direction), sort));
 
         return new ResponseEntity<>(productByReference, HttpStatus.OK);
     }
