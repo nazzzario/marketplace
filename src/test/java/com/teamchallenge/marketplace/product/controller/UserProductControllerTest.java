@@ -11,16 +11,19 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.util.List;
 
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.springframework.boot.test.context.SpringBootTest.WebEnvironment.MOCK;
-import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.jwt;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -35,46 +38,50 @@ class UserProductControllerTest {
     @MockBean
     UserProductService productService;
 
+
+
     @SneakyThrows
+    @WithMockUser
     @Test
     void getActiveProductsByUser() {
-        when(productService.getProductsWithStatusByUser(ProductStatusEnum.ACTIVE,
-                PageRequest.of(0, 6, Sort.by("id"))))
-                .thenReturn(new PageImpl<UserProductResponseDto>(List.of()));
-
-        mockMvc.perform(get("/api/v1/private/products/active").
-                requestAttr("pageable", PageRequest
-                        .of(0, 6, Sort.by("id")))
-                .with(jwt().authorities(new SimpleGrantedAuthority("ROLE_AUTHORIZED_PERSONNEL"))))
+        mockMvc.perform(get("/api/v1/private/products/active")
+                        .param("page", "0")
+                        .param("size", "6")
+                        .param("sort", "id")
+                        .param("direction", "desc"))
                 .andDo(print()).andExpect(status().isOk());
+
+        verify(productService).getProductsWithStatusByUser(eq(ProductStatusEnum.ACTIVE),
+                any(Pageable.class));
     }
 
     @SneakyThrows
+    @WithMockUser
     @Test
     void getFavoriteProductsByUser() {
-        when(productService.getFavoriteProductsByUser(PageRequest
-                .of(0, 6, Sort.by("id"))))
-                .thenReturn(new PageImpl<UserProductResponseDto>(List.of()));
-
-        mockMvc.perform(get("/api/v1/private/products/favorite").
-                        requestAttr("pageable", PageRequest
-                                .of(0, 6, Sort.by("id")))
-                        .with(jwt().authorities(new SimpleGrantedAuthority("ROLE_AUTHORIZED_PERSONNEL"))))
+        mockMvc.perform(get("/api/v1/private/products/favorite")
+                .param("page", "0")
+                .param("size", "6")
+                .param("sort", "id")
+                .param("direction", "desc"))
                 .andDo(print()).andExpect(status().isOk());
+
+        verify(productService).getFavoriteProductsByUser(any(Pageable.class));
     }
 
     @SneakyThrows
+    @WithMockUser
     @Test
     void getProductsByUserAndProductDisabled() {
-        when(productService.getProductsWithStatusByUser(ProductStatusEnum.ACTIVE,
-                PageRequest.of(0, 6, Sort.by("id"))))
-                .thenReturn(new PageImpl<UserProductResponseDto>(List.of()));
-
-        mockMvc.perform(get("/api/v1/private/products/disabled").
-                        requestAttr("pageable", PageRequest
-                                .of(0, 6, Sort.by("id")))
-                        .with(jwt().authorities(new SimpleGrantedAuthority("ROLE_AUTHORIZED_PERSONNEL"))))
+        mockMvc.perform(get("/api/v1/private/products/disabled")
+                        .param("page", "0")
+                        .param("size", "6")
+                        .param("sort", "id")
+                        .param("direction", "desc"))
                 .andDo(print()).andExpect(status().isOk());
+
+        verify(productService).getProductsWithStatusByUser(eq(ProductStatusEnum.DISABLED),
+                any(Pageable.class));
     }
 
     @SneakyThrows
@@ -84,9 +91,7 @@ class UserProductControllerTest {
                 PageRequest.of(0, 6, Sort.by("id"))))
                 .thenReturn(new PageImpl<UserProductResponseDto>(List.of()));
 
-        mockMvc.perform(get("/api/v1/private/products/active").
-                        requestAttr("pageable", PageRequest
-                                .of(0, 6, Sort.by("id"))))
+        mockMvc.perform(get("/api/v1/private/products/active"))
                 .andDo(print()).andExpect(status().isUnauthorized());
     }
 
@@ -97,9 +102,7 @@ class UserProductControllerTest {
                 .of(0, 6, Sort.by("id"))))
                 .thenReturn(new PageImpl<UserProductResponseDto>(List.of()));
 
-        mockMvc.perform(get("/api/v1/private/products/favorite").
-                        requestAttr("pageable", PageRequest
-                                .of(0, 6, Sort.by("id"))))
+        mockMvc.perform(get("/api/v1/private/products/favorite"))
                 .andDo(print()).andExpect(status().isUnauthorized());
     }
     @SneakyThrows
@@ -109,9 +112,7 @@ class UserProductControllerTest {
                 PageRequest.of(0, 6, Sort.by("id"))))
                 .thenReturn(new PageImpl<UserProductResponseDto>(List.of()));
 
-        mockMvc.perform(get("/api/v1/private/products/disabled").
-                        requestAttr("pageable", PageRequest
-                                .of(0, 6, Sort.by("id"))))
+        mockMvc.perform(get("/api/v1/private/products/disabled"))
                 .andDo(print()).andExpect(status().isUnauthorized());
     }
 }
