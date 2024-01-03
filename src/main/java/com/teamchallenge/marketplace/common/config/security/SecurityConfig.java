@@ -38,9 +38,13 @@ public class SecurityConfig {
                         .requestMatchers("/api/v1/public/**").permitAll()
                         .anyRequest().authenticated()
                 )
+
+                .oauth2Login(oauth2 -> oauth2.defaultSuccessUrl("/api/v1/public/products", true))
+
                 .sessionManagement(sm -> sm
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 )
+
                 .authenticationProvider(authenticationProvider)
                 .addFilterBefore(jwtAuthFilet, UsernamePasswordAuthenticationFilter.class)
                 .exceptionHandling(ex -> ex
