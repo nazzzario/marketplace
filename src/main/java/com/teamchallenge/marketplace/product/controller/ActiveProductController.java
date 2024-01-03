@@ -22,7 +22,7 @@ import java.util.UUID;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/api/v1/public/products/active")
+@RequestMapping("/api/v1/public")
 @Tag(name = "Product")
 public class ActiveProductController {
 
@@ -34,7 +34,7 @@ public class ActiveProductController {
             @ApiResponse(responseCode = "404", description = "Product by UUID not found",
                     content = {@Content(mediaType = "application/json", schema = @Schema(implementation = ExceptionResponseDto.class))})
     })
-    @GetMapping("/{referenceUser}")
+    @GetMapping("/products/active/{referenceUser}")
     public ResponseEntity<Page<ProductResponseDto>> getProduct(
             @Parameter(description = "User reference", required = true)
             @PathVariable(name = "referenceUser") UUID referenceUser,
