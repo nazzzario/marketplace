@@ -9,14 +9,12 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.data.domain.Pageable;
-import org.springframework.security.test.context.support.WithAnonymousUser;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.util.UUID;
 
-import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
@@ -25,7 +23,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@SpringBootTest(webEnvironment = MOCK)
+@SpringBootTest(webEnvironment = MOCK, classes = ActiveProductController.class)
 @AutoConfigureMockMvc
 @ActiveProfiles("test")
 class ActiveProductControllerTest {
@@ -36,6 +34,7 @@ class ActiveProductControllerTest {
     private ActiveProductService activeProductService;
 
     @SneakyThrows
+    @WithMockUser
     @Test
     void getProduct() {
         mockMvc.perform(get("/api/v1/public/products/active/550e8400-e29b-41d4-a716-446655440000")
@@ -45,7 +44,7 @@ class ActiveProductControllerTest {
                 .param("direction", "desc"))
                 .andDo(print()).andExpect(status().isOk());
 
-        /*verify(activeProductService).getProductByReferenceUser(eq(ProductStatusEnum.ACTIVE),
-                eq(UUID.fromString("test")), any(Pageable.class));*/
+        verify(activeProductService).getProductByReferenceUser(eq(ProductStatusEnum.ACTIVE),
+                eq(UUID.fromString("550e8400-e29b-41d4-a716-446655440000")), any(Pageable.class));
     }
 }
