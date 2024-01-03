@@ -1,6 +1,7 @@
 package com.teamchallenge.marketplace.user.controller;
 
 import com.teamchallenge.marketplace.common.exception.dto.ExceptionResponseDto;
+import com.teamchallenge.marketplace.product.persisit.entity.enums.ProductStatusEnum;
 import com.teamchallenge.marketplace.user.dto.request.UserPatchRequestDto;
 import com.teamchallenge.marketplace.user.dto.request.UserRequestDto;
 import com.teamchallenge.marketplace.user.dto.response.UserResponseDto;
@@ -18,6 +19,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.UUID;
 
 @RestController
@@ -41,6 +43,22 @@ public class UserController {
         UserResponseDto userByReference = userService.getUserByReference(reference);
 
         return ResponseEntity.ok(userByReference);
+    }
+
+    @Operation(summary = "Get list of users", description = "Get list of users by " +
+            "user product status is active")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "User data"),
+            @ApiResponse(responseCode = "403", description = "Invalid data",
+                    content = {@Content(mediaType = "application/json", schema = @Schema(implementation = ExceptionResponseDto.class))}),
+            @ApiResponse(responseCode = "404", description = "User not found",
+                    content = {@Content(mediaType = "application/json", schema = @Schema(implementation = ExceptionResponseDto.class))})
+    })
+    @GetMapping("public/users/product/active")
+    public ResponseEntity<List<UserResponseDto>> getUsersByProductActive(){
+        List<UserResponseDto> userByProductStatus = userService.getUsersByProductStatus(ProductStatusEnum.ACTIVE);
+
+        return ResponseEntity.ok(userByProductStatus);
     }
 
     @Operation(summary = "User registration", description = "Create new user")

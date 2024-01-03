@@ -9,6 +9,8 @@ import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
 
+import java.util.List;
+
 import static org.mapstruct.NullValuePropertyMappingStrategy.IGNORE;
 
 @Mapper(componentModel = "spring")
@@ -24,7 +26,7 @@ public interface UserMapper {
 
     UserResponseDto toResponseDto(UserEntity userEntity);
 
-
+    List<UserResponseDto> toListOfResponseDto(List<UserEntity> userEntities);
 
     @Mapping(target = "role", ignore = true)
     @Mapping(target = "reference", ignore = true)
