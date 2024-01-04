@@ -39,4 +39,9 @@ public interface ProductRepository extends JpaRepository<ProductEntity, Long>,
     Page<ProductEntity> findByCategoryNameAndStatus(@Param("category") ProductCategoriesEnum categoryName,
                                                     @Param("status") ProductStatusEnum status,
                                                     Pageable pageable);
+    @EntityGraph(attributePaths = "images")
+    Page<ProductEntity> findByOwnerAndStatus(UserEntity owner, ProductStatusEnum status, Pageable pageable);
+
+    @EntityGraph(attributePaths = "images")
+    Page<ProductEntity> findByFavoritismId(Long id, Pageable pageable);
 }
