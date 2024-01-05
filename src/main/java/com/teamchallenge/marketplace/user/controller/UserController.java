@@ -47,7 +47,8 @@ public class UserController {
         return ResponseEntity.ok(userByReference);
     }
 
-    @Operation(summary = "Get user", description = "Get user by active product")
+    @Operation(summary = "Get users with active product", description = "Get users with active product " +
+    "Default optional parameters: page=0, size=6, sort=id, direction=desc")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "User data"),
             @ApiResponse(responseCode = "403", description = "Invalid data",

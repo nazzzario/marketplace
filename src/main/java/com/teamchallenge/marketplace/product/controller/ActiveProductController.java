@@ -27,7 +27,10 @@ import java.util.UUID;
 public class ActiveProductController {
 
     private final ActiveProductService activeProductService;
-    @Operation(summary = "Get one product", description = "Get products by its reference UUID",responses = {
+
+
+    @Operation(summary = "Get one product with status active", description = "Get products with status active " +
+            "by user reference UUID. Default optional parameters: page=0, size=6, sort=id, direction=desc",responses = {
             @ApiResponse(responseCode = "200", description = "Product returned"),
             @ApiResponse(responseCode = "400", description = "Invalid input",
                     content = {@Content(mediaType = "application/json", schema = @Schema(implementation = ExceptionResponseDto.class))}),
