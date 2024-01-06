@@ -1,11 +1,11 @@
 package com.teamchallenge.marketplace.product.controller;
 
 import com.teamchallenge.marketplace.common.exception.dto.ExceptionResponseDto;
-import com.teamchallenge.marketplace.common.util.ApiPageable;
 import com.teamchallenge.marketplace.product.dto.response.UserProductResponseDto;
 import com.teamchallenge.marketplace.product.persisit.entity.enums.ProductStatusEnum;
 import com.teamchallenge.marketplace.product.service.UserProductService;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -28,7 +28,6 @@ import org.springframework.web.bind.annotation.RestController;
 public class UserProductController {
     private final UserProductService productService;
 
-    @ApiPageable
     @Operation(summary = "Get page of product with active status by user", description = "Get product with active status by user " +
             "Default optional parameters: page=0, size=6, sort=id, direction=desc", responses = {
             @ApiResponse(responseCode = "200", description = "Products page returned"),
@@ -44,7 +43,9 @@ public class UserProductController {
     public ResponseEntity<Page<UserProductResponseDto>> getActiveProductsByUser(
             @RequestParam(defaultValue = "0") Integer page,
             @RequestParam(defaultValue = "6") Integer size,
+            @Parameter(description = "The field by which sort", name = "sort", schema = @Schema(defaultValue = "id"))
             @RequestParam(defaultValue = "id") String sort,
+            @Parameter(description = "The direction can be asc or desc", name = "direction", schema = @Schema(defaultValue = "desc"))
             @RequestParam(defaultValue = "desc") String direction) {
         Page<UserProductResponseDto> productsByUserAndProductActive = productService
                 .getProductsWithStatusByUser(ProductStatusEnum.ACTIVE,
@@ -53,7 +54,6 @@ public class UserProductController {
         return new ResponseEntity<>(productsByUserAndProductActive, HttpStatus.OK);
     }
 
-    @ApiPageable
     @Operation(summary = "Get page of favorite product by user", description = "Get page of favorite product by user " +
             "Default optional parameters: page=0, size=6, sort=id, direction=desc", responses = {
             @ApiResponse(responseCode = "200", description = "Products page returned"),
@@ -69,7 +69,9 @@ public class UserProductController {
     public ResponseEntity<Page<UserProductResponseDto>> getFavoriteProductsByUser(
             @RequestParam(defaultValue = "0") Integer page,
             @RequestParam(defaultValue = "6") Integer size,
+            @Parameter(description = "The field by which sort", name = "sort", schema = @Schema(defaultValue = "id"))
             @RequestParam(defaultValue = "id") String sort,
+            @Parameter(description = "The direction can be asc or desc", name = "direction", schema = @Schema(defaultValue = "desc"))
             @RequestParam(defaultValue = "desc") String direction) {
         Page<UserProductResponseDto> productsByUserAndProductActive = productService
                 .getFavoriteProductsByUser( PageRequest.of(page, size, Sort.Direction.fromString(direction), sort));
@@ -77,7 +79,6 @@ public class UserProductController {
         return new ResponseEntity<>(productsByUserAndProductActive, HttpStatus.OK);
     }
 
-    @ApiPageable
     @Operation(summary = "Get page of product with disabled status by user", description = "Get page of product with disable status by user" +
             "Default optional parameters: page=0, size=6, sort=id, direction=desc", responses = {
             @ApiResponse(responseCode = "200", description = "Products page returned"),
@@ -92,7 +93,9 @@ public class UserProductController {
     public ResponseEntity<Page<UserProductResponseDto>> getProductsByUserAndProductDisabled(
             @RequestParam(defaultValue = "0") Integer page,
             @RequestParam(defaultValue = "6") Integer size,
+            @Parameter(description = "The field by which sort", name = "sort", schema = @Schema(defaultValue = "id"))
             @RequestParam(defaultValue = "id") String sort,
+            @Parameter(description = "The direction can be asc or desc", name = "direction", schema = @Schema(defaultValue = "desc"))
             @RequestParam(defaultValue = "desc") String direction) {
         Page<UserProductResponseDto> productsByUserAndProductActive = productService
                 .getProductsWithStatusByUser(ProductStatusEnum.DISABLED,

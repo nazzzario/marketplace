@@ -7,6 +7,7 @@ import com.teamchallenge.marketplace.user.dto.request.UserRequestDto;
 import com.teamchallenge.marketplace.user.dto.response.UserResponseDto;
 import com.teamchallenge.marketplace.user.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -60,7 +61,9 @@ public class UserController {
     public ResponseEntity<Page<UserResponseDto>> getUserByActiveProduct(
             @RequestParam(defaultValue = "0") Integer page,
             @RequestParam(defaultValue = "6") Integer size,
+            @Parameter(description = "The field by which sort", name = "sort", schema = @Schema(defaultValue = "id"))
             @RequestParam(defaultValue = "id") String sort,
+            @Parameter(description = "The direction can be asc or desc", name = "direction", schema = @Schema(defaultValue = "desc"))
             @RequestParam(defaultValue = "desc") String direction
     ){
         Page<UserResponseDto> userByReference = userService.getUserByStatusProduct(

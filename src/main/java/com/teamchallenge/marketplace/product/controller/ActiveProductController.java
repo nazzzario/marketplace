@@ -43,7 +43,9 @@ public class ActiveProductController {
             @PathVariable(name = "referenceUser") UUID referenceUser,
             @RequestParam(defaultValue = "0") Integer page,
             @RequestParam(defaultValue = "6") Integer size,
+            @Parameter(description = "The field by which sort", name = "sort", schema = @Schema(defaultValue = "id"))
             @RequestParam(defaultValue = "id") String sort,
+            @Parameter(description = "The direction can be asc or desc", name = "direction", schema = @Schema(defaultValue = "desc"))
             @RequestParam(defaultValue = "desc") String direction
     ) {
         Page<ProductResponseDto> productByReference = activeProductService
