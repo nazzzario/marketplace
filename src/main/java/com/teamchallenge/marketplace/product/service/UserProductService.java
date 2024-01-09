@@ -1,25 +1,17 @@
 package com.teamchallenge.marketplace.product.service;
 
+import com.teamchallenge.marketplace.product.dto.request.ProductRequestDto;
 import com.teamchallenge.marketplace.product.dto.response.UserProductResponseDto;
 import com.teamchallenge.marketplace.product.persisit.entity.enums.ProductStatusEnum;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
+
+import java.util.UUID;
 
 public interface UserProductService {
-    /**
-     * Get all products with status by user within pageable.
-     *
-     * @param status Status product
-     * @param pageable  page, size and sort .
-     */
+    UserProductResponseDto createOrGetNewProduct();
 
-    Page<UserProductResponseDto> getProductsWithStatusByUser(ProductStatusEnum status, Pageable pageable);
+    UserProductResponseDto patchProduct(ProductRequestDto requestDto, UUID productReference);
 
-    /**
-     * Get favorite products by user within pageable.
-     *
-     * @param pageable  page, size and sort .
-     */
-    Page<UserProductResponseDto> getFavoriteProductsByUser(Pageable pageable);
+    void deleteProduct(UUID productReference);
 
+    UserProductResponseDto changeStatusProduct(UUID productReference, ProductStatusEnum status);
 }

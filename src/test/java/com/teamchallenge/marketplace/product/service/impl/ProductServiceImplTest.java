@@ -7,7 +7,7 @@ import com.teamchallenge.marketplace.product.persisit.entity.enums.ProductCatego
 import com.teamchallenge.marketplace.product.persisit.entity.enums.ProductStateEnum;
 import com.teamchallenge.marketplace.product.persisit.entity.enums.ProductStatusEnum;
 import com.teamchallenge.marketplace.product.persisit.repository.ProductRepository;
-import com.teamchallenge.marketplace.product.service.ActiveProductService;
+import com.teamchallenge.marketplace.product.service.ProductService;
 import com.teamchallenge.marketplace.user.persisit.entity.UserEntity;
 import com.teamchallenge.marketplace.user.persisit.repository.UserRepository;
 import org.junit.jupiter.api.Test;
@@ -30,11 +30,11 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.NONE,
-        classes = ActiveProductServiceImpl.class)
+        classes = ProductServiceImpl.class)
 @ActiveProfiles("test")
-class ActiveProductServiceImplTest {
+class ProductServiceImplTest {
     @Autowired
-    private ActiveProductService activeProductService;
+    private ProductService productService;
     @MockBean
     private UserRepository userRepository;
     @MockBean
@@ -58,7 +58,7 @@ class ActiveProductServiceImplTest {
                 any(Pageable.class))).thenReturn(pageEntity);
         when(productMapper.toResponseDto(any(ProductEntity.class), eq(user))).thenReturn(productDto);
 
-        var products = activeProductService.getProductByReferenceUser(ProductStatusEnum.ACTIVE,
+        var products = productService.getProductByReferenceUser(ProductStatusEnum.ACTIVE,
                 reference, pageable);
 
         assertThat(products.stream().count()).isEqualTo(1);

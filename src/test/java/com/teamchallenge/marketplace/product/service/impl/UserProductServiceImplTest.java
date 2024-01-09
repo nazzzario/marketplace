@@ -8,7 +8,7 @@ import com.teamchallenge.marketplace.product.persisit.entity.enums.ProductCatego
 import com.teamchallenge.marketplace.product.persisit.entity.enums.ProductStateEnum;
 import com.teamchallenge.marketplace.product.persisit.entity.enums.ProductStatusEnum;
 import com.teamchallenge.marketplace.product.persisit.repository.ProductRepository;
-import com.teamchallenge.marketplace.product.service.UserProductService;
+import com.teamchallenge.marketplace.product.service.ShowUserProductService;
 import com.teamchallenge.marketplace.user.persisit.entity.UserEntity;
 import com.teamchallenge.marketplace.user.persisit.repository.UserRepository;
 import lombok.SneakyThrows;
@@ -39,14 +39,14 @@ import static org.mockito.Mockito.when;
 
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.NONE,
-        classes = UserProductServiceImpl.class)
+        classes = ShowUserProductServiceImpl.class)
 @WithMockUser
 @TestPropertySource(properties = {"spring.security.jwt.secret=testSecretKey",
         "spring.security.jwt.expiration=1"})
 @ActiveProfiles("test")
 class UserProductServiceImplTest {
     @Autowired
-    private UserProductService productService;
+    private ShowUserProductService productService;
 
     @MockBean
     private ProductRepository productRepository;
@@ -61,7 +61,7 @@ class UserProductServiceImplTest {
     PageRequest pageable = PageRequest.of(0, 6, Sort.by("id"));
     PageImpl<ProductEntity> pageEntity = new PageImpl<>(List.of(new ProductEntity()), pageable, 1);
     UUID reference = UUID.randomUUID();
-    UserProductImageDto imageDto = new UserProductImageDto("url", "reference");
+    UserProductImageDto imageDto = new UserProductImageDto("url", 1L);
     UserProductResponseDto responseDto = new UserProductResponseDto(reference,
             ProductCategoriesEnum.CLOTHE, "Kiev","Clothe", "Clothe",
             ProductStateEnum.USED, ProductStatusEnum.ACTIVE, 1, List.of(imageDto));

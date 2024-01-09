@@ -8,7 +8,6 @@ import com.teamchallenge.marketplace.product.dto.response.ProductNewestResponseD
 import com.teamchallenge.marketplace.product.dto.response.ProductResponseDto;
 import com.teamchallenge.marketplace.product.mapper.ProductMapper;
 import com.teamchallenge.marketplace.product.persisit.entity.ProductEntity;
-import com.teamchallenge.marketplace.product.persisit.entity.ProductImageEntity;
 import com.teamchallenge.marketplace.product.persisit.entity.enums.*;
 import com.teamchallenge.marketplace.product.persisit.repository.ProductImageRepository;
 import com.teamchallenge.marketplace.product.persisit.repository.ProductRepository;
@@ -18,18 +17,12 @@ import com.teamchallenge.marketplace.user.persisit.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.hibernate.annotations.BatchSize;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Slice;
-import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.*;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.scheduling.annotation.Scheduled;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.multipart.MultipartFile;
 
 import java.util.*;
 import java.util.concurrent.TimeUnit;
@@ -62,23 +55,6 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
-    @Transactional
-    public ProductResponseDto createProduct(ProductRequestDto requestDto) {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-
-        UserEntity userEntity = userRepository.findByEmail(authentication.getName())
-                .orElseThrow(() -> new ClientBackendException(ErrorCode.USER_NOT_FOUND));
-
-        ProductEntity entity = productMapper.toEntity(requestDto);
-        entity.setStatus(ProductStatusEnum.ACTIVE);
-
-        entity.setOwner(userEntity);
-        ProductEntity savedEntity = productRepository.save(entity);
-
-        return productMapper.toResponseDto(savedEntity, userEntity);
-    }
-
-    @Override
     public void createProduct(ProductRequestDto requestDto, UUID userReference) {
         UserEntity userEntity = userRepository.findByReference(userReference)
                 .orElseThrow(() -> new ClientBackendException(ErrorCode.USER_NOT_FOUND));
@@ -88,31 +64,6 @@ public class ProductServiceImpl implements ProductService {
 
         entity.setOwner(userEntity);
         productRepository.save(entity);
-    }
-
-    @Override
-    @Transactional
-    public void deleteProduct(UUID productReference) {
-        ProductEntity productEntity = productRepository.findByReference(productReference)
-                .orElseThrow(() -> new ClientBackendException(ErrorCode.PRODUCT_NOT_FOUND));
-
-        productRepository.deleteByReference(productReference);
-    }
-
-    @Override
-    public ProductResponseDto putProduct(ProductRequestDto requestDto) {
-        return null;
-    }
-
-    @Override
-    @Transactional
-    public ProductResponseDto patchProduct(ProductRequestDto requestDto, UUID productReference) {
-        ProductEntity productEntity = productRepository.findByReference(productReference)
-                .orElseThrow(() -> new ClientBackendException(ErrorCode.PRODUCT_NOT_FOUND));
-
-        productMapper.patchMerge(requestDto, productEntity);
-
-        return productMapper.toResponseDto(productEntity, productEntity.getOwner());
     }
 
     @Override
@@ -147,23 +98,6 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
-    @Transactional
-    public ProductResponseDto uploadImagesToProduct(UUID productReference, List<MultipartFile> images) {
-        ProductEntity productEntity = productRepository.findByReference(productReference)
-                .orElseThrow(() -> new ClientBackendException(ErrorCode.PRODUCT_NOT_FOUND));
-
-        List<ProductImageEntity> productImagesUrlEntity = fileUpload.uploadFiles(images).stream()
-                .map(productMapper::toProductImage)
-                .toList();
-
-        productImagesUrlEntity.forEach(pi -> pi.setProduct(productEntity));
-        productImageRepository.saveAll(productImagesUrlEntity);
-        productEntity.setImages(productImagesUrlEntity);
-
-        return productMapper.toResponseDto(productEntity, productEntity.getOwner());
-    }
-
-    @Override
     @Transactional(readOnly = true)
     @BatchSize(size = 10)
     public Page<ProductResponseDto> getAllProductsByCategory(ProductCategoriesEnum category,
@@ -180,50 +114,12 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
-    @Transactional
-    public void addProductToFavorites(Authentication authentication, UUID productReference) {
-        ProductEntity productEntity = productRepository.findByReference(productReference)
-                .orElseThrow(() -> new ClientBackendException(ErrorCode.PRODUCT_NOT_FOUND));
+    public Page<ProductResponseDto> getProductByReferenceUser(ProductStatusEnum status, UUID referenceUser, Pageable pageable) {
+        var user = userRepository.findByReference(referenceUser).orElseThrow(() ->
+                new ClientBackendException(ErrorCode.USER_NOT_FOUND));
 
-        if (Objects.nonNull(authentication) && authentication.isAuthenticated()) {
-            String email = authentication.getName();
-            UserEntity userEntity = userRepository.findByEmail(email)
-                    .orElseThrow(() -> new ClientBackendException(ErrorCode.USER_NOT_FOUND));
-            userEntity.getFavoriteProducts().add(productEntity);
-        } else {
-            throw new ClientBackendException(ErrorCode.CANNOT_ADD_PRODUCT_TO_FAVORITE);
-        }
-    }
-
-    @Override
-    @Transactional
-    public void removeProductFromFavorites(Authentication authentication, UUID productReference) {
-        ProductEntity productEntity = productRepository.findByReference(productReference)
-                .orElseThrow(() -> new ClientBackendException(ErrorCode.PRODUCT_NOT_FOUND));
-
-        if (Objects.nonNull(authentication) && authentication.isAuthenticated()) {
-            String email = authentication.getName();
-            UserEntity userEntity = userRepository.findByEmail(email)
-                    .orElseThrow(() -> new ClientBackendException(ErrorCode.USER_NOT_FOUND));
-            userEntity.getFavoriteProducts().remove(productEntity);
-        } else {
-            throw new ClientBackendException(ErrorCode.CANNOT_ADD_PRODUCT_TO_FAVORITE);
-        }
-    }
-
-    @Override
-    public List<ProductResponseDto> getUserFavoriteProducts(Authentication authentication) {
-        if (Objects.nonNull(authentication) && authentication.isAuthenticated()) {
-            String email = authentication.getName();
-            UserEntity userEntity = userRepository.findByEmail(email)
-                    .orElseThrow(() -> new ClientBackendException(ErrorCode.USER_NOT_FOUND));
-            return userEntity.getFavoriteProducts()
-                    .stream()
-                    .map(p -> productMapper.toResponseDto(p, userEntity))
-                    .toList();
-        } else {
-            throw new ClientBackendException(ErrorCode.UNKNOWN_SERVER_ERROR);
-        }
+        return productRepository.findByOwnerAndStatus(user, status, pageable)
+                .map(productEntity -> productMapper.toResponseDto(productEntity,user));
     }
 
     public void incrementProductViews(UUID productUUID) {

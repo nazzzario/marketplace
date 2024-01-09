@@ -1,7 +1,7 @@
 package com.teamchallenge.marketplace.product.controller;
 
 import com.teamchallenge.marketplace.product.persisit.entity.enums.ProductStatusEnum;
-import com.teamchallenge.marketplace.product.service.ActiveProductService;
+import com.teamchallenge.marketplace.product.service.ProductService;
 import lombok.SneakyThrows;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,15 +23,15 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@SpringBootTest(webEnvironment = MOCK, classes = ActiveProductController.class)
+@SpringBootTest(webEnvironment = MOCK, classes = ProductController.class)
 @AutoConfigureMockMvc
 @ActiveProfiles("test")
-class ActiveProductControllerTest {
+class ProductControllerTest {
     @Autowired
     private MockMvc mockMvc;
 
     @MockBean
-    private ActiveProductService activeProductService;
+    private ProductService productService;
 
     @SneakyThrows
     @WithMockUser
@@ -44,7 +44,7 @@ class ActiveProductControllerTest {
                 .param("direction", "desc"))
                 .andDo(print()).andExpect(status().isOk());
 
-        verify(activeProductService).getProductByReferenceUser(eq(ProductStatusEnum.ACTIVE),
+        verify(productService).getProductByReferenceUser(eq(ProductStatusEnum.ACTIVE),
                 eq(UUID.fromString("550e8400-e29b-41d4-a716-446655440000")), any(Pageable.class));
     }
 }

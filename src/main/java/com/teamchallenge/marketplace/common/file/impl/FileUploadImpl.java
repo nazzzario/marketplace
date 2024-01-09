@@ -10,7 +10,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
-import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
@@ -22,11 +21,11 @@ public class FileUploadImpl implements FileUpload {
     private final Cloudinary cloudinary;
 
     @Override
-    public String uploadFile(MultipartFile file) {
+    public String uploadFile(MultipartFile file, UUID reference) {
         try {
             return cloudinary
                    .uploader()
-                   .upload(file.getBytes(), Map.of("public_id", UUID.randomUUID().toString()))
+                   .upload(file.getBytes(), Map.of("public_id", reference.toString()))
                    .get("url")
                    .toString();
         } catch (IOException e) {
@@ -35,9 +34,12 @@ public class FileUploadImpl implements FileUpload {
     }
 
     @Override
-    public List<String> uploadFiles(List<MultipartFile> multipartFiles) {
-        return multipartFiles.parallelStream()
-                .map(this::uploadFile)
-                .toList();
+    public void deleteFile(UUID reference) {
+        try {
+            cloudinary.uploader().destroy(reference.toString(), null);
+        } catch (IOException e) {
+            throw new ClientBackendException(ErrorCode.PRODUCT_NOT_FOUND);
+        }
+
     }
 }
