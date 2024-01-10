@@ -32,6 +32,7 @@ public class ProductImageServiceImpl implements ProductImageService {
     private int sizeListImage;
 
     @Override
+    @Transactional
     public UserProductImageDto createImage(UUID productReference, MultipartFile image) {
         var authentication = SecurityContextHolder.getContext().getAuthentication();
 
@@ -59,6 +60,7 @@ public class ProductImageServiceImpl implements ProductImageService {
     }
 
     @Override
+    @Transactional
     public UserProductImageDto uploadImages(Long imageId, MultipartFile image) {
         var authentication = SecurityContextHolder.getContext().getAuthentication();
 

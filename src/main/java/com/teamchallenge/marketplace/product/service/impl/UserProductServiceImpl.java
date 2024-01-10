@@ -90,7 +90,9 @@ public class UserProductServiceImpl implements UserProductService {
     @Override
     public UserProductResponseDto changeStatusProduct(UUID productReference, ProductStatusEnum status) {
         var authentication = SecurityContextHolder.getContext().getAuthentication();
-        if (Objects.nonNull(authentication) && authentication.isAuthenticated()){
+        if (Objects.nonNull(authentication) && authentication.isAuthenticated() &&
+                userRepository.existsByEmailAndProductsReference(authentication.getName(),
+                        productReference)){
             String email = authentication.getName();
             UserEntity userEntity = userRepository.findByEmail(email)
                     .orElseThrow(() -> new ClientBackendException(ErrorCode.USER_NOT_FOUND));
