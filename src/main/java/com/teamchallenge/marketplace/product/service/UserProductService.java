@@ -7,6 +7,11 @@ import com.teamchallenge.marketplace.product.persisit.entity.enums.ProductStatus
 import java.util.UUID;
 
 public interface UserProductService {
+    /**
+     * Get product with status NEW. If there is no product create new product.
+     * Values of product is values of first product with status ACTIVE.
+     * If there is no any product with status ACTIVE fill values default values
+     * */
     UserProductResponseDto createOrGetNewProduct();
 
     UserProductResponseDto patchProduct(ProductRequestDto requestDto, UUID productReference);

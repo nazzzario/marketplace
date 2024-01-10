@@ -24,8 +24,8 @@ import java.util.UUID;
 @RequestMapping("/api/v1/private/product")
 @Tag(name = "Image product")
 public class ProductImagesController {
-    private ProductImageService imageService;
-    @Operation(summary = "Upload product images", description = "Upload product images by product UUID")
+    private final ProductImageService imageService;
+    @Operation(summary = "Create product images", description = "Create product images by product UUID")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Images upload successfully"),
             @ApiResponse(responseCode = "401", description = "Unauthenticated",
@@ -48,7 +48,7 @@ public class ProductImagesController {
 
         return new ResponseEntity<>(responseDto, HttpStatus.OK);
     }
-    @Operation(summary = "Upload product images", description = "Upload product images by product UUID")
+    @Operation(summary = "Upload product images", description = "Upload product images by image id")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Images upload successfully"),
             @ApiResponse(responseCode = "401", description = "Unauthenticated",
@@ -73,7 +73,7 @@ public class ProductImagesController {
         return new ResponseEntity<>(responseDto, HttpStatus.OK);
     }
 
-    @Operation(summary = "Delete product image", description = "Delete image by image UUID")
+    @Operation(summary = "Delete product image", description = "Delete image by image id")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Images upload successfully"),
             @ApiResponse(responseCode = "401", description = "Unauthenticated",
@@ -91,7 +91,7 @@ public class ProductImagesController {
             @Parameter(description = "Image id", required = true)
             @PathVariable(name = "imageId") Long imageId
     ) {
-        imageService.deleteImages(imageId);
+        imageService.deleteImage(imageId);
 
         return ResponseEntity.noContent().build();
     }

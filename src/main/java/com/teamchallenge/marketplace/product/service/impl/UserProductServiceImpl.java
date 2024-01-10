@@ -16,20 +16,25 @@ import com.teamchallenge.marketplace.product.service.UserProductService;
 import com.teamchallenge.marketplace.user.persisit.entity.UserEntity;
 import com.teamchallenge.marketplace.user.persisit.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
+import java.util.Objects;
 import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
 public class UserProductServiceImpl implements UserProductService {
-    private ProductRepository productRepository;
-    private UserRepository userRepository;
-    private UserProductMapper productMapper;
-    private ProductImageService productImageService;
+    private final ProductRepository productRepository;
+    private final UserRepository userRepository;
+    private final UserProductMapper productMapper;
+    private final ProductImageService productImageService;
+
+    @Value("${product.sizeProductDisabled}")
+    private int sizeProductDisabled;
 
     @Override
     public UserProductResponseDto createOrGetNewProduct() {
@@ -61,18 +66,35 @@ public class UserProductServiceImpl implements UserProductService {
         ProductEntity productEntity = productRepository.findByReference(productReference)
                 .orElseThrow(() -> new ClientBackendException(ErrorCode.PRODUCT_NOT_FOUND));
 
-        productEntity.getImages().forEach(image -> productImageService.deleteImages(image.getId()));
+        productEntity.getImages().forEach(image -> productImageService.deleteImage(image.getId()));
 
         productRepository.delete(productEntity);
     }
 
     @Override
     public UserProductResponseDto changeStatusProduct(UUID productReference, ProductStatusEnum status) {
-        ProductEntity productEntity = productRepository.findByReference(productReference)
-                .orElseThrow(() -> new ClientBackendException(ErrorCode.PRODUCT_NOT_FOUND));
-        productEntity.setStatus(status);
+        var authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (Objects.nonNull(authentication) && authentication.isAuthenticated()){
+            String email = authentication.getName();
+            UserEntity userEntity = userRepository.findByEmail(email)
+                    .orElseThrow(() -> new ClientBackendException(ErrorCode.USER_NOT_FOUND));
 
-        return productMapper.toResponseDto(productRepository.save(productEntity));
+            ProductEntity productEntity = productRepository.findByReference(productReference)
+                    .orElseThrow(() -> new ClientBackendException(ErrorCode.PRODUCT_NOT_FOUND));
+
+            if (status.equals(ProductStatusEnum.DISABLED) &&
+                    userEntity.getProducts().size() >= sizeProductDisabled){
+                throw new ClientBackendException(ErrorCode.LIMIT_IS_EXHAUSTED);
+            }
+
+            productEntity.setStatus(status);
+
+            return productMapper.toResponseDto(productRepository.save(productEntity));
+        } else {
+            throw new ClientBackendException(ErrorCode.UNKNOWN_SERVER_ERROR);
+        }
+
+
     }
 
     /**

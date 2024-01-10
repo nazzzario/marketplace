@@ -12,6 +12,7 @@ import com.teamchallenge.marketplace.product.service.ProductImageService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.UUID;
@@ -58,7 +59,15 @@ public class ProductImageServiceImpl implements ProductImageService {
     }
 
     @Override
-    public void deleteImages(Long imageId) {
+    public void deleteImage(ProductImageEntity entity) {
+        fileUpload.deleteFile(entity.getReference());
+
+        imageRepository.delete(entity);
+    }
+
+    @Override
+    @Transactional
+    public void deleteImage(Long imageId) {
         var imageEntity = imageRepository.findById(imageId).orElseThrow(() ->
                 new ClientBackendException(ErrorCode.PRODUCT_NOT_FOUND));
         fileUpload.deleteFile(imageEntity.getReference());

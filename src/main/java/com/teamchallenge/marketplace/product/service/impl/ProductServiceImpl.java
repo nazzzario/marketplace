@@ -2,14 +2,12 @@ package com.teamchallenge.marketplace.product.service.impl;
 
 import com.teamchallenge.marketplace.common.exception.ClientBackendException;
 import com.teamchallenge.marketplace.common.exception.ErrorCode;
-import com.teamchallenge.marketplace.common.file.FileUpload;
 import com.teamchallenge.marketplace.product.dto.request.ProductRequestDto;
 import com.teamchallenge.marketplace.product.dto.response.ProductNewestResponseDto;
 import com.teamchallenge.marketplace.product.dto.response.ProductResponseDto;
 import com.teamchallenge.marketplace.product.mapper.ProductMapper;
 import com.teamchallenge.marketplace.product.persisit.entity.ProductEntity;
 import com.teamchallenge.marketplace.product.persisit.entity.enums.*;
-import com.teamchallenge.marketplace.product.persisit.repository.ProductImageRepository;
 import com.teamchallenge.marketplace.product.persisit.repository.ProductRepository;
 import com.teamchallenge.marketplace.product.service.ProductService;
 import com.teamchallenge.marketplace.user.persisit.entity.UserEntity;
@@ -36,10 +34,9 @@ import static com.teamchallenge.marketplace.common.specification.CustomSpecifica
 public class ProductServiceImpl implements ProductService {
 
     private static final String VIEWS_KEY = "productViews";
+
     private final ProductRepository productRepository;
-    private final ProductImageRepository productImageRepository;
     private final UserRepository userRepository;
-    private final FileUpload fileUpload;
     private final RedisTemplate<String, String> redisTemplate;
 
     private final ProductMapper productMapper;

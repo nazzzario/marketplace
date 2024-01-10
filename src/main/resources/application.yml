@@ -23,3 +23,12 @@ cloudinary:
   name: ${CLOUD_NAME}
   key: ${API_KEY}
   secret: ${API_SECRET}
+
+product:
+  sizeListImage: 6
+  sizeProductDisabled: 5
+
+mail:
+  template:
+    path:
+      user: templates/msg_for_user.html
