@@ -53,22 +53,38 @@ public class UserProductServiceImpl implements UserProductService {
 
     @Override
     public UserProductResponseDto patchProduct(ProductRequestDto requestDto, UUID productReference) {
+        var authentication = SecurityContextHolder.getContext().getAuthentication();
+
+        if (Objects.nonNull(authentication) && authentication.isAuthenticated() &&
+                userRepository.existsByEmailAndProductsReference(authentication.getName(),
+                        productReference)){
         ProductEntity productEntity = productRepository.findByReference(productReference)
                 .orElseThrow(() -> new ClientBackendException(ErrorCode.PRODUCT_NOT_FOUND));
 
         productMapper.patchMerge(requestDto, productEntity);
 
         return productMapper.toResponseDto(productRepository.save(productEntity));
+        } else {
+            throw new ClientBackendException(ErrorCode.UNKNOWN_SERVER_ERROR);
+        }
     }
 
     @Override
     public void deleteProduct(UUID productReference) {
+        var authentication = SecurityContextHolder.getContext().getAuthentication();
+
+        if (Objects.nonNull(authentication) && authentication.isAuthenticated() &&
+                userRepository.existsByEmailAndProductsReference(authentication.getName(),
+                        productReference)){
         ProductEntity productEntity = productRepository.findByReference(productReference)
                 .orElseThrow(() -> new ClientBackendException(ErrorCode.PRODUCT_NOT_FOUND));
 
         productEntity.getImages().forEach(image -> productImageService.deleteImage(image.getId()));
 
         productRepository.delete(productEntity);
+        } else {
+            throw new ClientBackendException(ErrorCode.UNKNOWN_SERVER_ERROR);
+        }
     }
 
     @Override

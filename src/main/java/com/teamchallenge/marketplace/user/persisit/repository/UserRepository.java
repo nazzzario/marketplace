@@ -27,4 +27,7 @@ public interface UserRepository extends JpaRepository<UserEntity, Long> {
                                       @Param("email") String email);
 
 
+    boolean existsByEmailAndProductsReference(String email, UUID productReference);
+
+    boolean existsByEmailAndProductsImagesId(String email, Long imageId);
 }

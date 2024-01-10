@@ -9,12 +9,15 @@ import com.teamchallenge.marketplace.product.persisit.entity.ProductImageEntity;
 import com.teamchallenge.marketplace.product.persisit.repository.ProductImageRepository;
 import com.teamchallenge.marketplace.product.persisit.repository.ProductRepository;
 import com.teamchallenge.marketplace.product.service.ProductImageService;
+import com.teamchallenge.marketplace.user.persisit.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.util.Objects;
 import java.util.UUID;
 
 @Service
@@ -22,6 +25,7 @@ import java.util.UUID;
 public class ProductImageServiceImpl implements ProductImageService {
     private final ProductRepository productRepository;
     private final ProductImageRepository imageRepository;
+    private final UserRepository userRepository;
     private final FileUpload fileUpload;
 
     @Value("${product.sizeListImage}")
@@ -29,6 +33,11 @@ public class ProductImageServiceImpl implements ProductImageService {
 
     @Override
     public UserProductImageDto createImage(UUID productReference, MultipartFile image) {
+        var authentication = SecurityContextHolder.getContext().getAuthentication();
+
+        if (Objects.nonNull(authentication) && authentication.isAuthenticated() &&
+        userRepository.existsByEmailAndProductsReference(authentication.getName(),
+                productReference)){
         ProductEntity productEntity = productRepository.findByReference(productReference)
                 .orElseThrow(() -> new ClientBackendException(ErrorCode.PRODUCT_NOT_FOUND));
 
@@ -44,10 +53,18 @@ public class ProductImageServiceImpl implements ProductImageService {
 
         return new UserProductImageDto(newImageEntity.getImageUrl(),
                 newImageEntity.getId());
+        } else {
+            throw new ClientBackendException(ErrorCode.UNKNOWN_SERVER_ERROR);
+        }
     }
 
     @Override
     public UserProductImageDto uploadImages(Long imageId, MultipartFile image) {
+        var authentication = SecurityContextHolder.getContext().getAuthentication();
+
+        if (Objects.nonNull(authentication) && authentication.isAuthenticated() &&
+                userRepository.existsByEmailAndProductsImagesId(authentication.getName(),
+                        imageId)){
         var imageEntity = imageRepository.findById(imageId).orElseThrow(() ->
                 new ClientBackendException(ErrorCode.PRODUCT_NOT_FOUND));
         imageEntity.setImageUrl(fileUpload.uploadFile(image, imageEntity.getReference()));
@@ -56,6 +73,9 @@ public class ProductImageServiceImpl implements ProductImageService {
 
         return new UserProductImageDto(updateImageEntity.getImageUrl(),
                 updateImageEntity.getId());
+        } else {
+            throw new ClientBackendException(ErrorCode.UNKNOWN_SERVER_ERROR);
+        }
     }
 
     @Override
@@ -68,10 +88,18 @@ public class ProductImageServiceImpl implements ProductImageService {
     @Override
     @Transactional
     public void deleteImage(Long imageId) {
+        var authentication = SecurityContextHolder.getContext().getAuthentication();
+
+        if (Objects.nonNull(authentication) && authentication.isAuthenticated() &&
+                userRepository.existsByEmailAndProductsImagesId(authentication.getName(),
+                        imageId)){
         var imageEntity = imageRepository.findById(imageId).orElseThrow(() ->
                 new ClientBackendException(ErrorCode.PRODUCT_NOT_FOUND));
         fileUpload.deleteFile(imageEntity.getReference());
 
         imageRepository.deleteById(imageId);
+        } else {
+            throw new ClientBackendException(ErrorCode.UNKNOWN_SERVER_ERROR);
+        }
     }
 }

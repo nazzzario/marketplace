@@ -28,6 +28,7 @@ product:
   sizeListImage: 6
   sizeProductDisabled: 5
   periodDeadline: 30
+  cron: 1 * * * ?
 
 mail:
   template:

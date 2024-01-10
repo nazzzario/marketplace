@@ -26,6 +26,12 @@ public class AutomaticChangeProductServiceImpl implements AutomaticChangeProduct
     private final ProductRepository productRepository;
     private final EmailService emailService;
 
+    /**
+     * Select all expired products with users. For each user,
+     * we check whether there is space in the archive, if there is no space,
+     * we delete older products.
+     * */
+    //@Scheduled(cron = "${product.cron}")
     public void changeStatusFromActiveToDisabled(){
         var userActiveProducts = productRepository
                 .findByStatusAndPublishDateBefore(ProductStatusEnum.ACTIVE,
@@ -44,6 +50,10 @@ public class AutomaticChangeProductServiceImpl implements AutomaticChangeProduct
 
     }
 
+    /**
+     * Delete older product with deadline date in the archive
+     * */
+    //@Scheduled(cron = "${product.cron}")
     public void deleteDisabledOldProduct(){
         var userDisabledProducts = productRepository
                 .findByStatusAndPublishDateBefore(ProductStatusEnum.DISABLED,
