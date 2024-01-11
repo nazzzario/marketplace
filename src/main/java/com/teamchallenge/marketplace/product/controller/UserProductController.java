@@ -61,7 +61,7 @@ public class UserProductController {
     ) {
         UserProductResponseDto productResponse = productService.patchProduct(requestDto, productReference);
 
-        return new ResponseEntity<>(productResponse, HttpStatus.OK);
+        return new ResponseEntity<>(productResponse, HttpStatus.CREATED);
     }
 
     @Operation(summary = "Delete product", description = "Product owner can delete product by its reference")
@@ -103,6 +103,6 @@ public class UserProductController {
     ) {
         UserProductResponseDto productResponse = productService.changeStatusProduct(productReference, status);
 
-        return new ResponseEntity<>(productResponse, HttpStatus.OK);
+        return new ResponseEntity<>(productResponse, HttpStatus.CREATED);
     }
 }

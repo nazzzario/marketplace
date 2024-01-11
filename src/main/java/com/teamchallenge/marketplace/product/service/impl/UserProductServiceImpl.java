@@ -43,11 +43,10 @@ public class UserProductServiceImpl implements UserProductService {
         UserEntity userEntity = userRepository.findByEmail(authentication.getName())
                 .orElseThrow(() -> new ClientBackendException(ErrorCode.USER_NOT_FOUND));
 
-        return productMapper.toResponseDto(
-                productRepository.findByOwnerAndStatus(userEntity, ProductStatusEnum.NEW,
-                PageRequest.of(0, 6)).stream().findFirst()
-                .orElse(getNewProduct(userEntity))
-        );
+        ProductEntity productEntity = productRepository.findByOwnerAndStatus(userEntity, ProductStatusEnum.NEW,
+                PageRequest.of(0, 6)).stream().findFirst().orElse(null);
+
+        return productMapper.toResponseDto(Objects.requireNonNullElseGet(productEntity, () -> getNewProduct(userEntity)));
 
     }
 
