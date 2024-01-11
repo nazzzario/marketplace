@@ -28,7 +28,7 @@ import java.util.UUID;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/api/v1/public/products")
+@RequestMapping("/api/v1/public")
 @Tag(name = "Public information of product")
 public class ProductController {
 
@@ -41,7 +41,7 @@ public class ProductController {
             @ApiResponse(responseCode = "404", description = "Product by UUID not found",
                     content = {@Content(mediaType = "application/json", schema = @Schema(implementation = ExceptionResponseDto.class))})
     })
-    @GetMapping("/{productReference}")
+    @GetMapping("/products/{productReference}")
     public ResponseEntity<ProductResponseDto> getProduct(
             @Parameter(description = "Product reference", required = true)
             @PathVariable(name = "productReference") UUID productReference
@@ -67,7 +67,7 @@ public class ProductController {
             @ApiResponse(responseCode = "403", description = "Invalid search parameter input",
                     content = {@Content(mediaType = "application/json", schema = @Schema(implementation = ExceptionResponseDto.class))})
     })
-    @GetMapping("/search")
+    @GetMapping("/products/search")
     public ResponseEntity<Page<ProductResponseDto>> getProductsByProductTitle(
             @Parameter(description = "Product title for searching", required = true)
             @RequestParam(name = "product-title") String productTitle,
@@ -84,7 +84,7 @@ public class ProductController {
     @Operation(summary = "Get newest products", description = "Get slice of newest created products sorted",responses = {
             @ApiResponse(responseCode = "200", description = "Slice of products"),
     })
-    @GetMapping("/newest")
+    @GetMapping("/products/newest")
     public ResponseEntity<Slice<ProductNewestResponseDto>> getNewestProducts(
             Integer page,
             Integer size
@@ -103,7 +103,7 @@ public class ProductController {
             @ApiResponse(responseCode = "403", description = "Invalid search parameters",
                     content = {@Content(mediaType = "application/json", schema = @Schema(implementation = ExceptionResponseDto.class))}),
     })
-    @GetMapping("/listing")
+    @GetMapping("/products/listing")
     public ResponseEntity<Page<ProductResponseDto>> findProductByCategory(
             @RequestParam(name = "category") ProductCategoriesEnum categories,
             @RequestParam(name = "city", required = false) CitiesEnum city,
@@ -125,7 +125,7 @@ public class ProductController {
             @ApiResponse(responseCode = "404", description = "Product by UUID not found",
                     content = {@Content(mediaType = "application/json", schema = @Schema(implementation = ExceptionResponseDto.class))})
     })
-    @GetMapping("/active/{referenceUser}")
+    @GetMapping("/{referenceUser}/products/active")
     public ResponseEntity<Page<ProductResponseDto>> getProduct(
             @Parameter(description = "User reference", required = true)
             @PathVariable(name = "referenceUser") UUID referenceUser,
