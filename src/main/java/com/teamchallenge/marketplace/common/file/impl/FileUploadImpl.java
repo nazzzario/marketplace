@@ -1,6 +1,7 @@
 package com.teamchallenge.marketplace.common.file.impl;
 
 import com.cloudinary.Cloudinary;
+import com.cloudinary.utils.ObjectUtils;
 import com.teamchallenge.marketplace.common.exception.ClientBackendException;
 import com.teamchallenge.marketplace.common.exception.ErrorCode;
 import com.teamchallenge.marketplace.common.file.FileUpload;
@@ -36,7 +37,8 @@ public class FileUploadImpl implements FileUpload {
     @Override
     public void deleteFile(UUID reference) {
         try {
-            cloudinary.uploader().destroy(reference.toString(), null);
+            cloudinary.uploader().destroy(reference.toString(),
+                    ObjectUtils.asMap("invalidate", true ));
         } catch (IOException e) {
             throw new ClientBackendException(ErrorCode.PRODUCT_NOT_FOUND);
         }

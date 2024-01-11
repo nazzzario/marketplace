@@ -27,7 +27,8 @@ import java.util.UUID;
 public class UserProductController {
     private final UserProductService productService;
 
-    @Operation(summary = "Create product", description = "Create product entity without images",responses = {
+    @Operation(summary = "Get NEW or create product", description = "Get product with status NEW or create product entity without images and " +
+            "with value from first active product or default.", responses = {
             @ApiResponse(responseCode = "201", description = "Product create"),
             @ApiResponse(responseCode = "400", description = "Invalid input",
                     content = {@Content(mediaType = "application/json", schema = @Schema(implementation = ExceptionResponseDto.class))}),

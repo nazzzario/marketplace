@@ -18,8 +18,8 @@ import java.util.UUID;
 @Service
 @RequiredArgsConstructor
 public class UserFavoriteProductServiceImpl implements UserFavoriteProductService {
-    private ProductRepository productRepository;
-    private UserRepository userRepository;
+    private final ProductRepository productRepository;
+    private final UserRepository userRepository;
 
     @Override
     @Transactional

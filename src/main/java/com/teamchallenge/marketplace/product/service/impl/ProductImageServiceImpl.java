@@ -46,11 +46,14 @@ public class ProductImageServiceImpl implements ProductImageService {
             throw new ClientBackendException(ErrorCode.LIMIT_IS_EXHAUSTED);
         }
 
-        ProductImageEntity emptyImageEntity = imageRepository.save(new ProductImageEntity());
+        ProductImageEntity emptyImageEntity = new ProductImageEntity();
+        emptyImageEntity.setImageUrl("");
         emptyImageEntity.setProduct(productEntity);
-        emptyImageEntity.setImageUrl(fileUpload.uploadFile(image,emptyImageEntity.getReference()));
 
-        ProductImageEntity newImageEntity = imageRepository.save(emptyImageEntity);
+        ProductImageEntity transitImageEntity = imageRepository.save(emptyImageEntity);
+        transitImageEntity.setImageUrl(fileUpload.uploadFile(image,emptyImageEntity.getReference()));
+
+        ProductImageEntity newImageEntity = imageRepository.save(transitImageEntity);
 
         return new UserProductImageDto(newImageEntity.getImageUrl(),
                 newImageEntity.getId());
