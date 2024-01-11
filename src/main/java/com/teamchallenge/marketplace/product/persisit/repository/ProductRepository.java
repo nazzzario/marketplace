@@ -48,4 +48,6 @@ public interface ProductRepository extends JpaRepository<ProductEntity, Long>,
 
     @EntityGraph(attributePaths = "owner")
     List<ProductEntity> findByStatusAndOwnerIn(ProductStatusEnum status, Collection<UserEntity> userEntities);
+
+    long countByOwnerAndStatus(UserEntity userEntity, ProductStatusEnum status);
 }

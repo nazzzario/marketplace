@@ -1,5 +1,6 @@
 package com.teamchallenge.marketplace.user.persisit.repository;
 
+import com.teamchallenge.marketplace.product.persisit.entity.ProductEntity;
 import com.teamchallenge.marketplace.product.persisit.entity.enums.ProductStatusEnum;
 import com.teamchallenge.marketplace.user.persisit.entity.UserEntity;
 import org.springframework.data.domain.Page;
@@ -8,6 +9,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -30,4 +32,6 @@ public interface UserRepository extends JpaRepository<UserEntity, Long> {
     boolean existsByEmailAndProductsReference(String email, UUID productReference);
 
     boolean existsByEmailAndProductsImagesId(String email, Long imageId);
+
+    List<UserEntity> findByFavoriteProducts(ProductEntity productEntity);
 }

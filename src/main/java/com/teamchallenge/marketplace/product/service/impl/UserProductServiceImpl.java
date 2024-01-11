@@ -21,6 +21,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Objects;
 import java.util.UUID;
@@ -69,6 +70,7 @@ public class UserProductServiceImpl implements UserProductService {
     }
 
     @Override
+    @Transactional
     public void deleteProduct(UUID productReference) {
         var authentication = SecurityContextHolder.getContext().getAuthentication();
 
@@ -77,6 +79,9 @@ public class UserProductServiceImpl implements UserProductService {
                         productReference)){
         ProductEntity productEntity = productRepository.findByReference(productReference)
                 .orElseThrow(() -> new ClientBackendException(ErrorCode.PRODUCT_NOT_FOUND));
+
+        userRepository.findByFavoriteProducts(productEntity).forEach(user ->
+                user.getFavoriteProducts().remove(productEntity));
 
         productEntity.getImages().forEach(image -> productImageService.deleteImage(image.getId()));
 
@@ -99,8 +104,7 @@ public class UserProductServiceImpl implements UserProductService {
             ProductEntity productEntity = productRepository.findByReference(productReference)
                     .orElseThrow(() -> new ClientBackendException(ErrorCode.PRODUCT_NOT_FOUND));
 
-            if (status.equals(ProductStatusEnum.DISABLED) &&
-                    userEntity.getProducts().size() >= sizeProductDisabled){
+            if (status.equals(ProductStatusEnum.DISABLED) && isExhaustedLimit(userEntity)){
                 throw new ClientBackendException(ErrorCode.LIMIT_IS_EXHAUSTED);
             }
 
@@ -112,6 +116,11 @@ public class UserProductServiceImpl implements UserProductService {
         }
 
 
+    }
+
+    private boolean isExhaustedLimit(UserEntity userEntity) {
+        return productRepository.countByOwnerAndStatus(userEntity,
+                ProductStatusEnum.DISABLED) >= sizeProductDisabled;
     }
 
     /**
