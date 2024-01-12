@@ -8,6 +8,7 @@ import org.mapstruct.BeanMapping;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
+import org.springframework.security.oauth2.core.user.OAuth2User;
 
 import static org.mapstruct.NullValuePropertyMappingStrategy.IGNORE;
 
@@ -25,7 +26,6 @@ public interface UserMapper {
     UserResponseDto toResponseDto(UserEntity userEntity);
 
 
-
     @Mapping(target = "role", ignore = true)
     @Mapping(target = "reference", ignore = true)
     @Mapping(target = "products", ignore = true)
@@ -35,4 +35,12 @@ public interface UserMapper {
     @Mapping(target = "createdDate", ignore = true)
     @BeanMapping(nullValuePropertyMappingStrategy = IGNORE)
     void patchMerge(UserPatchRequestDto requestDto, @MappingTarget UserEntity userEntity);
+
+    default UserRequestDto oathToUser(OAuth2User oAuth2User) {
+        String email = oAuth2User.getAttribute("email");
+        String username = oAuth2User.getAttribute("name");
+        String password = oAuth2User.getAttribute("sub");
+        String phone = "";
+        return new UserRequestDto(username, email, phone, password);
+    }
 }

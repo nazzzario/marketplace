@@ -14,6 +14,7 @@ import org.springframework.security.core.AuthenticationException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.servlet.NoHandlerFoundException;
 
 import java.time.LocalDateTime;
 import java.util.stream.Collectors;
@@ -84,19 +85,18 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
     }
 
-
-    @ExceptionHandler(Exception.class)
-    public ResponseEntity<ExceptionResponseDto> handleExceptions(Exception ex, HttpServletRequest request) {
+    @ExceptionHandler(NoHandlerFoundException.class)
+    public ResponseEntity<ExceptionResponseDto> handleUnknownResource(NoHandlerFoundException ex, HttpServletRequest request){
         ExceptionResponseDto errorResponse = ExceptionResponseDto.builder()
                 .time(LocalDateTime.now().toString())
-                .errorCode(null)
+                .errorCode("This page does not exists")
                 .title(ex.getClass().getName())
-                .message("Unhandled exception")
-                .httpResponseCode(500)
+                .message(ex.getMessage())
+                .httpResponseCode(404)
                 .path(request.getRequestURI())
                 .build();
 
-        return new ResponseEntity<>(errorResponse, HttpStatus.INTERNAL_SERVER_ERROR);
+        return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)

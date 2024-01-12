@@ -38,6 +38,8 @@ public class UserEntity extends BaseEntity {
     @Enumerated(EnumType.STRING)
     private RoleEnum role;
 
+    private String googleId;
+
     @OneToMany(mappedBy = "owner", fetch = FetchType.LAZY)
     private List<ProductEntity> products;
 

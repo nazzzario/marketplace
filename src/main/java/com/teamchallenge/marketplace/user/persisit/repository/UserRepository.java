@@ -23,4 +23,7 @@ public interface UserRepository extends JpaRepository<UserEntity, Long> {
                                       @Param("email") String email);
 
 
+    boolean existsByGoogleId(String sub);
+
+    Optional<UserEntity> findByGoogleId(String sub);
 }

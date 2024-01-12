@@ -13,9 +13,11 @@ import com.teamchallenge.marketplace.user.service.UserService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Objects;
 import java.util.UUID;
 
 @Slf4j
@@ -29,7 +31,7 @@ public class UserServiceImpl implements UserService {
     @Override
     @Transactional
     public UserResponseDto userRegistration(UserRequestDto requestDto) {
-        if(existsByEmail(requestDto.email())){
+        if (userRepository.existsByEmail(requestDto.email())) {
             throw new ClientBackendException(ErrorCode.EMAIL_ALREADY_EXISTS);
         }
         UserEntity userEntity = userMapper.toEntity(requestDto);
@@ -69,5 +71,21 @@ public class UserServiceImpl implements UserService {
         userMapper.patchMerge(requestDto, userByReference);
 
         return userMapper.toResponseDto(userByReference);
+    }
+
+    @Override
+    public UserEntity oauthUserRegistration(OAuth2User oAuth2User) {
+        String sub = oAuth2User.getAttribute("sub");
+        UserRequestDto user = userMapper.oathToUser(oAuth2User);
+        if (Objects.nonNull(sub) && userRepository.existsByGoogleId(sub)) {
+            return userRepository.findByGoogleId(sub).orElseThrow(() -> new ClientBackendException(ErrorCode.USER_NOT_FOUND));
+        }
+        if (userRepository.existsByEmail(user.email())) {
+            throw new ClientBackendException(ErrorCode.EMAIL_ALREADY_EXISTS);
+        }
+        UserEntity userEntity = userMapper.toEntity(user);
+        userEntity.setRole(RoleEnum.USER);
+        userEntity.setGoogleId(sub);
+        return userRepository.save(userEntity);
     }
 }
