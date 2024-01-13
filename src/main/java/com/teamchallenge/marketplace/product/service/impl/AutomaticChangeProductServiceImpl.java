@@ -8,6 +8,7 @@ import com.teamchallenge.marketplace.product.service.AutomaticChangeProductServi
 import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
@@ -30,8 +31,9 @@ public class AutomaticChangeProductServiceImpl implements AutomaticChangeProduct
      * Select all expired products with users. For each user,
      * we check whether there is space in the archive, if there is no space,
      * we delete older products.
+     * For test: cron = "${product.cron}".
      * */
-    //@Scheduled(cron = "${product.cron}")
+    @Scheduled(cron = Scheduled.CRON_DISABLED)
     public void changeStatusFromActiveToDisabled(){
         var userActiveProducts = productRepository
                 .findByStatusAndPublishDateBefore(ProductStatusEnum.ACTIVE,
@@ -51,9 +53,10 @@ public class AutomaticChangeProductServiceImpl implements AutomaticChangeProduct
     }
 
     /**
-     * Delete older product with deadline date in the archive
+     * Delete older product with deadline date in the archive.
+     * For test: cron = "${product.cron}".
      * */
-    //@Scheduled(cron = "${product.cron}")
+    @Scheduled(cron = Scheduled.CRON_DISABLED)
     public void deleteDisabledOldProduct(){
         var userDisabledProducts = productRepository
                 .findByStatusAndPublishDateBefore(ProductStatusEnum.DISABLED,
