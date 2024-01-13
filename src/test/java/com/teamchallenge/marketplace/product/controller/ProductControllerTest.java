@@ -37,7 +37,7 @@ class ProductControllerTest {
     @WithMockUser
     @Test
     void getProduct() {
-        mockMvc.perform(get("/api/v1/public/products/active/550e8400-e29b-41d4-a716-446655440000")
+        mockMvc.perform(get("/api/v1/public/550e8400-e29b-41d4-a716-446655440000/products/active")
                 .param("page", "0")
                 .param("size", "6")
                 .param("sort", "id")
