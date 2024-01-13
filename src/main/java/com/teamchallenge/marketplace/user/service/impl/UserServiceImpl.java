@@ -14,10 +14,11 @@ import com.teamchallenge.marketplace.user.service.UserService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
 import java.util.UUID;
 
 @Slf4j
@@ -27,7 +28,6 @@ public class UserServiceImpl implements UserService {
 
     private final UserRepository userRepository;
     private final UserMapper userMapper;
-
 
     @Override
     @Transactional
@@ -75,8 +75,8 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public List<UserResponseDto> getUsersByProductStatus(ProductStatusEnum status) {
-        return userMapper.toListOfResponseDto(
-                userRepository.findDistinctByProductsStatus(status));
+    public Page<UserResponseDto> getUserByStatusProduct(ProductStatusEnum status, Pageable pageable) {
+        return userRepository.findDistinctByProductsStatus(status, pageable)
+                .map(userMapper::toResponseDto);
     }
 }

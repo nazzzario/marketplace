@@ -2,7 +2,7 @@ package com.teamchallenge.marketplace.product.controller;
 
 import com.teamchallenge.marketplace.product.dto.response.UserProductResponseDto;
 import com.teamchallenge.marketplace.product.persisit.entity.enums.ProductStatusEnum;
-import com.teamchallenge.marketplace.product.service.UserProductService;
+import com.teamchallenge.marketplace.product.service.ShowUserProductService;
 import lombok.SneakyThrows;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,7 +28,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@SpringBootTest(webEnvironment = MOCK, classes = UserProductController.class)
+@SpringBootTest(webEnvironment = MOCK, classes = ShowUserProductController.class)
 @AutoConfigureMockMvc
 @ActiveProfiles("test")
 class UserProductControllerTest {
@@ -36,7 +36,7 @@ class UserProductControllerTest {
     private MockMvc mockMvc;
 
     @MockBean
-    UserProductService productService;
+    ShowUserProductService productService;
 
 
 
