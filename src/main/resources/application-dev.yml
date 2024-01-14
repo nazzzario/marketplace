@@ -1,5 +1,5 @@
 springdoc:
-  server.url: http://ec2-18-197-60-214.eu-central-1.compute.amazonaws.com
+  server.url: https://back.komirka.pp.ua
 
 spring:
   datasource:
