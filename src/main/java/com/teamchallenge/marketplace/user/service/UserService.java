@@ -4,8 +4,9 @@ import com.teamchallenge.marketplace.product.persisit.entity.enums.ProductStatus
 import com.teamchallenge.marketplace.user.dto.request.UserPatchRequestDto;
 import com.teamchallenge.marketplace.user.dto.request.UserRequestDto;
 import com.teamchallenge.marketplace.user.dto.response.UserResponseDto;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
-import java.util.List;
 import java.util.UUID;
 
 public interface UserService {
@@ -19,5 +20,5 @@ public interface UserService {
 
     UserResponseDto patchUser(UUID userReference, UserPatchRequestDto requestDto);
 
-    List<UserResponseDto> getUsersByProductStatus(ProductStatusEnum status);
+    Page<UserResponseDto> getUserByStatusProduct(ProductStatusEnum status, Pageable pageable);
 }

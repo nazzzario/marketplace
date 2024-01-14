@@ -15,8 +15,8 @@ import org.springframework.data.repository.PagingAndSortingRepository;
 import org.springframework.data.repository.query.Param;
 import org.springframework.lang.NonNull;
 
-import java.util.Optional;
-import java.util.UUID;
+import java.time.LocalDate;
+import java.util.*;
 
 public interface ProductRepository extends JpaRepository<ProductEntity, Long>,
                                            PagingAndSortingRepository<ProductEntity, Long>,
@@ -32,13 +32,22 @@ public interface ProductRepository extends JpaRepository<ProductEntity, Long>,
     boolean existsByReferenceAndOwnerEmail(@Param("reference") UUID reference,
                                            @Param("email") String email);
 
+    @EntityGraph(attributePaths = "images")
+    Page<ProductEntity> findByOwnerAndStatus(UserEntity owner, ProductStatusEnum status, Pageable pageable);
+
     @Query("select p from ProductEntity p where p.categoryName = :category and p.status = :status")
     Page<ProductEntity> findByCategoryNameAndStatus(@Param("category") ProductCategoriesEnum categoryName,
                                                     @Param("status") ProductStatusEnum status,
                                                     Pageable pageable);
-    @EntityGraph(attributePaths = "images")
-    Page<ProductEntity> findByOwnerAndStatus(UserEntity owner, ProductStatusEnum status, Pageable pageable);
 
     @EntityGraph(attributePaths = "images")
     Page<ProductEntity> findByFavoritismId(Long id, Pageable pageable);
+
+    @EntityGraph(attributePaths = "owner")
+    List<ProductEntity> findByStatusAndPublishDateBefore(ProductStatusEnum status, LocalDate deadlineDate);
+
+    @EntityGraph(attributePaths = "owner")
+    List<ProductEntity> findByStatusAndOwnerIn(ProductStatusEnum status, Collection<UserEntity> userEntities);
+
+    long countByOwnerAndStatus(UserEntity userEntity, ProductStatusEnum status);
 }

@@ -3,13 +3,9 @@ package com.teamchallenge.marketplace.product.controller;
 import com.teamchallenge.marketplace.common.exception.dto.ExceptionResponseDto;
 import com.teamchallenge.marketplace.common.util.ApiPageable;
 import com.teamchallenge.marketplace.common.util.ApiSlice;
-import com.teamchallenge.marketplace.product.dto.request.ProductRequestDto;
 import com.teamchallenge.marketplace.product.dto.response.ProductNewestResponseDto;
 import com.teamchallenge.marketplace.product.dto.response.ProductResponseDto;
-import com.teamchallenge.marketplace.product.persisit.entity.enums.CitiesEnum;
-import com.teamchallenge.marketplace.product.persisit.entity.enums.ProductCategoriesEnum;
-import com.teamchallenge.marketplace.product.persisit.entity.enums.ProductStateEnum;
-import com.teamchallenge.marketplace.product.persisit.entity.enums.SortingFieldEnum;
+import com.teamchallenge.marketplace.product.persisit.entity.enums.*;
 import com.teamchallenge.marketplace.product.service.ProductService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -18,25 +14,22 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Slice;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 import java.util.UUID;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/api/v1")
-@Tag(name = "Product")
+@RequestMapping("/api/v1/public")
+@Tag(name = "Public information of product")
 public class ProductController {
 
     private final ProductService productService;
@@ -48,7 +41,7 @@ public class ProductController {
             @ApiResponse(responseCode = "404", description = "Product by UUID not found",
                     content = {@Content(mediaType = "application/json", schema = @Schema(implementation = ExceptionResponseDto.class))})
     })
-    @GetMapping("/public/products/{productReference}")
+    @GetMapping("/products/{productReference}")
     public ResponseEntity<ProductResponseDto> getProduct(
             @Parameter(description = "Product reference", required = true)
             @PathVariable(name = "productReference") UUID productReference
@@ -58,27 +51,10 @@ public class ProductController {
         return new ResponseEntity<>(productByReference, HttpStatus.OK);
     }
 
-    @Operation(summary = "Create product", description = "Create product entity without images",responses = {
-            @ApiResponse(responseCode = "201", description = "Product create"),
-            @ApiResponse(responseCode = "400", description = "Invalid input",
-                    content = {@Content(mediaType = "application/json", schema = @Schema(implementation = ExceptionResponseDto.class))}),
-            @ApiResponse(responseCode = "401", description = "User is not authenticated",
-                    content = {@Content(mediaType = "application/json", schema = @Schema(implementation = ExceptionResponseDto.class))})
-    })
-    @PostMapping("/private/products/create")
-    @PreAuthorize("isAuthenticated()")
-    public ResponseEntity<ProductResponseDto> createProduct(
-            @Valid @RequestBody ProductRequestDto requestDto
-    ) {
-        ProductResponseDto productResponse = productService.createProduct(requestDto);
-
-        return new ResponseEntity<>(productResponse, HttpStatus.CREATED);
-    }
-
     @Operation(summary = "Get all product", description = "Get list of all products",responses = {
             @ApiResponse(responseCode = "200", description = "Product returned")
     })
-    @GetMapping("/public/products")
+    @GetMapping
     public ResponseEntity<List<ProductResponseDto>> getAllProducts() {
         List<ProductResponseDto> allProducts = productService.getAllProducts();
 
@@ -91,7 +67,7 @@ public class ProductController {
             @ApiResponse(responseCode = "403", description = "Invalid search parameter input",
                     content = {@Content(mediaType = "application/json", schema = @Schema(implementation = ExceptionResponseDto.class))})
     })
-    @GetMapping("/public/products/search")
+    @GetMapping("/products/search")
     public ResponseEntity<Page<ProductResponseDto>> getProductsByProductTitle(
             @Parameter(description = "Product title for searching", required = true)
             @RequestParam(name = "product-title") String productTitle,
@@ -108,7 +84,7 @@ public class ProductController {
     @Operation(summary = "Get newest products", description = "Get slice of newest created products sorted",responses = {
             @ApiResponse(responseCode = "200", description = "Slice of products"),
     })
-    @GetMapping("/public/products/newest")
+    @GetMapping("/products/newest")
     public ResponseEntity<Slice<ProductNewestResponseDto>> getNewestProducts(
             Integer page,
             Integer size
@@ -116,71 +92,6 @@ public class ProductController {
         Slice<ProductNewestResponseDto> newestProducts = productService.getNewestProducts(page, size);
 
         return new ResponseEntity<>(newestProducts, HttpStatus.OK);
-    }
-
-    @Operation(summary = "Delete product", description = "Product owner can delete product by its reference")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "204", description = "Product deleted successfully"),
-            @ApiResponse(responseCode = "401", description = "Unauthenticated",
-                    content = {@Content(mediaType = "application/json", schema = @Schema(implementation = ExceptionResponseDto.class))}),
-            @ApiResponse(responseCode = "403", description = "Access denied",
-                    content = {@Content(mediaType = "application/json", schema = @Schema(implementation = ExceptionResponseDto.class))}),
-            @ApiResponse(responseCode = "404", description = "Product not found",
-                    content = {@Content(mediaType = "application/json", schema = @Schema(implementation = ExceptionResponseDto.class))})
-    })
-    @PreAuthorize("@productSecurity.checkOwnership(#productReference, principal.username)")
-    @DeleteMapping("/private/products/{productReference}")
-    public ResponseEntity<Void> deleteProduct(
-            @Parameter(description = "Product reference", required = true)
-            @PathVariable UUID productReference
-    ) {
-        productService.deleteProduct(productReference);
-        return ResponseEntity.noContent().build();
-    }
-
-    @Operation(summary = "Upload product images", description = "Upload product images by product UUID")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Images upload successfully"),
-            @ApiResponse(responseCode = "401", description = "Unauthenticated",
-                    content = {@Content(mediaType = "application/json", schema = @Schema(implementation = ExceptionResponseDto.class))}),
-            @ApiResponse(responseCode = "403", description = "Access denied",
-                    content = {@Content(mediaType = "application/json", schema = @Schema(implementation = ExceptionResponseDto.class))}),
-            @ApiResponse(responseCode = "404", description = "Product not found",
-                    content = {@Content(mediaType = "application/json", schema = @Schema(implementation = ExceptionResponseDto.class))}),
-            @ApiResponse(responseCode = "503", description = "Unable to save images",
-                    content = {@Content(mediaType = "application/json", schema = @Schema(implementation = ExceptionResponseDto.class))}),
-    })
-    @PostMapping(path = "/private/products/{productReference}/images", consumes = {MediaType.MULTIPART_FORM_DATA_VALUE})
-    public ResponseEntity<ProductResponseDto> uploadProductImages(
-            @Parameter(description = "Product reference", required = true)
-            @PathVariable(name = "productReference") UUID productReference,
-            @Parameter(description = "List of images", required = true)
-            @RequestBody List<MultipartFile> images
-    ) {
-        ProductResponseDto responseDto = productService.uploadImagesToProduct(productReference, images);
-
-        return new ResponseEntity<>(responseDto, HttpStatus.OK);
-    }
-
-    @Operation(summary = "Patch product", description = "Product owner can patch product by its reference")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "201", description = "Product patched successfully"),
-            @ApiResponse(responseCode = "401", description = "Unauthenticated",
-                    content = {@Content(mediaType = "application/json", schema = @Schema(implementation = ExceptionResponseDto.class))}),
-            @ApiResponse(responseCode = "403", description = "Access denied",
-                    content = {@Content(mediaType = "application/json", schema = @Schema(implementation = ExceptionResponseDto.class))}),
-            @ApiResponse(responseCode = "404", description = "Product not found",
-                    content = {@Content(mediaType = "application/json", schema = @Schema(implementation = ExceptionResponseDto.class))})
-    })
-    @PatchMapping("/private/products/{productReference}")
-    public ResponseEntity<ProductResponseDto> patchProduct(
-            @Parameter(description = "Product reference", required = true)
-            @PathVariable(name = "productReference") UUID productReference,
-            @RequestBody ProductRequestDto requestDto
-    ) {
-        ProductResponseDto productResponse = productService.patchProduct(requestDto, productReference);
-
-        return new ResponseEntity<>(productResponse, HttpStatus.OK);
     }
 
     @ApiPageable
@@ -192,7 +103,7 @@ public class ProductController {
             @ApiResponse(responseCode = "403", description = "Invalid search parameters",
                     content = {@Content(mediaType = "application/json", schema = @Schema(implementation = ExceptionResponseDto.class))}),
     })
-    @GetMapping("/public/products/listing")
+    @GetMapping("/products/listing")
     public ResponseEntity<Page<ProductResponseDto>> findProductByCategory(
             @RequestParam(name = "category") ProductCategoriesEnum categories,
             @RequestParam(name = "city", required = false) CitiesEnum city,
@@ -206,57 +117,29 @@ public class ProductController {
         return new ResponseEntity<>(productsByCategory, HttpStatus.OK);
     }
 
-    @Operation(summary = "Set product to user favorites", description = "An authenticated user can add product to his favorite product list", tags = "favorites")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "204", description = "Product add to favorites list successfully"),
-            @ApiResponse(responseCode = "401", description = "Unauthenticated",
+    @Operation(summary = "Get one product with status active", description = "Get products with status active " +
+            "by user reference UUID. Default optional parameters: page=0, size=6, sort=id, direction=desc",responses = {
+            @ApiResponse(responseCode = "200", description = "Product returned"),
+            @ApiResponse(responseCode = "400", description = "Invalid input",
                     content = {@Content(mediaType = "application/json", schema = @Schema(implementation = ExceptionResponseDto.class))}),
-            @ApiResponse(responseCode = "403", description = "Invalid product reference",
-                    content = {@Content(mediaType = "application/json", schema = @Schema(implementation = ExceptionResponseDto.class))}),
-            @ApiResponse(responseCode = "404", description = "Product not found",
-                    content = {@Content(mediaType = "application/json", schema = @Schema(implementation = ExceptionResponseDto.class))}),
-            @ApiResponse(responseCode = "400", description = "Cannot add product to favorites",
-                    content = {@Content(mediaType = "application/json", schema = @Schema(implementation = ExceptionResponseDto.class))})
-
-    })
-    @PostMapping("/private/products/{productReference}/favorites")
-    public ResponseEntity<Void> addProductToFavorites(@PathVariable("productReference") UUID productReference,
-                                                      Authentication authentication){
-        productService.addProductToFavorites(authentication, productReference);
-        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
-    }
-
-    @Operation(summary = "Remove product from user favorites", description = "An authenticated user can remove product from his favorite product list", tags = "favorites")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "204", description = "Product removed from favorites list successfully"),
-            @ApiResponse(responseCode = "401", description = "Unauthenticated",
-                    content = {@Content(mediaType = "application/json", schema = @Schema(implementation = ExceptionResponseDto.class))}),
-            @ApiResponse(responseCode = "403", description = "Invalid product reference",
-                    content = {@Content(mediaType = "application/json", schema = @Schema(implementation = ExceptionResponseDto.class))}),
-            @ApiResponse(responseCode = "404", description = "Product not found",
-                    content = {@Content(mediaType = "application/json", schema = @Schema(implementation = ExceptionResponseDto.class))}),
-            @ApiResponse(responseCode = "400", description = "Cannot add product to favorites",
+            @ApiResponse(responseCode = "404", description = "Product by UUID not found",
                     content = {@Content(mediaType = "application/json", schema = @Schema(implementation = ExceptionResponseDto.class))})
     })
-    @DeleteMapping("/private/products/{productReference}/favorites")
-    public ResponseEntity<Void> removeProductFromFavorites(@PathVariable("productReference") UUID productReference,
-                                                           Authentication authentication){
-        productService.removeProductFromFavorites(authentication, productReference);
-        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
-    }
+    @GetMapping("/{referenceUser}/products/active")
+    public ResponseEntity<Page<ProductResponseDto>> getProduct(
+            @Parameter(description = "User reference", required = true)
+            @PathVariable(name = "referenceUser") UUID referenceUser,
+            @RequestParam(defaultValue = "0") Integer page,
+            @RequestParam(defaultValue = "6") Integer size,
+            @Parameter(description = "The field by which sort", name = "sort", schema = @Schema(defaultValue = "id"))
+            @RequestParam(defaultValue = "id") String sort,
+            @Parameter(description = "The direction can be asc or desc", name = "direction", schema = @Schema(defaultValue = "desc"))
+            @RequestParam(defaultValue = "desc") String direction
+    ) {
+        Page<ProductResponseDto> productByReference = productService
+                .getProductByReferenceUser(ProductStatusEnum.ACTIVE, referenceUser,
+                        PageRequest.of(page, size, Sort.Direction.fromString(direction), sort));
 
-    @Operation(summary = "List of user favorites products", description = "An authenticated user can get a list of his favorite products", tags = "favorites")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "User favorite product list"),
-            @ApiResponse(responseCode = "401", description = "Unauthenticated",
-                    content = {@Content(mediaType = "application/json", schema = @Schema(implementation = ExceptionResponseDto.class))}),
-            @ApiResponse(responseCode = "403", description = "Invalid product reference",
-                    content = {@Content(mediaType = "application/json", schema = @Schema(implementation = ExceptionResponseDto.class))}),
-    })
-    @GetMapping("/private/products/favorites")
-    public ResponseEntity<List<ProductResponseDto>> getUserFavoritesProducts(Authentication authentication){
-        List<ProductResponseDto> favoriteProducts = productService.getUserFavoriteProducts(authentication);
-
-        return new ResponseEntity<>(favoriteProducts, HttpStatus.OK);
+        return new ResponseEntity<>(productByReference, HttpStatus.OK);
     }
 }

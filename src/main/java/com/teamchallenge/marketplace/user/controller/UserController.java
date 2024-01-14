@@ -7,6 +7,7 @@ import com.teamchallenge.marketplace.user.dto.request.UserRequestDto;
 import com.teamchallenge.marketplace.user.dto.response.UserResponseDto;
 import com.teamchallenge.marketplace.user.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -14,12 +15,14 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
 import java.util.UUID;
 
 @RestController
@@ -45,8 +48,8 @@ public class UserController {
         return ResponseEntity.ok(userByReference);
     }
 
-    @Operation(summary = "Get list of users", description = "Get list of users by " +
-            "user product status is active")
+    @Operation(summary = "Get users with active product", description = "Get users with active product " +
+    "Default optional parameters: page=0, size=6, sort=id, direction=desc")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "User data"),
             @ApiResponse(responseCode = "403", description = "Invalid data",
@@ -54,11 +57,21 @@ public class UserController {
             @ApiResponse(responseCode = "404", description = "User not found",
                     content = {@Content(mediaType = "application/json", schema = @Schema(implementation = ExceptionResponseDto.class))})
     })
-    @GetMapping("public/users/product/active")
-    public ResponseEntity<List<UserResponseDto>> getUsersByProductActive(){
-        List<UserResponseDto> userByProductStatus = userService.getUsersByProductStatus(ProductStatusEnum.ACTIVE);
+    @GetMapping("public/users/products/active")
+    public ResponseEntity<Page<UserResponseDto>> getUserByActiveProduct(
+            @RequestParam(defaultValue = "0") Integer page,
+            @RequestParam(defaultValue = "6") Integer size,
+            @Parameter(description = "The field by which sort", name = "sort", schema = @Schema(defaultValue = "id"))
+            @RequestParam(defaultValue = "id") String sort,
+            @Parameter(description = "The direction can be asc or desc", name = "direction", schema = @Schema(defaultValue = "desc"))
+            @RequestParam(defaultValue = "desc") String direction
+    ){
+        Page<UserResponseDto> userByReference = userService.getUserByStatusProduct(
+                ProductStatusEnum.ACTIVE,
+                PageRequest.of(page, size, Sort.Direction.fromString(direction), sort)
+        );
 
-        return ResponseEntity.ok(userByProductStatus);
+        return ResponseEntity.ok(userByReference);
     }
 
     @Operation(summary = "User registration", description = "Create new user")
