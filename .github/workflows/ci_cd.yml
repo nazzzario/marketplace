@@ -52,5 +52,4 @@ jobs:
             docker pull ${{ secrets.DOCKER_USERNAME }}/${{ secrets.IMAGE }}:latest
             ./remove_images.sh
             ./remove_container.sh marketplace-container
-            docker run --name ${{ secrets.CONTAINER }} --env-file=marketplace.env -d -p 80:8080 ${{ secrets.DOCKER_USERNAME }}/${{ secrets.IMAGE }}:latest
             docker run --name ${{ secrets.CONTAINER }} --network=komirka-nt --env-file=marketplace.env -d -p 8080:8080 ${{ secrets.DOCKER_USERNAME }}/${{ secrets.IMAGE }}:latest
