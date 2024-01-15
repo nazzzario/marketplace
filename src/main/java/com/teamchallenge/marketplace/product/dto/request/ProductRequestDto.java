@@ -3,8 +3,6 @@ package com.teamchallenge.marketplace.product.dto.request;
 import com.teamchallenge.marketplace.product.persisit.entity.enums.CitiesEnum;
 import com.teamchallenge.marketplace.product.persisit.entity.enums.ProductCategoriesEnum;
 import com.teamchallenge.marketplace.product.persisit.entity.enums.ProductStateEnum;
-import com.teamchallenge.marketplace.product.persisit.entity.enums.ProductStatusEnum;
-import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -21,5 +19,7 @@ public record ProductRequestDto(
         String productTitle,
         String productDescription,
         @NotNull(message = "Product state cannot be null")
-        ProductStateEnum state) {
+        ProductStateEnum state,
+        @NotNull(message = "Product period cannot be null")
+        Integer timePeriod) {
 }

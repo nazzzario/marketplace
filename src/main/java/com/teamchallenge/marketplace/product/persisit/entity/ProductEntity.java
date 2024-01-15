@@ -52,6 +52,8 @@ public class ProductEntity extends BaseEntity {
 
     private LocalDate publishDate;
 
+    private int timePeriod;
+
     private long viewCount;
 
     @PrePersist
