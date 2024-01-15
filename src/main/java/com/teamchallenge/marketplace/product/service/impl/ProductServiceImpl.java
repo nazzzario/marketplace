@@ -73,7 +73,7 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
-    public Page<ProductResponseDto> getProductsByProductTitle(String productTitle, CitiesEnum city, Integer page, Integer size) {
+    public Page<ProductResponseDto> getProductsByProductTitle(String productTitle, String city, Integer page, Integer size) {
         if (Objects.isNull(productTitle)) {
             throw new ClientBackendException(ErrorCode.INVALID_SEARCH_INPUT);
         }
@@ -98,7 +98,7 @@ public class ProductServiceImpl implements ProductService {
     @Transactional(readOnly = true)
     @BatchSize(size = 10)
     public Page<ProductResponseDto> getAllProductsByCategory(ProductCategoriesEnum category,
-                                                             CitiesEnum city,
+                                                             String city,
                                                              List<ProductStateEnum> states,
                                                              Integer page,
                                                              Integer size,
@@ -145,7 +145,7 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @SuppressWarnings(value = "unchecked")
-    private Specification<ProductEntity> searchProductsLikeTitleAndCity(String searchInput, CitiesEnum city) {
+    private Specification<ProductEntity> searchProductsLikeTitleAndCity(String searchInput, String city) {
         return Specification.where((Specification<ProductEntity>) searchLikeString("productTitle", searchInput))
                 .and((Specification<ProductEntity>) fieldEqual("status", ProductStatusEnum.ACTIVE))
                 .and((r, rq, cb) -> Optional.ofNullable(city).map(c -> cb.equal(r.get("city"), city)).orElse(null));
@@ -153,7 +153,7 @@ public class ProductServiceImpl implements ProductService {
 
     @SuppressWarnings(value = "unchecked")
     private Specification<ProductEntity> getProductByCategoryWithFilters(ProductCategoriesEnum category,
-                                                                         CitiesEnum city,
+                                                                         String city,
                                                                          List<ProductStateEnum> states) {
         return Specification.where((Specification<ProductEntity>) fieldEqual("categoryName", category))
                 .and((Specification<ProductEntity>) fieldEqual("status", ProductStatusEnum.ACTIVE))
