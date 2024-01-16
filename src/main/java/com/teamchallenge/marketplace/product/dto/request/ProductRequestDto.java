@@ -1,10 +1,7 @@
 package com.teamchallenge.marketplace.product.dto.request;
 
-import com.teamchallenge.marketplace.product.persisit.entity.enums.CitiesEnum;
 import com.teamchallenge.marketplace.product.persisit.entity.enums.ProductCategoriesEnum;
 import com.teamchallenge.marketplace.product.persisit.entity.enums.ProductStateEnum;
-import com.teamchallenge.marketplace.product.persisit.entity.enums.ProductStatusEnum;
-import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -15,7 +12,7 @@ public record ProductRequestDto(
         @NotNull(message = "Product category cannot be null")
         ProductCategoriesEnum categoryName,
         @NotNull(message = "Product city cannot be null")
-        CitiesEnum city,
+        String city,
         @NotBlank(message = "Product title cannot be empty")
         @Size(min = 4, max = 30, message = "Product length between 4 and 30")
         String productTitle,

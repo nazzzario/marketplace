@@ -19,13 +19,13 @@ public interface ProductService {
 
     List<ProductResponseDto> getAllProducts();
 
-    Page<ProductResponseDto> getProductsByProductTitle(String productTitle, CitiesEnum city,
+    Page<ProductResponseDto> getProductsByProductTitle(String productTitle, String city,
                                                        Integer page, Integer size);
 
     Slice<ProductNewestResponseDto> getNewestProducts(Integer page, Integer size);
 
     Page<ProductResponseDto> getAllProductsByCategory(ProductCategoriesEnum category,
-                                                      CitiesEnum city,
+                                                      String city,
                                                       List<ProductStateEnum> statusList,
                                                       Integer page,
                                                       Integer size,

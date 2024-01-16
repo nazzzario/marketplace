@@ -71,7 +71,7 @@ public class ProductController {
     public ResponseEntity<Page<ProductResponseDto>> getProductsByProductTitle(
             @Parameter(description = "Product title for searching", required = true)
             @RequestParam(name = "product-title") String productTitle,
-            @RequestParam(name = "city", required = false) CitiesEnum city,
+            @RequestParam(name = "city", required = false) String city,
             Integer page,
             Integer size
     ) {
@@ -106,7 +106,7 @@ public class ProductController {
     @GetMapping("/products/listing")
     public ResponseEntity<Page<ProductResponseDto>> findProductByCategory(
             @RequestParam(name = "category") ProductCategoriesEnum categories,
-            @RequestParam(name = "city", required = false) CitiesEnum city,
+            @RequestParam(name = "city", required = false) String city,
             @RequestParam(name = "states", required = false) List<ProductStateEnum> states,
             Integer page,
             Integer size,
@@ -131,14 +131,13 @@ public class ProductController {
             @PathVariable(name = "referenceUser") UUID referenceUser,
             @RequestParam(defaultValue = "0") Integer page,
             @RequestParam(defaultValue = "6") Integer size,
-            @Parameter(description = "The field by which sort", name = "sort", schema = @Schema(defaultValue = "id"))
-            @RequestParam(defaultValue = "id") String sort,
+            @RequestParam(name = "sort", defaultValue = "DATE", required = false) SortingFieldEnum sort,
             @Parameter(description = "The direction can be asc or desc", name = "direction", schema = @Schema(defaultValue = "desc"))
             @RequestParam(defaultValue = "desc") String direction
     ) {
         Page<ProductResponseDto> productByReference = productService
                 .getProductByReferenceUser(ProductStatusEnum.ACTIVE, referenceUser,
-                        PageRequest.of(page, size, Sort.Direction.fromString(direction), sort));
+                        PageRequest.of(page, size, Sort.Direction.fromString(direction), sort.getFiledName()));
 
         return new ResponseEntity<>(productByReference, HttpStatus.OK);
     }
