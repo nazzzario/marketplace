@@ -50,4 +50,6 @@ public interface ProductRepository extends JpaRepository<ProductEntity, Long>,
     List<ProductEntity> findByStatusAndOwnerIn(ProductStatusEnum status, Collection<UserEntity> userEntities);
 
     long countByOwnerAndStatus(UserEntity userEntity, ProductStatusEnum status);
+
+    List<ProductEntity> findByStatusAndTimePeriodAndPublishDateBefore(ProductStatusEnum status, Integer days, LocalDate deadlineDate);
 }

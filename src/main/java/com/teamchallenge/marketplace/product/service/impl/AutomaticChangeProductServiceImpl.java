@@ -12,6 +12,7 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
+import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -20,9 +21,11 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class AutomaticChangeProductServiceImpl implements AutomaticChangeProductService {
     @Value("${product.periodDeadline}")
-    private long periodDeadline;
+    private int periodDeadline;
     @Value("${product.sizeProductDisabled}")
     private long sizeProductDisabled;
+    @Value("${product.periodsDeadline}")
+    private int[] periodsDeadline;
 
     private final ProductRepository productRepository;
     private final EmailService emailService;
@@ -35,10 +38,11 @@ public class AutomaticChangeProductServiceImpl implements AutomaticChangeProduct
      * */
     @Scheduled(cron = Scheduled.CRON_DISABLED)
     public void changeStatusFromActiveToDisabled(){
-        var userActiveProducts = productRepository
-                .findByStatusAndPublishDateBefore(ProductStatusEnum.ACTIVE,
-                        getDeadlineDate()).stream().collect(Collectors
-                        .groupingBy(ProductEntity::getOwner));
+        var userActiveProducts = Arrays.stream(periodsDeadline).boxed()
+                .flatMap(days -> productRepository
+                .findByStatusAndTimePeriodAndPublishDateBefore(ProductStatusEnum.ACTIVE,
+                        days, getDeadlineDate(days)).stream()).collect(Collectors
+                .groupingBy(ProductEntity::getOwner));
 
         var userDisabledProduct = productRepository.findByStatusAndOwnerIn(
                 ProductStatusEnum.DISABLED, userActiveProducts.keySet())
@@ -60,7 +64,7 @@ public class AutomaticChangeProductServiceImpl implements AutomaticChangeProduct
     public void deleteDisabledOldProduct(){
         var userDisabledProducts = productRepository
                 .findByStatusAndPublishDateBefore(ProductStatusEnum.DISABLED,
-                        getDeadlineDate()).stream().collect(Collectors
+                        getDeadlineDate(periodDeadline)).stream().collect(Collectors
                         .groupingBy(ProductEntity::getOwner));
 
         userDisabledProducts.forEach((key, value) -> processDeleteOldEntities(key.getEmail(), value));
@@ -107,7 +111,7 @@ public class AutomaticChangeProductServiceImpl implements AutomaticChangeProduct
 
 
 
-    private LocalDate getDeadlineDate() {
-        return LocalDate.now().minusDays(periodDeadline);
+    private LocalDate getDeadlineDate(int days) {
+        return LocalDate.now().minusDays(days);
     }
 }

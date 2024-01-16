@@ -19,7 +19,5 @@ public record ProductRequestDto(
         String productTitle,
         String productDescription,
         @NotNull(message = "Product state cannot be null")
-        ProductStateEnum state,
-        @NotNull(message = "Product period cannot be null")
-        Integer timePeriod) {
+        ProductStateEnum state) {
 }
