@@ -48,12 +48,9 @@ public class AutomaticChangeProductServiceImpl implements AutomaticChangeProduct
                 ProductStatusEnum.DISABLED, userActiveProducts.keySet())
                 .stream().collect(Collectors.groupingBy(ProductEntity::getOwner));
 
-
-
         userDisabledProduct.forEach((key, value) -> processChangeStatusAndDeleteOldEntities(
                 key.getEmail(), userActiveProducts.get(key), value,
                 (value.size() + userActiveProducts.get(key).size() - sizeProductDisabled)));
-
     }
 
     /**
