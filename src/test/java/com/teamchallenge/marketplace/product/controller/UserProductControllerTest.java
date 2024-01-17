@@ -2,6 +2,7 @@ package com.teamchallenge.marketplace.product.controller;
 
 import com.teamchallenge.marketplace.product.dto.response.UserProductResponseDto;
 import com.teamchallenge.marketplace.product.persisit.entity.enums.ProductStatusEnum;
+import com.teamchallenge.marketplace.product.persisit.entity.enums.SortingFieldEnum;
 import com.teamchallenge.marketplace.product.service.ShowUserProductService;
 import lombok.SneakyThrows;
 import org.junit.jupiter.api.Test;
@@ -47,7 +48,7 @@ class UserProductControllerTest {
         mockMvc.perform(get("/api/v1/private/products/active")
                         .param("page", "0")
                         .param("size", "6")
-                        .param("sort", "id")
+                        .param("sort", "DATE")
                         .param("direction", "desc"))
                 .andDo(print()).andExpect(status().isOk());
 
@@ -62,7 +63,7 @@ class UserProductControllerTest {
         mockMvc.perform(get("/api/v1/private/products/favorite")
                 .param("page", "0")
                 .param("size", "6")
-                .param("sort", "id")
+                .param("sort", "DATE")
                 .param("direction", "desc"))
                 .andDo(print()).andExpect(status().isOk());
 
@@ -76,7 +77,7 @@ class UserProductControllerTest {
         mockMvc.perform(get("/api/v1/private/products/disabled")
                         .param("page", "0")
                         .param("size", "6")
-                        .param("sort", "id")
+                        .param("sort", "DATE")
                         .param("direction", "desc"))
                 .andDo(print()).andExpect(status().isOk());
 
@@ -88,7 +89,7 @@ class UserProductControllerTest {
     @Test
     void getActiveProductsByUserNotAuthorizeUser() {
         when(productService.getProductsWithStatusByUser(ProductStatusEnum.ACTIVE,
-                PageRequest.of(0, 6, Sort.by("id"))))
+                PageRequest.of(0, 6, Sort.by(SortingFieldEnum.DATE.getFiledName()))))
                 .thenReturn(new PageImpl<UserProductResponseDto>(List.of()));
 
         mockMvc.perform(get("/api/v1/private/products/active"))
@@ -99,7 +100,7 @@ class UserProductControllerTest {
     @Test
     void getFavoriteProductsByUserNotAuthorizeUser() {
         when(productService.getFavoriteProductsByUser(PageRequest
-                .of(0, 6, Sort.by("id"))))
+                .of(0, 6, Sort.by(SortingFieldEnum.DATE.getFiledName()))))
                 .thenReturn(new PageImpl<UserProductResponseDto>(List.of()));
 
         mockMvc.perform(get("/api/v1/private/products/favorite"))
@@ -109,7 +110,7 @@ class UserProductControllerTest {
     @Test
     void getProductsByUserAndProductDisabledNotAuthorizeUser() {
         when(productService.getProductsWithStatusByUser(ProductStatusEnum.ACTIVE,
-                PageRequest.of(0, 6, Sort.by("id"))))
+                PageRequest.of(0, 6, Sort.by(SortingFieldEnum.DATE.getFiledName()))))
                 .thenReturn(new PageImpl<UserProductResponseDto>(List.of()));
 
         mockMvc.perform(get("/api/v1/private/products/disabled"))

@@ -40,7 +40,7 @@ class ProductControllerTest {
         mockMvc.perform(get("/api/v1/public/550e8400-e29b-41d4-a716-446655440000/products/active")
                 .param("page", "0")
                 .param("size", "6")
-                .param("sort", "id")
+                .param("sort", "DATE")
                 .param("direction", "desc"))
                 .andDo(print()).andExpect(status().isOk());
 
