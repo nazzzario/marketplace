@@ -71,7 +71,7 @@ public class ProductController {
     public ResponseEntity<Page<ProductResponseDto>> getProductsByProductTitle(
             @Parameter(description = "Product title for searching", required = true)
             @RequestParam(name = "product-title") String productTitle,
-            @RequestParam(name = "city", required = false) CitiesEnum city,
+            @RequestParam(name = "city", required = false) String city,
             Integer page,
             Integer size
     ) {
@@ -106,7 +106,7 @@ public class ProductController {
     @GetMapping("/products/listing")
     public ResponseEntity<Page<ProductResponseDto>> findProductByCategory(
             @RequestParam(name = "category") ProductCategoriesEnum categories,
-            @RequestParam(name = "city", required = false) CitiesEnum city,
+            @RequestParam(name = "city", required = false) String city,
             @RequestParam(name = "states", required = false) List<ProductStateEnum> states,
             Integer page,
             Integer size,

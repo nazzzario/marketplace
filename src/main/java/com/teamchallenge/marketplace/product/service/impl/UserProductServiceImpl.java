@@ -6,7 +6,6 @@ import com.teamchallenge.marketplace.product.dto.request.ProductRequestDto;
 import com.teamchallenge.marketplace.product.dto.response.UserProductResponseDto;
 import com.teamchallenge.marketplace.product.mapper.UserProductMapper;
 import com.teamchallenge.marketplace.product.persisit.entity.ProductEntity;
-import com.teamchallenge.marketplace.product.persisit.entity.enums.CitiesEnum;
 import com.teamchallenge.marketplace.product.persisit.entity.enums.ProductCategoriesEnum;
 import com.teamchallenge.marketplace.product.persisit.entity.enums.ProductStateEnum;
 import com.teamchallenge.marketplace.product.persisit.entity.enums.ProductStatusEnum;
@@ -167,7 +166,7 @@ public class UserProductServiceImpl implements UserProductService {
             newProductEntity = new ProductEntity();
             newProductEntity.setProductTitle("Title");
             newProductEntity.setProductDescription("Description");
-            newProductEntity.setCity(CitiesEnum.KYIV);
+            newProductEntity.setCity("Київ");
             newProductEntity.setCategoryName(ProductCategoriesEnum.OTHER);
             newProductEntity.setState(ProductStateEnum.USED);
         }

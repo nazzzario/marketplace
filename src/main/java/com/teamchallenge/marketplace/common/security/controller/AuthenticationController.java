@@ -3,6 +3,7 @@ package com.teamchallenge.marketplace.common.security.controller;
 import com.teamchallenge.marketplace.common.exception.dto.ExceptionResponseDto;
 import com.teamchallenge.marketplace.common.security.bean.UserAccount;
 import com.teamchallenge.marketplace.common.security.dto.request.AuthenticationRequest;
+import com.teamchallenge.marketplace.common.security.dto.request.AuthenticationRequestPhone;
 import com.teamchallenge.marketplace.common.security.dto.response.AuthenticationResponse;
 import com.teamchallenge.marketplace.common.security.service.JwtService;
 import com.teamchallenge.marketplace.user.persisit.entity.UserEntity;
@@ -49,11 +50,33 @@ public class AuthenticationController {
     @PreAuthorize("isAnonymous()")
     public ResponseEntity<AuthenticationResponse> authenticate(@Valid @RequestBody AuthenticationRequest request) {
         authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(request.email(), request.password()
-                )
+                new UsernamePasswordAuthenticationToken(request.email(), request.password())
         );
 
         UserEntity userEntity = userRepository.findByEmail(request.email()).orElseThrow();
+        String token = jwtService.generateToken(UserAccount.fromUserEntityToCustomUserDetails(userEntity));
+
+        return new ResponseEntity<>(new AuthenticationResponse(userEntity.getReference(), token), HttpStatus.OK);
+    }
+
+    @PostMapping("/auth/phone")
+    @Operation(summary = "Authenticate user", description = "Input user credentials to get JWT token")
+
+    @ApiResponse(responseCode = "200", description = "User authentication token returned",
+            content = {@Content(mediaType = "application/json", schema = @Schema(implementation = ExceptionResponseDto.class))})
+    @ApiResponse(responseCode = "400", description = "Invalid input",
+            content = {@Content(mediaType = "application/json", schema = @Schema(implementation = ExceptionResponseDto.class))})
+    @ApiResponse(responseCode = "401", description = "Invalid user credentials",
+            content = {@Content(mediaType = "application/json", schema = @Schema(implementation = ExceptionResponseDto.class))})
+    @ApiResponse(responseCode = "403", description = "User already authenticated",
+            content = {@Content(mediaType = "application/json", schema = @Schema(implementation = ExceptionResponseDto.class))})
+    @PreAuthorize("isAnonymous()")
+    public ResponseEntity<AuthenticationResponse> authenticate(@Valid @RequestBody AuthenticationRequestPhone request) {
+        authenticationManager.authenticate(
+                new UsernamePasswordAuthenticationToken(request.phone(), request.password())
+        );
+
+        UserEntity userEntity = userRepository.findByPhoneNumber(request.phone()).orElseThrow();
         String token = jwtService.generateToken(UserAccount.fromUserEntityToCustomUserDetails(userEntity));
 
         return new ResponseEntity<>(new AuthenticationResponse(userEntity.getReference(), token), HttpStatus.OK);
