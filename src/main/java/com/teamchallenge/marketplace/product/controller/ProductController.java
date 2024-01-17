@@ -131,14 +131,13 @@ public class ProductController {
             @PathVariable(name = "referenceUser") UUID referenceUser,
             @RequestParam(defaultValue = "0") Integer page,
             @RequestParam(defaultValue = "6") Integer size,
-            @Parameter(description = "The field by which sort", name = "sort", schema = @Schema(defaultValue = "id"))
-            @RequestParam(defaultValue = "id") String sort,
+            @RequestParam(name = "sort", defaultValue = "DATE", required = false) SortingFieldEnum sort,
             @Parameter(description = "The direction can be asc or desc", name = "direction", schema = @Schema(defaultValue = "desc"))
             @RequestParam(defaultValue = "desc") String direction
     ) {
         Page<ProductResponseDto> productByReference = productService
                 .getProductByReferenceUser(ProductStatusEnum.ACTIVE, referenceUser,
-                        PageRequest.of(page, size, Sort.Direction.fromString(direction), sort));
+                        PageRequest.of(page, size, Sort.Direction.fromString(direction), sort.getFiledName()));
 
         return new ResponseEntity<>(productByReference, HttpStatus.OK);
     }

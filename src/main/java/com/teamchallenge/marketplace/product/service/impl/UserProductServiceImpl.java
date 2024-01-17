@@ -101,7 +101,7 @@ public class UserProductServiceImpl implements UserProductService {
         var authentication = SecurityContextHolder.getContext().getAuthentication();
         if (Objects.nonNull(authentication) && authentication.isAuthenticated() &&
                 userRepository.existsByEmailAndProductsReference(authentication.getName(),
-                        productReference)){
+                        productReference) && !status.equals(ProductStatusEnum.NEW)){
             String email = authentication.getName();
             UserEntity userEntity = userRepository.findByEmail(email)
                     .orElseThrow(() -> new ClientBackendException(ErrorCode.USER_NOT_FOUND));
