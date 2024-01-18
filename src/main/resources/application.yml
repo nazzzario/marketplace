@@ -29,7 +29,7 @@ product:
   sizeProductDisabled: 5
   periodsDeadline: 15,30,45
   periodDeadline: 30
-  cron: 1 * * * ?
+  cron: 0 * * * * ?
 
 mail:
   template:
