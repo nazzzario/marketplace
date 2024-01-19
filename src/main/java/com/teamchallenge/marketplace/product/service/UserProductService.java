@@ -18,5 +18,5 @@ public interface UserProductService {
 
     void deleteProduct(UUID productReference);
 
-    UserProductResponseDto changeStatusProduct(UUID productReference, ProductStatusEnum status);
+    UserProductResponseDto changeStatusProduct(UUID productReference, ProductStatusEnum status, int period);
 }

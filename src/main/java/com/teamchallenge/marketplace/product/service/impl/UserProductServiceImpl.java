@@ -28,6 +28,11 @@ import java.util.UUID;
 @Service
 @RequiredArgsConstructor
 public class UserProductServiceImpl implements UserProductService {
+    @Value("${product.periodsDeadline}")
+    private int[] periodsActive;
+    @Value("${product.periodDeadline}")
+    private int periodDisabled;
+
     private final ProductRepository productRepository;
     private final UserRepository userRepository;
     private final UserProductMapper productMapper;
@@ -91,11 +96,11 @@ public class UserProductServiceImpl implements UserProductService {
     }
 
     @Override
-    public UserProductResponseDto changeStatusProduct(UUID productReference, ProductStatusEnum status) {
+    public UserProductResponseDto changeStatusProduct(UUID productReference, ProductStatusEnum status, int period) {
         var authentication = SecurityContextHolder.getContext().getAuthentication();
         if (Objects.nonNull(authentication) && authentication.isAuthenticated() &&
                 userRepository.existsByEmailAndProductsReference(authentication.getName(),
-                        productReference)){
+                        productReference) && !status.equals(ProductStatusEnum.NEW)){
             String email = authentication.getName();
             UserEntity userEntity = userRepository.findByEmail(email)
                     .orElseThrow(() -> new ClientBackendException(ErrorCode.USER_NOT_FOUND));
@@ -108,6 +113,7 @@ public class UserProductServiceImpl implements UserProductService {
             }
 
             productEntity.setStatus(status);
+            productEntity.setTimePeriod(getCorrectPeriod(status, period));
 
             return productMapper.toResponseDto(productRepository.save(productEntity));
         } else {
@@ -115,6 +121,26 @@ public class UserProductServiceImpl implements UserProductService {
         }
 
 
+    }
+
+    /**
+     * Enter period with status Active can be less value of array plus half difference
+     * between next value. It with status Disabled get period from variable
+     *
+     * @param status Status of product
+     * @param period Enter period*/
+    private int getCorrectPeriod(ProductStatusEnum status, int period) {
+        if (status.equals(ProductStatusEnum.ACTIVE)){
+            for (int i = 0; i < periodsActive.length - 1; i++) {
+                if (periodsActive[i] + (periodsActive[i + 1] - periodsActive[i])/2 >=
+                        period){
+                    return periodsActive[i];
+                }
+            }
+            return periodsActive[periodsActive.length - 1];
+        } else {
+            return periodDisabled;
+        }
     }
 
     private boolean isExhaustedLimit(UserEntity userEntity) {

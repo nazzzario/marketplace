@@ -5,13 +5,14 @@ import com.teamchallenge.marketplace.product.persisit.entity.ProductEntity;
 import com.teamchallenge.marketplace.product.persisit.entity.enums.ProductStatusEnum;
 import com.teamchallenge.marketplace.product.persisit.repository.ProductRepository;
 import com.teamchallenge.marketplace.product.service.AutomaticChangeProductService;
-import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
+import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -20,9 +21,11 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class AutomaticChangeProductServiceImpl implements AutomaticChangeProductService {
     @Value("${product.periodDeadline}")
-    private long periodDeadline;
+    private int periodDeadline;
     @Value("${product.sizeProductDisabled}")
     private long sizeProductDisabled;
+    @Value("${product.periodsDeadline}")
+    private int[] periodsDeadline;
 
     private final ProductRepository productRepository;
     private final EmailService emailService;
@@ -34,22 +37,66 @@ public class AutomaticChangeProductServiceImpl implements AutomaticChangeProduct
      * For test: cron = "${product.cron}".
      * */
     @Scheduled(cron = Scheduled.CRON_DISABLED)
+    @Async
     public void changeStatusFromActiveToDisabled(){
-        var userActiveProducts = productRepository
-                .findByStatusAndPublishDateBefore(ProductStatusEnum.ACTIVE,
-                        getDeadlineDate()).stream().collect(Collectors
-                        .groupingBy(ProductEntity::getOwner));
+        var userActiveProducts = Arrays.stream(periodsDeadline).boxed()
+                .flatMap(days -> productRepository
+                .findByStatusAndTimePeriodAndPublishDateBefore(ProductStatusEnum.ACTIVE,
+                        days, getDeadlineDate(days)).stream()).collect(Collectors
+                .groupingBy(ProductEntity::getOwner));
+
+        if (userActiveProducts.isEmpty()) return;
 
         var userDisabledProduct = productRepository.findByStatusAndOwnerIn(
                 ProductStatusEnum.DISABLED, userActiveProducts.keySet())
                 .stream().collect(Collectors.groupingBy(ProductEntity::getOwner));
 
+        if (!userDisabledProduct.isEmpty()){
+            userDisabledProduct.forEach((key, value) -> deleteOldEntity(value,
+                    (userActiveProducts.get(key).size() + value.size() - sizeProductDisabled),
+                    key.getEmail()));
+        }
 
+        userActiveProducts.forEach((key, value) -> processChangeStatus(
+                key.getEmail(), value));
+    }
 
-        userDisabledProduct.forEach((key, value) -> processChangeStatusAndDeleteOldEntities(
-                key.getEmail(), userActiveProducts.get(key), value,
-                (value.size() + userActiveProducts.get(key).size() - sizeProductDisabled)));
+    private void processChangeStatus(String email, List<ProductEntity> products) {
+        StringBuilder message = new StringBuilder();
 
+        message.append("<h2>Ми перевели статус ваших повідомлень з активного в архів:</h2>")
+                .append("<ul>");
+        products.forEach(product ->{
+            product.setStatus(ProductStatusEnum.DISABLED);
+            message.append("<li>").append(product.getProductDescription()).append("</li>");
+            productRepository.save(product);
+        });
+
+        message.append("</ul>").append("<h3>Відповідно до умов користування сайтом.</h3>");
+        emailService.sendEmail(email, emailService.buildMsgForUser(message.toString()),
+                "Автоматичний переведення просрочених повідомлень");
+
+    }
+
+    private void deleteOldEntity(List<ProductEntity> products, long sizeDeleteEntity, String email) {
+        if (sizeDeleteEntity > 0){
+            StringBuilder message = new StringBuilder();
+
+            message.append("<h2>Ми видалили з архіву ваші старі повідомлення:</h2>")
+                    .append("<ul>");
+            products.stream().sorted(Comparator.comparing(ProductEntity::getPublishDate))
+                    .limit(sizeDeleteEntity).forEach(product -> {
+                        productRepository.delete(product);
+                        message.append("<li>").append(product.getProductDescription()).append("</li>");
+                    });
+            message.append("<h3>Це потрібно для внесення в архів нових повідомлень</h3>");
+            emailService.sendEmail(email, emailService.buildMsgForUser(message.toString()),
+                    "Автоматичне видалення зайвих повідомлень");
+        }
+    }
+
+    private LocalDate getDeadlineDate(int days) {
+        return LocalDate.now().minusDays(days);
     }
 
     /**
@@ -57,10 +104,11 @@ public class AutomaticChangeProductServiceImpl implements AutomaticChangeProduct
      * For test: cron = "${product.cron}".
      * */
     @Scheduled(cron = Scheduled.CRON_DISABLED)
+    @Async
     public void deleteDisabledOldProduct(){
         var userDisabledProducts = productRepository
                 .findByStatusAndPublishDateBefore(ProductStatusEnum.DISABLED,
-                        getDeadlineDate()).stream().collect(Collectors
+                        getDeadlineDate(periodDeadline)).stream().collect(Collectors
                         .groupingBy(ProductEntity::getOwner));
 
         userDisabledProducts.forEach((key, value) -> processDeleteOldEntities(key.getEmail(), value));
@@ -69,45 +117,15 @@ public class AutomaticChangeProductServiceImpl implements AutomaticChangeProduct
     private void processDeleteOldEntities(String email, List<ProductEntity> disabledProducts) {
         StringBuilder message = new StringBuilder();
 
-        message.append("Ми видалили з архіву ваші старі повідомлення:").append("\n");
+        message.append("<h2>Ми видалили з архіву ваші старі повідомлення:</h2>")
+                .append("<ul>");
         disabledProducts.forEach(product -> {
             productRepository.delete(product);
-            message.append(product.getProductDescription()).append("\n");
+            message.append("<li>").append(product.getProductDescription()).append("/li>");
         });
-        message.append(". Відповідно до умов користування сайтом.").append("\n");
+        message.append("</ul>").append("<h3>Відповідно до умов користування сайтом.</h3>");
 
         emailService.sendEmail(email, emailService.buildMsgForUser(message.toString()),
                 "Автоматичний видалення просрочених повідомлень");
-    }
-
-    private void processChangeStatusAndDeleteOldEntities(@NotNull String email, List<ProductEntity> activeProductEntities,
-                                                         List<ProductEntity> disabledEntities, long sizeDeleteEntity) {
-        StringBuilder message = new StringBuilder();
-
-        if (sizeDeleteEntity > 0){
-            message.append("Ми видалили з архіву ваші старі повідомлення:").append("\n");
-            disabledEntities.stream().sorted(Comparator.comparing(ProductEntity::getPublishDate))
-                .limit(sizeDeleteEntity).forEach(product -> {
-                    productRepository.delete(product);
-                    message.append(product.getProductDescription()).append("\n");
-                });
-            message.append("Це потрібно для внесення в архів нових повідомлень").append("\n");
-        }
-
-        message.append("Ми перевели статус ваших повідомлень з активного в архів:").append("\n");
-        activeProductEntities.forEach(product ->{
-            product.setStatus(ProductStatusEnum.DISABLED);
-            productRepository.save(product);
-        });
-
-        message.append(". Відповідно до умов користування сайтом.").append("\n");
-        emailService.sendEmail(email, emailService.buildMsgForUser(message.toString()),
-                "Автоматичний переведення просрочених повідомлень та видалення зайвих");
-    }
-
-
-
-    private LocalDate getDeadlineDate() {
-        return LocalDate.now().minusDays(periodDeadline);
     }
 }
