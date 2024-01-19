@@ -21,6 +21,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.test.context.ActiveProfiles;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -54,7 +55,7 @@ class ProductServiceImplTest {
         var productDto = new ProductResponseDto(reference,
                 ProductCategoriesEnum.CLOTHE, "Kiev","Clothe", "Clothe",
                 "User","0-00-000", ProductStateEnum.USED,
-                ProductStatusEnum.ACTIVE, 1, List.of("image"));
+                ProductStatusEnum.ACTIVE, 1, LocalDate.parse("2024-01-01"), List.of("image"));
 
         when(userRepository.findByReference(reference)).thenReturn(Optional.of(user));
         when(productRepository.findByOwnerAndStatus(eq(user), eq(ProductStatusEnum.ACTIVE),

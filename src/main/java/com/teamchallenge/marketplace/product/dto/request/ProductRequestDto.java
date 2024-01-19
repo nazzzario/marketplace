@@ -7,6 +7,8 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 
+import java.time.LocalDate;
+
 @Schema(description = "The product fields to be entered")
 public record ProductRequestDto(
         @NotNull(message = "Product category cannot be null")
@@ -18,5 +20,7 @@ public record ProductRequestDto(
         String productTitle,
         String productDescription,
         @NotNull(message = "Product state cannot be null")
-        ProductStateEnum state) {
+        ProductStateEnum state,
+        @NotNull(message = "Product publish date cannot be null")
+        LocalDate publishDate) {
 }
