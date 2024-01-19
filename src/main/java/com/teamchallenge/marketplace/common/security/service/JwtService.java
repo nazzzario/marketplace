@@ -1,5 +1,6 @@
 package com.teamchallenge.marketplace.common.security.service;
 
+import com.teamchallenge.marketplace.user.persisit.entity.UserEntity;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
@@ -19,10 +20,10 @@ import java.util.function.Function;
 public class JwtService {
 
     @Value("${spring.security.jwt.secret}")
-    private String SECRET_KEY;
+    private String secretKey;
 
     @Value("${spring.security.jwt.expiration}")
-    private Long EXPIRATION_TIME;
+    private Long expirationTime;
 
     public String extractUsername(String token) {
         return extractClaim(token, Claims::getSubject);
@@ -33,8 +34,8 @@ public class JwtService {
         return claimsResolver.apply(claims);
     }
 
-    public String generateToken(UserDetails userDetails){
-        return generateToken(new HashMap<>(), userDetails);
+    public String generateAccessToken(UserDetails userDetails){
+        return generateAccessToken(new HashMap<>(), userDetails);
     }
 
     public boolean isTokenValid(String token, UserDetails userDetails){
@@ -50,7 +51,7 @@ public class JwtService {
         return extractClaim(token, Claims::getExpiration);
     }
 
-    public String generateToken(
+    public String generateAccessToken(
             Map<String, Object> extractClaims,
             UserDetails userDetails
     ){
@@ -58,7 +59,7 @@ public class JwtService {
                 .setClaims(extractClaims)
                 .setSubject(userDetails.getUsername())
                 .setIssuedAt(new Date(System.currentTimeMillis()))
-                .setExpiration(new Date(System.currentTimeMillis() + EXPIRATION_TIME))
+                .setExpiration(new Date(System.currentTimeMillis() + expirationTime))
                 .signWith(getSignInKey(), SignatureAlgorithm.HS256)
                 .compact();
     }
@@ -72,7 +73,11 @@ public class JwtService {
     }
 
     private Key getSignInKey() {
-        byte[] keyBytes = Decoders.BASE64.decode(SECRET_KEY);
+        byte[] keyBytes = Decoders.BASE64.decode(secretKey);
         return Keys.hmacShaKeyFor(keyBytes);
+    }
+
+    public String generateRefreshToken(UserEntity userEntity) {
+        return userEntity.getUsername();
     }
 }

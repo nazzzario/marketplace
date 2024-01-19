@@ -54,9 +54,11 @@ public class AuthenticationController {
         );
 
         UserEntity userEntity = userRepository.findByEmail(request.email()).orElseThrow();
-        String token = jwtService.generateToken(UserAccount.fromUserEntityToCustomUserDetails(userEntity));
+        String accessToken = jwtService.generateAccessToken(UserAccount.fromUserEntityToCustomUserDetails(userEntity));
+        String refreshToken = jwtService.generateRefreshToken(userEntity);
 
-        return new ResponseEntity<>(new AuthenticationResponse(userEntity.getReference(), token), HttpStatus.OK);
+        return new ResponseEntity<>(new AuthenticationResponse(userEntity.getReference(), accessToken,
+                refreshToken), HttpStatus.OK);
     }
 
     @PostMapping("/auth/phone")
@@ -77,8 +79,9 @@ public class AuthenticationController {
         );
 
         UserEntity userEntity = userRepository.findByPhoneNumber(request.phone()).orElseThrow();
-        String token = jwtService.generateToken(UserAccount.fromUserEntityToCustomUserDetails(userEntity));
+        String accessToken = jwtService.generateAccessToken(UserAccount.fromUserEntityToCustomUserDetails(userEntity));
+        String refreshToken = jwtService.generateRefreshToken(userEntity);
 
-        return new ResponseEntity<>(new AuthenticationResponse(userEntity.getReference(), token), HttpStatus.OK);
+        return new ResponseEntity<>(new AuthenticationResponse(userEntity.getReference(), accessToken, refreshToken), HttpStatus.OK);
     }
 }
