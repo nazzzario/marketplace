@@ -5,6 +5,7 @@ import com.teamchallenge.marketplace.product.persisit.entity.enums.ProductStateE
 import com.teamchallenge.marketplace.product.persisit.entity.enums.ProductStatusEnum;
 import io.swagger.v3.oas.annotations.media.Schema;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.UUID;
 
@@ -17,5 +18,6 @@ public record UserProductResponseDto(UUID reference,
                                      ProductStateEnum state,
                                      ProductStatusEnum status,
                                      long viewCount,
+                                     LocalDate publishDate,
                                      List<UserProductImageDto> images) {
 }

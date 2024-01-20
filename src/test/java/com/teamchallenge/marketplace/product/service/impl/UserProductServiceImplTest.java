@@ -28,6 +28,7 @@ import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.TestPropertySource;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -64,7 +65,7 @@ class UserProductServiceImplTest {
     UserProductImageDto imageDto = new UserProductImageDto("url", 1L);
     UserProductResponseDto responseDto = new UserProductResponseDto(reference,
             ProductCategoriesEnum.CLOTHE, "Kiev","Clothe", "Clothe",
-            ProductStateEnum.USED, ProductStatusEnum.ACTIVE, 1, List.of(imageDto));
+            ProductStateEnum.USED, ProductStatusEnum.ACTIVE, 1, LocalDate.parse("2024-01-01"), List.of(imageDto));
     PageImpl<UserProductResponseDto> pageDto = new PageImpl<>(List.of(responseDto), pageable, 1);
     SecurityContext securityContext;
 
