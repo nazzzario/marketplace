@@ -36,7 +36,7 @@ public class AutomaticChangeProductServiceImpl implements AutomaticChangeProduct
      * we delete older products.
      * For test: cron = "${product.cron}".
      * */
-    @Scheduled(cron = Scheduled.CRON_DISABLED)
+    @Scheduled(cron = "${product.cron}")
     @Async
     public void changeStatusFromActiveToDisabled(){
         var userActiveProducts = Arrays.stream(periodsDeadline).boxed()
@@ -103,7 +103,7 @@ public class AutomaticChangeProductServiceImpl implements AutomaticChangeProduct
      * Delete older product with deadline date in the archive.
      * For test: cron = "${product.cron}".
      * */
-    @Scheduled(cron = Scheduled.CRON_DISABLED)
+    @Scheduled(cron = "${product.cron}")
     @Async
     public void deleteDisabledOldProduct(){
         var userDisabledProducts = productRepository
