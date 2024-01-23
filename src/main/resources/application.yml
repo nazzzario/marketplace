@@ -26,9 +26,9 @@ cloudinary:
 
 product:
   sizeListImage: 6
-  sizeProductDisabled: 5
-  periodsDeadline: 15,30,45
-  periodDeadline: 30
+  sizeProductDisabled: 6
+  periodsDeadline: 30,60
+  periodDeadline: 180
   cron: 0 * * * * ?
 
 mail:
