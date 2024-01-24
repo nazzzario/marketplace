@@ -96,7 +96,7 @@ public class GlobalExceptionHandler {
                 .time(LocalDateTime.now().toString())
                 .errorCode(null)
                 .title(ex.getClass().getName())
-                .message("Unhandled exception")
+                .message("Unhandled exception: " + ex.getMessage())
                 .httpResponseCode(500)
                 .path(request.getRequestURI())
                 .build();
