@@ -21,11 +21,19 @@ import java.util.stream.Collectors;
 @Service
 @RequiredArgsConstructor
 public class AutomaticChangeProductServiceImpl implements AutomaticChangeProductService {
-    @Value("${product.periodDeadline}")
+    private static final String CONDITIONS = "<h3>Відповідно до умов користування сайтом.</h3>";
+    private static final String UL_CLOSE = "</ul>";
+    private static final String UL = "<ul>";
+    private static final String LI = "<li>";
+    private static final String LI_CLOSE = "/li>";
+
+    @Value("${product.delete.periodDeadline}")
     private int periodDeadline;
-    @Value("${product.sizeProductDisabled}")
+    @Value("${product.delete.periodWarning}")
+    private int periodWarning;
+    @Value("${product.disable.size}")
     private long sizeProductDisabled;
-    @Value("${product.periodsDeadline}")
+    @Value("${product.active.periodsDeadline}")
     private int[] periodsDeadline;
 
     private final ProductRepository productRepository;
@@ -67,14 +75,14 @@ public class AutomaticChangeProductServiceImpl implements AutomaticChangeProduct
         StringBuilder message = new StringBuilder();
 
         message.append("<h2>Ми перевели статус ваших повідомлень з активного в архів:</h2>")
-                .append("<ul>");
+                .append(UL);
         products.forEach(product ->{
             product.setStatus(ProductStatusEnum.DISABLED);
-            message.append("<li>").append(product.getProductDescription()).append("</li>");
+            message.append(LI).append(product.getProductDescription()).append("</li>");
             productRepository.save(product);
         });
 
-        message.append("</ul>").append("<h3>Відповідно до умов користування сайтом.</h3>");
+        message.append(UL_CLOSE).append(CONDITIONS);
         emailService.sendEmail(email, emailService.buildMsgForUser(message.toString()),
                 "Автоматичний переведення просрочених повідомлень");
 
@@ -85,11 +93,11 @@ public class AutomaticChangeProductServiceImpl implements AutomaticChangeProduct
             StringBuilder message = new StringBuilder();
 
             message.append("<h2>Ми видалили з архіву ваші старі повідомлення:</h2>")
-                    .append("<ul>");
+                    .append(UL);
             products.stream().sorted(Comparator.comparing(ProductEntity::getPublishDate))
                     .limit(sizeDeleteEntity).forEach(product -> {
                         productService.processDeleteProduct(product);
-                        message.append("<li>").append(product.getProductDescription()).append("</li>");
+                        message.append(LI).append(product.getProductDescription()).append("</li>");
                     });
             message.append("<h3>Це потрібно для внесення в архів нових повідомлень</h3>");
             emailService.sendEmail(email, emailService.buildMsgForUser(message.toString()),
@@ -120,14 +128,44 @@ public class AutomaticChangeProductServiceImpl implements AutomaticChangeProduct
         StringBuilder message = new StringBuilder();
 
         message.append("<h2>Ми видалили з архіву ваші старі повідомлення:</h2>")
-                .append("<ul>");
+                .append(UL);
         disabledProducts.forEach(product -> {
             productService.processDeleteProduct(product);
-            message.append("<li>").append(product.getProductDescription()).append("/li>");
+            message.append(LI).append(product.getProductDescription()).append(LI_CLOSE);
         });
-        message.append("</ul>").append("<h3>Відповідно до умов користування сайтом.</h3>");
+        message.append(UL_CLOSE).append(CONDITIONS);
 
         emailService.sendEmail(email, emailService.buildMsgForUser(message.toString()),
                 "Автоматичний видалення просрочених повідомлень");
+    }
+
+    /**
+     * Warning about delete older product for the period before deadline date in the archive.
+     * For test: cron = "${product.cron}".
+     * */
+    @Scheduled(cron = "${product.cron}")
+    public void deleteWarningOldEntity(){
+        var userDisabledProducts = productRepository
+                .findByStatusAndPublishDateBefore(ProductStatusEnum.DISABLED,
+                        getDeadlineDate(periodDeadline - periodWarning)).stream().collect(Collectors
+                        .groupingBy(ProductEntity::getOwner));
+
+        userDisabledProducts.forEach((key, value) -> processWarningDeleteOldEntities(key.getEmail(), value));
+    }
+
+    private void processWarningDeleteOldEntities(String email, List<ProductEntity> products) {
+        StringBuilder message = new StringBuilder();
+
+        message.append("<h2>Ми попереджаємо про видалення з архіву через ")
+                .append(periodWarning).append(" днів(день -ня) ваших старих повідомленнь:</h2>")
+                .append(UL);
+
+        products.forEach(product -> message.append(LI).append(product.getProductDescription())
+                .append(LI_CLOSE));
+
+        message.append(UL_CLOSE).append(CONDITIONS);
+
+        emailService.sendEmail(email, emailService.buildMsgForUser(message.toString()),
+                "Попередження про автоматичний видалення просрочених повідомлень");
     }
 }
