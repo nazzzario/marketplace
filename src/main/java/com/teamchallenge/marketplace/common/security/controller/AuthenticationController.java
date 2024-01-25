@@ -56,7 +56,7 @@ public class AuthenticationController {
 
         UserEntity userEntity = userRepository.findByEmail(request.email()).orElseThrow();
         String accessToken = jwtService.generateAccessToken(UserAccount.fromUserEntityToCustomUserDetails(userEntity));
-        String refreshToken = jwtService.generateRefreshToken(userEntity.getId());
+        String refreshToken = jwtService.generateRefreshToken(userEntity.getEmail());
 
         return new ResponseEntity<>(new AuthenticationResponse(userEntity.getReference(), accessToken,
                 refreshToken), HttpStatus.OK);
@@ -81,7 +81,7 @@ public class AuthenticationController {
 
         UserEntity userEntity = userRepository.findByPhoneNumber(request.phone()).orElseThrow();
         String accessToken = jwtService.generateAccessToken(UserAccount.fromUserEntityToCustomUserDetails(userEntity));
-        String refreshToken = jwtService.generateRefreshToken(userEntity.getId());
+        String refreshToken = jwtService.generateRefreshToken(userEntity.getEmail());
 
         return new ResponseEntity<>(new AuthenticationResponse(userEntity.getReference(), accessToken, refreshToken), HttpStatus.OK);
     }
@@ -97,13 +97,12 @@ public class AuthenticationController {
             content = {@Content(mediaType = "application/json", schema = @Schema(implementation = ExceptionResponseDto.class))})
     @ApiResponse(responseCode = "403", description = "User already authenticated",
             content = {@Content(mediaType = "application/json", schema = @Schema(implementation = ExceptionResponseDto.class))})
-    @PreAuthorize("isAnonymous()")
     public ResponseEntity<AuthenticationResponse> refreshtoken(@Valid @RequestBody TokenRefreshRequest token) {
 
 
-        UserEntity userEntity = userRepository.findById(jwtService.findByRefreshToken(token.refreshToken())).orElseThrow();
+        UserEntity userEntity = userRepository.findByEmail(jwtService.findByRefreshToken(token.refreshToken())).orElseThrow();
         String accessToken = jwtService.generateAccessToken(UserAccount.fromUserEntityToCustomUserDetails(userEntity));
-        String refreshToken = jwtService.generateRefreshToken(userEntity.getId());
+        String refreshToken = jwtService.generateRefreshToken(userEntity.getEmail());
 
         return new ResponseEntity<>(new AuthenticationResponse(userEntity.getReference(), accessToken, refreshToken), HttpStatus.OK);
     }
