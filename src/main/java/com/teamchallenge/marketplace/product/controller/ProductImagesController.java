@@ -25,9 +25,9 @@ import java.util.UUID;
 @Tag(name = "Image product")
 public class ProductImagesController {
     private final ProductImageService imageService;
-    @Operation(summary = "Create product images", description = "Create product images by product UUID")
+    @Operation(summary = "Create product image", description = "Create product image by product UUID")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Images upload successfully"),
+            @ApiResponse(responseCode = "200", description = "Image upload successfully"),
             @ApiResponse(responseCode = "401", description = "Unauthenticated",
                     content = {@Content(mediaType = "application/json", schema = @Schema(implementation = ExceptionResponseDto.class))}),
             @ApiResponse(responseCode = "403", description = "Access denied",
@@ -42,7 +42,7 @@ public class ProductImagesController {
             @Parameter(description = "Product reference", required = true)
             @PathVariable(name = "productReference") UUID productReference,
             @Parameter(description = "Image", required = true)
-            @RequestBody MultipartFile image
+            MultipartFile image
     ) {
         UserProductImageDto responseDto = imageService.createImage(productReference, image);
 
