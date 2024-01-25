@@ -28,8 +28,7 @@ public class JwtService {
     @Value("${spring.security.jwt.expiration}")
     private Long expirationTime;
 
-    private final RedisTemplate<String, String> tokenRedisTemplate;
-
+    private final RedisTemplate<String, String> redisTemplate;
 
     public String extractUsername(String token) {
         return extractClaim(token, Claims::getSubject);
@@ -85,13 +84,14 @@ public class JwtService {
 
     public String generateRefreshToken(@NotNull String userEmail) {
         String token = UUID.randomUUID().toString();
-        String oldToken = tokenRedisTemplate.opsForValue().getAndSet(userEmail, token);
-        if (oldToken != null){tokenRedisTemplate.delete(oldToken);}
-        tokenRedisTemplate.opsForValue().set(token, userEmail, timeoutToken, TimeUnit.HOURS);
+        String oldToken = redisTemplate.opsForValue().getAndSet(userEmail, token);
+        if (oldToken != null){
+            redisTemplate.delete(oldToken);}
+        redisTemplate.opsForValue().set(token, userEmail, timeoutToken, TimeUnit.HOURS);
         return token;
     }
 
     public String findByRefreshToken(String refreshToken) {
-        return tokenRedisTemplate.opsForValue().get(refreshToken);
+        return redisTemplate.opsForValue().get(refreshToken);
     }
 }

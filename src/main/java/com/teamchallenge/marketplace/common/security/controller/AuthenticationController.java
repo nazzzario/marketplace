@@ -38,9 +38,9 @@ public class AuthenticationController {
 
 
     @PostMapping("/auth")
-    @Operation(summary = "Authenticate user", description = "Input user credentials to get JWT token")
+    @Operation(summary = "Authenticate user", description = "Input user credentials to get JWT token and refresh token")
 
-    @ApiResponse(responseCode = "200", description = "User authentication token returned",
+    @ApiResponse(responseCode = "200", description = "User authentication tokens returned",
             content = {@Content(mediaType = "application/json", schema = @Schema(implementation = ExceptionResponseDto.class))})
     @ApiResponse(responseCode = "400", description = "Invalid input",
             content = {@Content(mediaType = "application/json", schema = @Schema(implementation = ExceptionResponseDto.class))})
@@ -63,7 +63,7 @@ public class AuthenticationController {
     }
 
     @PostMapping("/auth/phone")
-    @Operation(summary = "Authenticate user", description = "Input user credentials to get JWT token")
+    @Operation(summary = "Authenticate user", description = "Input user credentials to get JWT token and refresh token.")
 
     @ApiResponse(responseCode = "200", description = "User authentication token returned",
             content = {@Content(mediaType = "application/json", schema = @Schema(implementation = ExceptionResponseDto.class))})
@@ -87,7 +87,7 @@ public class AuthenticationController {
     }
 
     @PostMapping("/refreshtoken")
-    @Operation(summary = "Authenticate user", description = "Input user credentials to get JWT token")
+    @Operation(summary = "Authenticate user", description = "Input user credentials to get JWT token and refresh token")
 
     @ApiResponse(responseCode = "200", description = "User authentication token returned",
             content = {@Content(mediaType = "application/json", schema = @Schema(implementation = ExceptionResponseDto.class))})
