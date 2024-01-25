@@ -22,4 +22,6 @@ public interface UserProductService {
     UserProductResponseDto changeStatusProduct(UUID productReference, ProductStatusEnum status, int period);
 
     void processDeleteProduct(ProductEntity productEntity);
+
+    ProductEntity getProductAndChangeStatus(ProductEntity product, ProductStatusEnum status);
 }

@@ -28,18 +28,18 @@ import java.util.UUID;
 @Service
 @RequiredArgsConstructor
 public class UserProductServiceImpl implements UserProductService {
-    @Value("${product.periodsDeadline}")
+    @Value("${product.active.periodsDeadline}")
     private int[] periodsActive;
-    @Value("${product.periodDeadline}")
+    @Value("${product.delete.periodDeadline}")
     private int periodDisabled;
+    @Value("${product.disable.size}")
+    private int sizeProductDisabled;
 
     private final ProductRepository productRepository;
     private final UserRepository userRepository;
     private final UserProductMapper productMapper;
     private final ProductImageService productImageService;
 
-    @Value("${product.sizeProductDisabled}")
-    private int sizeProductDisabled;
 
     @Override
     public UserProductResponseDto createOrGetNewProduct() {
@@ -117,15 +117,19 @@ public class UserProductServiceImpl implements UserProductService {
                 throw new ClientBackendException(ErrorCode.LIMIT_IS_EXHAUSTED);
             }
 
-            productEntity.setStatus(status);
             productEntity.setTimePeriod(getCorrectPeriod(status, period));
 
-            return productMapper.toResponseDto(productRepository.save(productEntity));
+            return productMapper.toResponseDto(getProductAndChangeStatus(productEntity, status));
         } else {
             throw new ClientBackendException(ErrorCode.UNKNOWN_SERVER_ERROR);
         }
 
+    }
 
+    @Override
+    public ProductEntity getProductAndChangeStatus(ProductEntity product, ProductStatusEnum status) {
+        product.setStatus(status);
+        return productRepository.save(product);
     }
 
     /**

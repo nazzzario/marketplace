@@ -26,9 +26,13 @@ cloudinary:
 
 product:
   sizeListImage: 6
-  sizeProductDisabled: 6
-  periodsDeadline: 30,60
-  periodDeadline: 180
+  disable:
+    size: 6
+  active:
+    periodsDeadline: 30,60
+  delete:
+    periodDeadline: 180
+    periodWarning: 5
   cron: 0 * * * * ?
 
 mail:
