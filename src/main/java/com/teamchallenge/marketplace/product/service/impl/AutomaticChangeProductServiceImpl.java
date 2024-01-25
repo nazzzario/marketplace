@@ -5,6 +5,7 @@ import com.teamchallenge.marketplace.product.persisit.entity.ProductEntity;
 import com.teamchallenge.marketplace.product.persisit.entity.enums.ProductStatusEnum;
 import com.teamchallenge.marketplace.product.persisit.repository.ProductRepository;
 import com.teamchallenge.marketplace.product.service.AutomaticChangeProductService;
+import com.teamchallenge.marketplace.product.service.UserProductService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Async;
@@ -28,6 +29,7 @@ public class AutomaticChangeProductServiceImpl implements AutomaticChangeProduct
     private int[] periodsDeadline;
 
     private final ProductRepository productRepository;
+    private final UserProductService productService;
     private final EmailService emailService;
 
     /**
@@ -86,7 +88,7 @@ public class AutomaticChangeProductServiceImpl implements AutomaticChangeProduct
                     .append("<ul>");
             products.stream().sorted(Comparator.comparing(ProductEntity::getPublishDate))
                     .limit(sizeDeleteEntity).forEach(product -> {
-                        productRepository.delete(product);
+                        productService.processDeleteProduct(product);
                         message.append("<li>").append(product.getProductDescription()).append("</li>");
                     });
             message.append("<h3>Це потрібно для внесення в архів нових повідомлень</h3>");
@@ -120,7 +122,7 @@ public class AutomaticChangeProductServiceImpl implements AutomaticChangeProduct
         message.append("<h2>Ми видалили з архіву ваші старі повідомлення:</h2>")
                 .append("<ul>");
         disabledProducts.forEach(product -> {
-            productRepository.delete(product);
+            productService.processDeleteProduct(product);
             message.append("<li>").append(product.getProductDescription()).append("/li>");
         });
         message.append("</ul>").append("<h3>Відповідно до умов користування сайтом.</h3>");
