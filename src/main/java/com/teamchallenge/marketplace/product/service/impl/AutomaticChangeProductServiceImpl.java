@@ -46,8 +46,9 @@ public class AutomaticChangeProductServiceImpl implements AutomaticChangeProduct
      * we delete older products.
      * For test: cron = "${product.cron}".
      * */
-    @Scheduled(cron = "${product.cron}")
+    @Scheduled(cron = Scheduled.CRON_DISABLED)
     @Async
+    @Override
     public void changeStatusFromActiveToDisabled(){
         var userActiveProducts = Arrays.stream(periodsDeadline).boxed()
                 .flatMap(days -> productRepository
@@ -77,9 +78,8 @@ public class AutomaticChangeProductServiceImpl implements AutomaticChangeProduct
         message.append("<h2>Ми перевели статус ваших повідомлень з активного в архів:</h2>")
                 .append(UL);
         products.forEach(product ->{
-            product.setStatus(ProductStatusEnum.DISABLED);
-            message.append(LI).append(product.getProductDescription()).append("</li>");
-            productRepository.save(product);
+            productService.getProductAndChangeStatus(product, ProductStatusEnum.DISABLED);
+            message.append(LI).append(product.getProductDescription()).append(LI_CLOSE);
         });
 
         message.append(UL_CLOSE).append(CONDITIONS);
@@ -113,8 +113,9 @@ public class AutomaticChangeProductServiceImpl implements AutomaticChangeProduct
      * Delete older product with deadline date in the archive.
      * For test: cron = "${product.cron}".
      * */
-    @Scheduled(cron = "${product.cron}")
+    @Scheduled(cron = Scheduled.CRON_DISABLED)
     @Async
+    @Override
     public void deleteDisabledOldProduct(){
         var userDisabledProducts = productRepository
                 .findByStatusAndPublishDateBefore(ProductStatusEnum.DISABLED,
@@ -143,7 +144,9 @@ public class AutomaticChangeProductServiceImpl implements AutomaticChangeProduct
      * Warning about delete older product for the period before deadline date in the archive.
      * For test: cron = "${product.cron}".
      * */
-    @Scheduled(cron = "${product.cron}")
+    @Scheduled(cron = Scheduled.CRON_DISABLED)
+    @Async
+    @Override
     public void deleteWarningOldEntity(){
         var userDisabledProducts = productRepository
                 .findByStatusAndPublishDateBefore(ProductStatusEnum.DISABLED,
