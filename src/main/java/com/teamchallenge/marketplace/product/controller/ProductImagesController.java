@@ -41,8 +41,8 @@ public class ProductImagesController {
     public ResponseEntity<UserProductImageDto> createProductImages(
             @Parameter(description = "Product reference", required = true)
             @PathVariable(name = "productReference") UUID productReference,
-            @Parameter(description = "Image", required = true)
-            MultipartFile image
+            @Parameter(description = "Image can be *.jpg, *.png, *.webp", required = true)
+            @RequestPart("image") MultipartFile image
     ) {
         UserProductImageDto responseDto = imageService.createImage(productReference, image);
 
@@ -65,8 +65,8 @@ public class ProductImagesController {
     public ResponseEntity<UserProductImageDto> uploadProductImages(
             @Parameter(description = "Image id", required = true)
             @PathVariable(name = "imageId") Long imageId,
-            @Parameter(description = "Image", required = true)
-            MultipartFile image
+            @Parameter(description = "Image can be *.jpg, *.png, *.webp", required = true)
+            @RequestPart("image") MultipartFile image
     ) {
         UserProductImageDto responseDto = imageService.uploadImages(imageId, image);
 
