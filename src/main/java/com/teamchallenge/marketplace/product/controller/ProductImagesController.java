@@ -41,7 +41,7 @@ public class ProductImagesController {
     public ResponseEntity<UserProductImageDto> createProductImages(
             @Parameter(description = "Product reference", required = true)
             @PathVariable(name = "productReference") UUID productReference,
-            @Parameter(description = "List of images", required = true)
+            @Parameter(description = "Image", required = true)
             @RequestBody MultipartFile image
     ) {
         UserProductImageDto responseDto = imageService.createImage(productReference, image);
