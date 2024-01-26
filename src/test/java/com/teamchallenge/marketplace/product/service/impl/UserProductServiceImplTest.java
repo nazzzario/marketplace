@@ -62,7 +62,7 @@ class UserProductServiceImplTest {
     PageRequest pageable = PageRequest.of(0, 6, Sort.by("id"));
     PageImpl<ProductEntity> pageEntity = new PageImpl<>(List.of(new ProductEntity()), pageable, 1);
     UUID reference = UUID.randomUUID();
-    UserProductImageDto imageDto = new UserProductImageDto("url", 1L);
+    UserProductImageDto imageDto = new UserProductImageDto("url", UUID.fromString("550e8400-e29b-41d4-a716-446655440000"),1L);
     UserProductResponseDto responseDto = new UserProductResponseDto(reference,
             ProductCategoriesEnum.CLOTHE, "Kiev","Clothe", "Clothe",
             ProductStateEnum.USED, ProductStatusEnum.ACTIVE, 1, 30 ,LocalDate.parse("2024-01-01"), List.of(imageDto));

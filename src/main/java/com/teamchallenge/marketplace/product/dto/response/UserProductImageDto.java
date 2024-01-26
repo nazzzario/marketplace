@@ -1,4 +1,6 @@
 package com.teamchallenge.marketplace.product.dto.response;
 
-public record UserProductImageDto(String imageUrl, Long id) {
+import java.util.UUID;
+
+public record UserProductImageDto(String imageUrl, UUID reference, Long id) {
 }
