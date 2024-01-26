@@ -5,24 +5,30 @@ import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
+import jakarta.validation.constraints.NotNull;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
 import java.security.Key;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
+import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
 
 @Service
+@RequiredArgsConstructor
 public class JwtService {
-
+    @Value("${spring.security.jwt.refresh-token-time}")
+    private int timeoutToken;
     @Value("${spring.security.jwt.secret}")
-    private String SECRET_KEY;
+    private String secretKey;
 
     @Value("${spring.security.jwt.expiration}")
-    private Long EXPIRATION_TIME;
+    private Long expirationTime;
+
+    private final RedisTemplate<String, String> redisTemplate;
 
     public String extractUsername(String token) {
         return extractClaim(token, Claims::getSubject);
@@ -33,8 +39,8 @@ public class JwtService {
         return claimsResolver.apply(claims);
     }
 
-    public String generateToken(UserDetails userDetails){
-        return generateToken(new HashMap<>(), userDetails);
+    public String generateAccessToken(UserDetails userDetails){
+        return generateAccessToken(new HashMap<>(), userDetails);
     }
 
     public boolean isTokenValid(String token, UserDetails userDetails){
@@ -50,7 +56,7 @@ public class JwtService {
         return extractClaim(token, Claims::getExpiration);
     }
 
-    public String generateToken(
+    public String generateAccessToken(
             Map<String, Object> extractClaims,
             UserDetails userDetails
     ){
@@ -58,7 +64,7 @@ public class JwtService {
                 .setClaims(extractClaims)
                 .setSubject(userDetails.getUsername())
                 .setIssuedAt(new Date(System.currentTimeMillis()))
-                .setExpiration(new Date(System.currentTimeMillis() + EXPIRATION_TIME))
+                .setExpiration(new Date(System.currentTimeMillis() + expirationTime))
                 .signWith(getSignInKey(), SignatureAlgorithm.HS256)
                 .compact();
     }
@@ -72,7 +78,20 @@ public class JwtService {
     }
 
     private Key getSignInKey() {
-        byte[] keyBytes = Decoders.BASE64.decode(SECRET_KEY);
+        byte[] keyBytes = Decoders.BASE64.decode(secretKey);
         return Keys.hmacShaKeyFor(keyBytes);
+    }
+
+    public String generateRefreshToken(@NotNull String userEmail) {
+        String token = UUID.randomUUID().toString();
+        String oldToken = redisTemplate.opsForValue().getAndSet(userEmail, token);
+        if (oldToken != null){
+            redisTemplate.delete(oldToken);}
+        redisTemplate.opsForValue().set(token, userEmail, timeoutToken, TimeUnit.HOURS);
+        return token;
+    }
+
+    public String findByRefreshToken(String refreshToken) {
+        return redisTemplate.opsForValue().get(refreshToken);
     }
 }
