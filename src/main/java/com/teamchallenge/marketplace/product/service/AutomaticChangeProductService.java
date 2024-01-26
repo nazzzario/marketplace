@@ -4,4 +4,6 @@ public interface AutomaticChangeProductService {
     void changeStatusFromActiveToDisabled();
     void deleteDisabledOldProduct();
     void deleteWarningOldEntity();
+
+    void changeWarningStatusEntity();
 }

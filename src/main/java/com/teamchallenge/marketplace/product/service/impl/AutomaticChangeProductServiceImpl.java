@@ -29,7 +29,7 @@ public class AutomaticChangeProductServiceImpl implements AutomaticChangeProduct
 
     @Value("${product.delete.periodDeadline}")
     private int periodDeadline;
-    @Value("${product.delete.periodWarning}")
+    @Value("${product.periodWarning}")
     private int periodWarning;
     @Value("${product.disable.size}")
     private long sizeProductDisabled;
@@ -44,7 +44,7 @@ public class AutomaticChangeProductServiceImpl implements AutomaticChangeProduct
      * Select all expired products with users. For each user,
      * we check whether there is space in the archive, if there is no space,
      * we delete older products.
-     * For test: cron = "${product.cron}".
+     * For use: cron = "${product.cron}".
      * */
     @Scheduled(cron = Scheduled.CRON_DISABLED)
     @Async
@@ -111,7 +111,7 @@ public class AutomaticChangeProductServiceImpl implements AutomaticChangeProduct
 
     /**
      * Delete older product with deadline date in the archive.
-     * For test: cron = "${product.cron}".
+     * For use: cron = "${product.cron}".
      * */
     @Scheduled(cron = Scheduled.CRON_DISABLED)
     @Async
@@ -142,19 +142,20 @@ public class AutomaticChangeProductServiceImpl implements AutomaticChangeProduct
 
     /**
      * Warning about delete older product for the period before deadline date in the archive.
-     * For test: cron = "${product.cron}".
+     * For use: cron = "${product.cron}".
      * */
     @Scheduled(cron = Scheduled.CRON_DISABLED)
     @Async
     @Override
     public void deleteWarningOldEntity(){
         var userDisabledProducts = productRepository
-                .findByStatusAndPublishDateBefore(ProductStatusEnum.DISABLED,
+                .findByStatusAndPublishDate(ProductStatusEnum.DISABLED,
                         getDeadlineDate(periodDeadline - periodWarning)).stream().collect(Collectors
                         .groupingBy(ProductEntity::getOwner));
 
         userDisabledProducts.forEach((key, value) -> processWarningDeleteOldEntities(key.getEmail(), value));
     }
+
 
     private void processWarningDeleteOldEntities(String email, List<ProductEntity> products) {
         StringBuilder message = new StringBuilder();
@@ -170,5 +171,39 @@ public class AutomaticChangeProductServiceImpl implements AutomaticChangeProduct
 
         emailService.sendEmail(email, emailService.buildMsgForUser(message.toString()),
                 "Попередження про автоматичний видалення просрочених повідомлень");
+    }
+
+    /**
+     * Warning about change product for the period before deadline date in the archive.
+     * For use: cron = "${product.cron}".
+     * */
+    @Scheduled(cron = Scheduled.CRON_DISABLED)
+    @Async
+    @Override
+    public void changeWarningStatusEntity() {
+        var userActiveProducts = Arrays.stream(periodsDeadline).boxed()
+                .flatMap(days -> productRepository
+                        .findByStatusAndTimePeriodAndPublishDate(ProductStatusEnum.ACTIVE,
+                                days, getDeadlineDate(days - periodWarning)).stream()).collect(Collectors
+                        .groupingBy(ProductEntity::getOwner));
+
+        userActiveProducts.forEach((key, value) -> processWarningChangeStatus(
+                key.getEmail(), value));
+    }
+
+    private void processWarningChangeStatus(String email, List<ProductEntity> products) {
+        StringBuilder message = new StringBuilder();
+
+        message.append("<h2>Ми попереджаємо про переведення через ").append(periodWarning)
+                .append(" днів(день -ня) ваших активних повідомленнь в архів:</h2>")
+                .append(UL);
+
+        products.forEach(product -> message.append(LI).append(product.getProductDescription())
+                .append(LI_CLOSE));
+
+        message.append(UL_CLOSE).append(CONDITIONS);
+
+        emailService.sendEmail(email, emailService.buildMsgForUser(message.toString()),
+                "Попередження про автоматичний переведення просрочених активних повідомлень");
     }
 }

@@ -84,18 +84,24 @@ public class UserProductServiceImpl implements UserProductService {
         ProductEntity productEntity = productRepository.findByReference(productReference)
                 .orElseThrow(() -> new ClientBackendException(ErrorCode.PRODUCT_NOT_FOUND));
 
-            processDeleteProduct(productEntity);
+            userRepository.findByFavoriteProducts(productEntity).forEach(user ->
+                    user.getFavoriteProducts().remove(productEntity));
+
+            productEntity.getImages().forEach(image -> productImageService.processDeleteImage(image.getId()));
+
+            productRepository.delete(productEntity);
         } else {
             throw new ClientBackendException(ErrorCode.UNKNOWN_SERVER_ERROR);
         }
     }
 
     @Override
+    @Transactional
     public void processDeleteProduct(ProductEntity productEntity) {
         userRepository.findByFavoriteProducts(productEntity).forEach(user ->
                 user.getFavoriteProducts().remove(productEntity));
 
-        productEntity.getImages().forEach(image -> productImageService.deleteImage(image.getId()));
+        productEntity.getImages().forEach(image -> productImageService.processDeleteImage(image.getId()));
 
         productRepository.delete(productEntity);
     }

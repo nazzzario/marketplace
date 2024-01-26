@@ -16,7 +16,7 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/api/v1/public/product")
+@RequestMapping("/api/v1/public/product/automatic")
 @Tag(name = "Automatic processing")
 public class AutomaticProcessingController {
 
@@ -32,7 +32,7 @@ public class AutomaticProcessingController {
             @ApiResponse(responseCode = "404", description = "Product by UUID not found",
                     content = {@Content(mediaType = "application/json", schema = @Schema(implementation = ExceptionResponseDto.class))})
     })
-    @PostMapping("/automatic/change/{code}")
+    @PostMapping("/change/{code}")
     public ResponseEntity<Void> changeStatus(
             @Parameter(description = "Code start", required = true)
             @PathVariable(name = "code") Integer code
@@ -52,7 +52,7 @@ public class AutomaticProcessingController {
             @ApiResponse(responseCode = "404", description = "Product by UUID not found",
                     content = {@Content(mediaType = "application/json", schema = @Schema(implementation = ExceptionResponseDto.class))})
     })
-    @DeleteMapping("/automatic/delete/{code}")
+    @DeleteMapping("/delete/{code}")
     public ResponseEntity<Void> deleteDisableProduct(
             @Parameter(description = "Product reference", required = true)
             @PathVariable(name = "code") Integer code
@@ -63,7 +63,7 @@ public class AutomaticProcessingController {
 
         return ResponseEntity.noContent().build();
     }
-    @Operation(summary = "Automatic send warning", description = "Automatic send warning about delete product with status Disabled",
+    @Operation(summary = "Automatic send warning about delete", description = "Automatic send warning about delete product with status Disabled",
             responses = {
             @ApiResponse(responseCode = "200", description = "Product change status"),
             @ApiResponse(responseCode = "400", description = "Invalid input",
@@ -71,7 +71,7 @@ public class AutomaticProcessingController {
             @ApiResponse(responseCode = "404", description = "Product by UUID not found",
                     content = {@Content(mediaType = "application/json", schema = @Schema(implementation = ExceptionResponseDto.class))})
     })
-    @GetMapping("/automatic/warning/{code}")
+    @GetMapping("/warning/delete/{code}")
     public ResponseEntity<Void> warningDeleteDisableProduct(
             @Parameter(description = "Product reference", required = true)
             @PathVariable(name = "code") Integer code
@@ -79,6 +79,26 @@ public class AutomaticProcessingController {
         if (code != CODE){throw new ClientBackendException(ErrorCode.UNKNOWN_SERVER_ERROR);
         }
         productService.deleteWarningOldEntity();
+
+        return ResponseEntity.noContent().build();
+    }
+
+    @Operation(summary = "Automatic send warning about change", description = "Automatic send warning about change status from ACTIVE to Disabled",
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "Product change status"),
+                    @ApiResponse(responseCode = "400", description = "Invalid input",
+                            content = {@Content(mediaType = "application/json", schema = @Schema(implementation = ExceptionResponseDto.class))}),
+                    @ApiResponse(responseCode = "404", description = "Product by UUID not found",
+                            content = {@Content(mediaType = "application/json", schema = @Schema(implementation = ExceptionResponseDto.class))})
+            })
+    @GetMapping("/warning/change/{code}")
+    public ResponseEntity<Void> warningChangeStatusProduct(
+            @Parameter(description = "Product reference", required = true)
+            @PathVariable(name = "code") Integer code
+    ) {
+        if (code != CODE){throw new ClientBackendException(ErrorCode.UNKNOWN_SERVER_ERROR);
+        }
+        productService.changeWarningStatusEntity();
 
         return ResponseEntity.noContent().build();
     }
