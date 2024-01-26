@@ -1,8 +1,10 @@
 package com.teamchallenge.marketplace.common.security.dto.request;
 
-import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+
+import java.util.UUID;
 
 public record TokenRefreshRequest(
-        @NotBlank(message = "Token cannot be null")
-        String refreshToken) {
+        @NotNull
+        UUID refreshToken) {
 }
