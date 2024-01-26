@@ -6,6 +6,7 @@ import com.teamchallenge.marketplace.product.persisit.entity.enums.ProductStatus
 import com.teamchallenge.marketplace.product.persisit.repository.ProductRepository;
 import com.teamchallenge.marketplace.product.service.AutomaticChangeProductService;
 import com.teamchallenge.marketplace.product.service.UserProductService;
+import com.teamchallenge.marketplace.user.persisit.entity.UserEntity;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Async;
@@ -25,7 +26,7 @@ public class AutomaticChangeProductServiceImpl implements AutomaticChangeProduct
     private static final String UL_CLOSE = "</ul>";
     private static final String UL = "<ul>";
     private static final String LI = "<li>";
-    private static final String LI_CLOSE = "/li>";
+    private static final String LI_CLOSE = "</li>";
 
     @Value("${product.delete.periodDeadline}")
     private int periodDeadline;
@@ -56,23 +57,20 @@ public class AutomaticChangeProductServiceImpl implements AutomaticChangeProduct
                         days, getDeadlineDate(days)).stream()).collect(Collectors
                 .groupingBy(ProductEntity::getOwner));
 
-        if (userActiveProducts.isEmpty()) return;
-
-        var userDisabledProduct = productRepository.findByStatusAndOwnerIn(
-                ProductStatusEnum.DISABLED, userActiveProducts.keySet())
-                .stream().collect(Collectors.groupingBy(ProductEntity::getOwner));
-
-        if (!userDisabledProduct.isEmpty()){
-            userDisabledProduct.forEach((key, value) -> deleteOldEntity(value,
-                    (userActiveProducts.get(key).size() + value.size() - sizeProductDisabled),
-                    key.getEmail()));
+        if (!userActiveProducts.isEmpty()) {
+            userActiveProducts.forEach(this::processChangeStatus);
         }
-
-        userActiveProducts.forEach((key, value) -> processChangeStatus(
-                key.getEmail(), value));
     }
 
-    private void processChangeStatus(String email, List<ProductEntity> products) {
+    private void processChangeStatus(UserEntity user, List<ProductEntity> products) {
+        long countDisabled = productRepository.countByOwnerAndStatus(user,
+                ProductStatusEnum.DISABLED);
+        if(countDisabled > 0 && (products.size() + countDisabled > sizeProductDisabled)){
+            deleteOldEntity(productRepository.findByStatusAndOwner(ProductStatusEnum.DISABLED,
+                    user), (products.size() + countDisabled - sizeProductDisabled),
+                    user.getEmail());
+        }
+
         StringBuilder message = new StringBuilder();
 
         message.append("<h2>Ми перевели статус ваших повідомлень з активного в архів:</h2>")
@@ -83,7 +81,7 @@ public class AutomaticChangeProductServiceImpl implements AutomaticChangeProduct
         });
 
         message.append(UL_CLOSE).append(CONDITIONS);
-        emailService.sendEmail(email, emailService.buildMsgForUser(message.toString()),
+        emailService.sendEmail(user.getEmail(), emailService.buildMsgForUser(message.toString()),
                 "Автоматичний переведення просрочених повідомлень");
 
     }
@@ -97,7 +95,7 @@ public class AutomaticChangeProductServiceImpl implements AutomaticChangeProduct
             products.stream().sorted(Comparator.comparing(ProductEntity::getPublishDate))
                     .limit(sizeDeleteEntity).forEach(product -> {
                         productService.processDeleteProduct(product);
-                        message.append(LI).append(product.getProductDescription()).append("</li>");
+                        message.append(LI).append(product.getProductDescription()).append(LI_CLOSE);
                     });
             message.append("<h3>Це потрібно для внесення в архів нових повідомлень</h3>");
             emailService.sendEmail(email, emailService.buildMsgForUser(message.toString()),

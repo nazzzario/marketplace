@@ -59,4 +59,6 @@ public interface ProductRepository extends JpaRepository<ProductEntity, Long>,
 
     @EntityGraph(attributePaths = "owner")
     List<ProductEntity> findByStatusAndTimePeriodAndPublishDate(ProductStatusEnum status, Integer days, LocalDate deadlineDate);
+
+    List<ProductEntity> findByStatusAndOwner(ProductStatusEnum status, UserEntity user);
 }
