@@ -55,7 +55,7 @@ public class ProductImageServiceImpl implements ProductImageService {
 
         ProductImageEntity newImageEntity = imageRepository.save(transitImageEntity);
 
-        return new UserProductImageDto(newImageEntity.getImageUrl(),
+        return new UserProductImageDto(newImageEntity.getImageUrl(), newImageEntity.getReference(),
                 newImageEntity.getId());
         } else {
             throw new ClientBackendException(ErrorCode.UNKNOWN_SERVER_ERROR);
@@ -77,7 +77,7 @@ public class ProductImageServiceImpl implements ProductImageService {
         var updateImageEntity = imageRepository.save(imageEntity);
 
         return new UserProductImageDto(updateImageEntity.getImageUrl(),
-                updateImageEntity.getId());
+                updateImageEntity.getReference(), updateImageEntity.getId());
         } else {
             throw new ClientBackendException(ErrorCode.UNKNOWN_SERVER_ERROR);
         }
