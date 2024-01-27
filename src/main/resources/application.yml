@@ -33,7 +33,7 @@ product:
     periodsDeadline: 30
   delete:
     periodDeadline: 180
-  cron: 0 0 0 ? * MON
+  cron: 0 0 3 ? * MON
 
 mail:
   template:
