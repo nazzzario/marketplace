@@ -13,4 +13,5 @@
     <changeSet id="006" author="Nazar Krasnovoronka" context="add publish_date and view_count too tbl_product"><sqlFile path="database/changelogs/changelog.006.sql"/></changeSet>
     <changeSet id="007" author="Nazar Krasnovoronka" context="create tbl_user_favorite_products"><sqlFile path="database/changelogs/changelog.007.sql"/></changeSet>
     <changeSet id="008" author="Andrey Sitarskiy" context="add time_period"><sqlFile path="database/changelogs/changelog.008.sql"/></changeSet>
+    <changeSet id="009" author="Andrey Sitarskiy" context="change the column size password"><sqlFile path="database/changelogs/changelog.009.sql"/></changeSet>
 </databaseChangeLog>

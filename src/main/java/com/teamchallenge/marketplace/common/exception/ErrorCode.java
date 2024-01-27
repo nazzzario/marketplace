@@ -27,6 +27,8 @@ public enum ErrorCode {
     LIMIT_IS_EXHAUSTED("400-007",
             "Cannot add entity to list, because limit is exhausted",
             400),
+    PASSWORD_NOT_EXISTS("400-008", "Password not exists",
+            400),
     FORBIDDEN("403-001",
             "Forbidden",
             403),

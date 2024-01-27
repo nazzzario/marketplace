@@ -2,6 +2,7 @@ package com.teamchallenge.marketplace.user.controller;
 
 import com.teamchallenge.marketplace.common.exception.dto.ExceptionResponseDto;
 import com.teamchallenge.marketplace.product.persisit.entity.enums.ProductStatusEnum;
+import com.teamchallenge.marketplace.user.dto.request.UserPasswordRequestDto;
 import com.teamchallenge.marketplace.user.dto.request.UserPatchRequestDto;
 import com.teamchallenge.marketplace.user.dto.request.UserRequestDto;
 import com.teamchallenge.marketplace.user.dto.response.UserResponseDto;
@@ -105,5 +106,25 @@ public class UserController {
         UserResponseDto patchedUser = userService.patchUser(userReference, requestDto);
 
         return new ResponseEntity<>(patchedUser, HttpStatus.OK);
+    }
+
+    @Operation(summary = "Edit user information", description = "Change user data by it reference. " +
+            "1. GET user by reference\n2.Pass user data with updated fields")
+
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Patched user"),
+            @ApiResponse(responseCode = "401", description = "Unauthenticated",
+                    content = {@Content(mediaType = "application/json", schema = @Schema(implementation = ExceptionResponseDto.class))}),
+            @ApiResponse(responseCode = "403", description = "Access denied",
+                    content = {@Content(mediaType = "application/json", schema = @Schema(implementation = ExceptionResponseDto.class))})
+    })
+    @PreAuthorize("@userSecurity.checkReference(#userReference)")
+    @PatchMapping("private/users/{userReference}/password")
+    public ResponseEntity<Void> patchUserPassword(
+            @PathVariable UUID userReference,
+            @Valid @RequestBody UserPasswordRequestDto requestDto){
+        userService.patchPassword(userReference, requestDto);
+
+        return ResponseEntity.noContent().build();
     }
 }
