@@ -63,43 +63,5 @@ public class AutomaticProcessingController {
 
         return ResponseEntity.noContent().build();
     }
-    @Operation(summary = "Automatic send warning about delete", description = "Automatic send warning about delete product with status Disabled",
-            responses = {
-            @ApiResponse(responseCode = "200", description = "Product change status"),
-            @ApiResponse(responseCode = "400", description = "Invalid input",
-                    content = {@Content(mediaType = "application/json", schema = @Schema(implementation = ExceptionResponseDto.class))}),
-            @ApiResponse(responseCode = "404", description = "Product by UUID not found",
-                    content = {@Content(mediaType = "application/json", schema = @Schema(implementation = ExceptionResponseDto.class))})
-    })
-    @GetMapping("/warning/delete/{code}")
-    public ResponseEntity<Void> warningDeleteDisableProduct(
-            @Parameter(description = "Product reference", required = true)
-            @PathVariable(name = "code") Integer code
-    ) {
-        if (code != CODE){throw new ClientBackendException(ErrorCode.UNKNOWN_SERVER_ERROR);
-        }
-        productService.deleteWarningOldEntity();
 
-        return ResponseEntity.noContent().build();
-    }
-
-    @Operation(summary = "Automatic send warning about change", description = "Automatic send warning about change status from ACTIVE to Disabled",
-            responses = {
-                    @ApiResponse(responseCode = "200", description = "Product change status"),
-                    @ApiResponse(responseCode = "400", description = "Invalid input",
-                            content = {@Content(mediaType = "application/json", schema = @Schema(implementation = ExceptionResponseDto.class))}),
-                    @ApiResponse(responseCode = "404", description = "Product by UUID not found",
-                            content = {@Content(mediaType = "application/json", schema = @Schema(implementation = ExceptionResponseDto.class))})
-            })
-    @GetMapping("/warning/change/{code}")
-    public ResponseEntity<Void> warningChangeStatusProduct(
-            @Parameter(description = "Product reference", required = true)
-            @PathVariable(name = "code") Integer code
-    ) {
-        if (code != CODE){throw new ClientBackendException(ErrorCode.UNKNOWN_SERVER_ERROR);
-        }
-        productService.changeWarningStatusEntity();
-
-        return ResponseEntity.noContent().build();
-    }
 }

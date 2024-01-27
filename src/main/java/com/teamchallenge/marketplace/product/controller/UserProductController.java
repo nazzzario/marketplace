@@ -100,9 +100,9 @@ public class UserProductController {
             @PathVariable(name = "productReference") UUID productReference,
             @Parameter(description = "Product status. Except status NEW, it use only create product", required = true)
             @PathVariable(name = "status") ProductStatusEnum status,
-            @Parameter(description = "Product period. It can be 30,60 days with status ACTIVE and " +
-                    "180 days with status DISABLED")
-            @RequestParam(name = "period", defaultValue = "30") int period
+            @Parameter(description = "Product period. It can be ${product.active.periodsDeadline} days with status ACTIVE and " +
+                    "${product.delete.periodDeadline} days with status DISABLED")
+            @RequestParam(name = "period", defaultValue = "${product.active.periodsDeadline}") int period
     ) {
         UserProductResponseDto productResponse = productService.changeStatusProduct(productReference, status, period);
 

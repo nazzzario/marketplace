@@ -29,7 +29,7 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class UserProductServiceImpl implements UserProductService {
     @Value("${product.active.periodsDeadline}")
-    private int[] periodsActive;
+    private int periodsActive;
     @Value("${product.delete.periodDeadline}")
     private int periodDisabled;
     @Value("${product.disable.size}")
@@ -123,9 +123,8 @@ public class UserProductServiceImpl implements UserProductService {
                 throw new ClientBackendException(ErrorCode.LIMIT_IS_EXHAUSTED);
             }
 
-            productEntity.setTimePeriod(getCorrectPeriod(status, period));
-
-            return productMapper.toResponseDto(getProductAndChangeStatus(productEntity, status));
+            return productMapper.toResponseDto(getProductAndChangeStatus(productEntity, status,
+                    getCorrectPeriod(status)));
         } else {
             throw new ClientBackendException(ErrorCode.UNKNOWN_SERVER_ERROR);
         }
@@ -133,26 +132,20 @@ public class UserProductServiceImpl implements UserProductService {
     }
 
     @Override
-    public ProductEntity getProductAndChangeStatus(ProductEntity product, ProductStatusEnum status) {
+    public ProductEntity getProductAndChangeStatus(ProductEntity product, ProductStatusEnum status, int period) {
+        product.setTimePeriod(period);
         product.setStatus(status);
         return productRepository.save(product);
     }
 
     /**
-     * Enter period with status Active can be less value of array plus half difference
-     * between next value. It with status Disabled get period from variable
+     * Period with status Active get period from variable.
+     * It with status Disabled get period from variable.
      *
-     * @param status Status of product
-     * @param period Enter period*/
-    private int getCorrectPeriod(ProductStatusEnum status, int period) {
+     * @param status Status of product. */
+    private int getCorrectPeriod(ProductStatusEnum status) {
         if (status.equals(ProductStatusEnum.ACTIVE)){
-            for (int i = 0; i < periodsActive.length - 1; i++) {
-                if (periodsActive[i] + (periodsActive[i + 1] - periodsActive[i])/2 >=
-                        period){
-                    return periodsActive[i];
-                }
-            }
-            return periodsActive[periodsActive.length - 1];
+            return periodsActive;
         } else {
             return periodDisabled;
         }
