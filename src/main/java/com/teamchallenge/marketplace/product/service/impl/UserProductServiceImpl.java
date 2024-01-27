@@ -13,11 +13,13 @@ import com.teamchallenge.marketplace.product.persisit.repository.ProductReposito
 import com.teamchallenge.marketplace.product.service.ProductImageService;
 import com.teamchallenge.marketplace.product.service.UserProductService;
 import com.teamchallenge.marketplace.user.persisit.entity.UserEntity;
+import com.teamchallenge.marketplace.user.persisit.entity.enums.RoleEnum;
 import com.teamchallenge.marketplace.user.persisit.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -60,8 +62,10 @@ public class UserProductServiceImpl implements UserProductService {
         var authentication = SecurityContextHolder.getContext().getAuthentication();
 
         if (Objects.nonNull(authentication) && authentication.isAuthenticated() &&
+                (authentication.getAuthorities().contains(new SimpleGrantedAuthority(
+                        RoleEnum.ADMIN.name())) ||
                 userRepository.existsByEmailAndProductsReference(authentication.getName(),
-                        productReference)){
+                        productReference))){
         ProductEntity productEntity = productRepository.findByReference(productReference)
                 .orElseThrow(() -> new ClientBackendException(ErrorCode.PRODUCT_NOT_FOUND));
 
@@ -79,8 +83,10 @@ public class UserProductServiceImpl implements UserProductService {
         var authentication = SecurityContextHolder.getContext().getAuthentication();
 
         if (Objects.nonNull(authentication) && authentication.isAuthenticated() &&
+                (authentication.getAuthorities().contains(new SimpleGrantedAuthority(
+                        RoleEnum.ADMIN.name())) ||
                 userRepository.existsByEmailAndProductsReference(authentication.getName(),
-                        productReference)){
+                                productReference))){
         ProductEntity productEntity = productRepository.findByReference(productReference)
                 .orElseThrow(() -> new ClientBackendException(ErrorCode.PRODUCT_NOT_FOUND));
 
@@ -104,8 +110,10 @@ public class UserProductServiceImpl implements UserProductService {
     public UserProductResponseDto changeStatusProduct(UUID productReference, ProductStatusEnum status, int period) {
         var authentication = SecurityContextHolder.getContext().getAuthentication();
         if (Objects.nonNull(authentication) && authentication.isAuthenticated() &&
+                (authentication.getAuthorities().contains(new SimpleGrantedAuthority(
+                        RoleEnum.ADMIN.name())) ||
                 userRepository.existsByEmailAndProductsReference(authentication.getName(),
-                        productReference) && !status.equals(ProductStatusEnum.NEW)){
+                        productReference)) && !status.equals(ProductStatusEnum.NEW)){
             String email = authentication.getName();
             UserEntity userEntity = userRepository.findByEmail(email)
                     .orElseThrow(() -> new ClientBackendException(ErrorCode.USER_NOT_FOUND));

@@ -28,15 +28,21 @@ public class UserFavoriteProductServiceImpl implements UserFavoriteProductServic
 
         if (Objects.nonNull(authentication) && authentication.isAuthenticated()) {
             String email = authentication.getName();
-            UserEntity userEntity = userRepository.findByEmail(email)
-                    .orElseThrow(() -> new ClientBackendException(ErrorCode.USER_NOT_FOUND));
-
-            ProductEntity productEntity = productRepository.findByReference(productReference)
-                    .orElseThrow(() -> new ClientBackendException(ErrorCode.PRODUCT_NOT_FOUND));
-
-            userEntity.getFavoriteProducts().add(productEntity);
+            processAddToFavorites(productReference, email);
         } else {
             throw new ClientBackendException(ErrorCode.CANNOT_ADD_PRODUCT_TO_FAVORITE);
+        }
+    }
+
+    public void processAddToFavorites(UUID productReference, String email) {
+        UserEntity userEntity = userRepository.findByEmail(email)
+                .orElseThrow(() -> new ClientBackendException(ErrorCode.USER_NOT_FOUND));
+
+        ProductEntity productEntity = productRepository.findByReference(productReference)
+                .orElseThrow(() -> new ClientBackendException(ErrorCode.PRODUCT_NOT_FOUND));
+
+        if (userEntity != null && productEntity != null) {
+            userEntity.getFavoriteProducts().add(productEntity);
         }
     }
 

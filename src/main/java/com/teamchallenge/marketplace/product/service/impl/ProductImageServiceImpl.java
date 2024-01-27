@@ -9,9 +9,11 @@ import com.teamchallenge.marketplace.product.persisit.entity.ProductImageEntity;
 import com.teamchallenge.marketplace.product.persisit.repository.ProductImageRepository;
 import com.teamchallenge.marketplace.product.persisit.repository.ProductRepository;
 import com.teamchallenge.marketplace.product.service.ProductImageService;
+import com.teamchallenge.marketplace.user.persisit.entity.enums.RoleEnum;
 import com.teamchallenge.marketplace.user.persisit.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -37,8 +39,10 @@ public class ProductImageServiceImpl implements ProductImageService {
         var authentication = SecurityContextHolder.getContext().getAuthentication();
 
         if (Objects.nonNull(authentication) && authentication.isAuthenticated() &&
-        userRepository.existsByEmailAndProductsReference(authentication.getName(),
-                productReference)){
+                (authentication.getAuthorities().contains(new SimpleGrantedAuthority(
+                        RoleEnum.ADMIN.name())) ||
+                userRepository.existsByEmailAndProductsReference(authentication.getName(),
+                        productReference))){
         ProductEntity productEntity = productRepository.findByReference(productReference)
                 .orElseThrow(() -> new ClientBackendException(ErrorCode.PRODUCT_NOT_FOUND));
 
@@ -68,8 +72,10 @@ public class ProductImageServiceImpl implements ProductImageService {
         var authentication = SecurityContextHolder.getContext().getAuthentication();
 
         if (Objects.nonNull(authentication) && authentication.isAuthenticated() &&
+                (authentication.getAuthorities().contains(new SimpleGrantedAuthority(
+                        RoleEnum.ADMIN.name())) ||
                 userRepository.existsByEmailAndProductsImagesId(authentication.getName(),
-                        imageId)){
+                        imageId))){
         var imageEntity = imageRepository.findById(imageId).orElseThrow(() ->
                 new ClientBackendException(ErrorCode.PRODUCT_NOT_FOUND));
         imageEntity.setImageUrl(fileUpload.uploadFile(image, imageEntity.getReference()));
@@ -96,8 +102,10 @@ public class ProductImageServiceImpl implements ProductImageService {
         var authentication = SecurityContextHolder.getContext().getAuthentication();
 
         if (Objects.nonNull(authentication) && authentication.isAuthenticated() &&
+                (authentication.getAuthorities().contains(new SimpleGrantedAuthority(
+                        RoleEnum.ADMIN.name())) ||
                 userRepository.existsByEmailAndProductsImagesId(authentication.getName(),
-                        imageId)){
+                        imageId))){
         var imageEntity = imageRepository.findById(imageId).orElseThrow(() ->
                 new ClientBackendException(ErrorCode.PRODUCT_NOT_FOUND));
         fileUpload.deleteFile(imageEntity.getReference());
