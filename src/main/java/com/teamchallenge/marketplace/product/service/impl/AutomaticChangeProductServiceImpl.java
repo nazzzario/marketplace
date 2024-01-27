@@ -6,6 +6,7 @@ import com.teamchallenge.marketplace.product.persisit.entity.enums.ProductStatus
 import com.teamchallenge.marketplace.product.persisit.repository.ProductRepository;
 import com.teamchallenge.marketplace.product.service.AutomaticChangeProductService;
 import com.teamchallenge.marketplace.product.service.UserProductService;
+import com.teamchallenge.marketplace.user.persisit.entity.UserEntity;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Async;
@@ -13,7 +14,6 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
-import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -25,16 +25,16 @@ public class AutomaticChangeProductServiceImpl implements AutomaticChangeProduct
     private static final String UL_CLOSE = "</ul>";
     private static final String UL = "<ul>";
     private static final String LI = "<li>";
-    private static final String LI_CLOSE = "/li>";
+    private static final String LI_CLOSE = "</li>";
 
     @Value("${product.delete.periodDeadline}")
-    private int periodDeadline;
-    @Value("${product.delete.periodWarning}")
+    private int periodDeleteDeadline;
+    @Value("${product.periodWarning}")
     private int periodWarning;
     @Value("${product.disable.size}")
     private long sizeProductDisabled;
     @Value("${product.active.periodsDeadline}")
-    private int[] periodsDeadline;
+    private int periodActiveDeadline;
 
     private final ProductRepository productRepository;
     private final UserProductService productService;
@@ -44,46 +44,42 @@ public class AutomaticChangeProductServiceImpl implements AutomaticChangeProduct
      * Select all expired products with users. For each user,
      * we check whether there is space in the archive, if there is no space,
      * we delete older products.
-     * For test: cron = "${product.cron}".
+     * For use: cron = "${product.cron}".
      * */
     @Scheduled(cron = Scheduled.CRON_DISABLED)
     @Async
     @Override
     public void changeStatusFromActiveToDisabled(){
-        var userActiveProducts = Arrays.stream(periodsDeadline).boxed()
-                .flatMap(days -> productRepository
+        var userActiveProducts = productRepository
                 .findByStatusAndTimePeriodAndPublishDateBefore(ProductStatusEnum.ACTIVE,
-                        days, getDeadlineDate(days)).stream()).collect(Collectors
-                .groupingBy(ProductEntity::getOwner));
-
-        if (userActiveProducts.isEmpty()) return;
-
-        var userDisabledProduct = productRepository.findByStatusAndOwnerIn(
-                ProductStatusEnum.DISABLED, userActiveProducts.keySet())
+                        periodActiveDeadline, getDeadlineDate(periodActiveDeadline))
                 .stream().collect(Collectors.groupingBy(ProductEntity::getOwner));
 
-        if (!userDisabledProduct.isEmpty()){
-            userDisabledProduct.forEach((key, value) -> deleteOldEntity(value,
-                    (userActiveProducts.get(key).size() + value.size() - sizeProductDisabled),
-                    key.getEmail()));
-        }
-
-        userActiveProducts.forEach((key, value) -> processChangeStatus(
-                key.getEmail(), value));
+        userActiveProducts.forEach(this::processChangeStatus);
     }
 
-    private void processChangeStatus(String email, List<ProductEntity> products) {
+    private void processChangeStatus(UserEntity user, List<ProductEntity> products) {
+        long countDisabled = productRepository.countByOwnerAndStatus(user,
+                ProductStatusEnum.DISABLED);
+        if(countDisabled > 0 && (products.size() + countDisabled > sizeProductDisabled)){
+            deleteOldEntity(productRepository.findByStatusAndOwner(ProductStatusEnum.DISABLED,
+                    user), (products.size() + countDisabled - sizeProductDisabled),
+                    user.getEmail());
+        }
+
         StringBuilder message = new StringBuilder();
 
         message.append("<h2>Ми перевели статус ваших повідомлень з активного в архів:</h2>")
                 .append(UL);
+
         products.forEach(product ->{
-            productService.getProductAndChangeStatus(product, ProductStatusEnum.DISABLED);
+            productService.getProductAndChangeStatus(product, ProductStatusEnum.DISABLED,
+                    periodDeleteDeadline);
             message.append(LI).append(product.getProductDescription()).append(LI_CLOSE);
         });
 
         message.append(UL_CLOSE).append(CONDITIONS);
-        emailService.sendEmail(email, emailService.buildMsgForUser(message.toString()),
+        emailService.sendEmail(user.getEmail(), emailService.buildMsgForUser(message.toString()),
                 "Автоматичний переведення просрочених повідомлень");
 
     }
@@ -97,7 +93,7 @@ public class AutomaticChangeProductServiceImpl implements AutomaticChangeProduct
             products.stream().sorted(Comparator.comparing(ProductEntity::getPublishDate))
                     .limit(sizeDeleteEntity).forEach(product -> {
                         productService.processDeleteProduct(product);
-                        message.append(LI).append(product.getProductDescription()).append("</li>");
+                        message.append(LI).append(product.getProductDescription()).append(LI_CLOSE);
                     });
             message.append("<h3>Це потрібно для внесення в архів нових повідомлень</h3>");
             emailService.sendEmail(email, emailService.buildMsgForUser(message.toString()),
@@ -111,7 +107,7 @@ public class AutomaticChangeProductServiceImpl implements AutomaticChangeProduct
 
     /**
      * Delete older product with deadline date in the archive.
-     * For test: cron = "${product.cron}".
+     * For use: cron = "${product.cron}".
      * */
     @Scheduled(cron = Scheduled.CRON_DISABLED)
     @Async
@@ -119,7 +115,7 @@ public class AutomaticChangeProductServiceImpl implements AutomaticChangeProduct
     public void deleteDisabledOldProduct(){
         var userDisabledProducts = productRepository
                 .findByStatusAndPublishDateBefore(ProductStatusEnum.DISABLED,
-                        getDeadlineDate(periodDeadline)).stream().collect(Collectors
+                        getDeadlineDate(periodDeleteDeadline)).stream().collect(Collectors
                         .groupingBy(ProductEntity::getOwner));
 
         userDisabledProducts.forEach((key, value) -> processDeleteOldEntities(key.getEmail(), value));
@@ -138,37 +134,5 @@ public class AutomaticChangeProductServiceImpl implements AutomaticChangeProduct
 
         emailService.sendEmail(email, emailService.buildMsgForUser(message.toString()),
                 "Автоматичний видалення просрочених повідомлень");
-    }
-
-    /**
-     * Warning about delete older product for the period before deadline date in the archive.
-     * For test: cron = "${product.cron}".
-     * */
-    @Scheduled(cron = Scheduled.CRON_DISABLED)
-    @Async
-    @Override
-    public void deleteWarningOldEntity(){
-        var userDisabledProducts = productRepository
-                .findByStatusAndPublishDateBefore(ProductStatusEnum.DISABLED,
-                        getDeadlineDate(periodDeadline - periodWarning)).stream().collect(Collectors
-                        .groupingBy(ProductEntity::getOwner));
-
-        userDisabledProducts.forEach((key, value) -> processWarningDeleteOldEntities(key.getEmail(), value));
-    }
-
-    private void processWarningDeleteOldEntities(String email, List<ProductEntity> products) {
-        StringBuilder message = new StringBuilder();
-
-        message.append("<h2>Ми попереджаємо про видалення з архіву через ")
-                .append(periodWarning).append(" днів(день -ня) ваших старих повідомленнь:</h2>")
-                .append(UL);
-
-        products.forEach(product -> message.append(LI).append(product.getProductDescription())
-                .append(LI_CLOSE));
-
-        message.append(UL_CLOSE).append(CONDITIONS);
-
-        emailService.sendEmail(email, emailService.buildMsgForUser(message.toString()),
-                "Попередження про автоматичний видалення просрочених повідомлень");
     }
 }

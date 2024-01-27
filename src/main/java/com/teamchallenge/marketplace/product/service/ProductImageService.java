@@ -14,4 +14,6 @@ public interface ProductImageService {
     void deleteImage(Long imageId);
 
     void deleteImage(ProductImageEntity entity);
+
+    void processDeleteImage(Long imageId);
 }

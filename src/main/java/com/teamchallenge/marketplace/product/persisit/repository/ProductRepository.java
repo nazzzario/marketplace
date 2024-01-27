@@ -43,13 +43,13 @@ public interface ProductRepository extends JpaRepository<ProductEntity, Long>,
     @EntityGraph(attributePaths = "images")
     Page<ProductEntity> findByFavoritismId(Long id, Pageable pageable);
 
-    @EntityGraph(attributePaths = "owner")
+    @EntityGraph(attributePaths = {"owner", "images"})
     List<ProductEntity> findByStatusAndPublishDateBefore(ProductStatusEnum status, LocalDate deadlineDate);
-
-    @EntityGraph(attributePaths = "owner")
-    List<ProductEntity> findByStatusAndOwnerIn(ProductStatusEnum status, Collection<UserEntity> userEntities);
 
     long countByOwnerAndStatus(UserEntity userEntity, ProductStatusEnum status);
 
+    @EntityGraph(attributePaths = "owner")
     List<ProductEntity> findByStatusAndTimePeriodAndPublishDateBefore(ProductStatusEnum status, Integer days, LocalDate deadlineDate);
+
+    List<ProductEntity> findByStatusAndOwner(ProductStatusEnum status, UserEntity user);
 }

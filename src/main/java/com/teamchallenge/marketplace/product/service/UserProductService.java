@@ -23,5 +23,5 @@ public interface UserProductService {
 
     void processDeleteProduct(ProductEntity productEntity);
 
-    ProductEntity getProductAndChangeStatus(ProductEntity product, ProductStatusEnum status);
+    ProductEntity getProductAndChangeStatus(ProductEntity product, ProductStatusEnum status, int period);
 }

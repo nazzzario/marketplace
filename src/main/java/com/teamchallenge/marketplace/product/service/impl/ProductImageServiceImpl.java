@@ -98,13 +98,23 @@ public class ProductImageServiceImpl implements ProductImageService {
         if (Objects.nonNull(authentication) && authentication.isAuthenticated() &&
                 userRepository.existsByEmailAndProductsImagesId(authentication.getName(),
                         imageId)){
+            var imageEntity = imageRepository.findById(imageId).orElseThrow(() ->
+                    new ClientBackendException(ErrorCode.PRODUCT_NOT_FOUND));
+            fileUpload.deleteFile(imageEntity.getReference());
+
+            imageRepository.deleteById(imageId);
+        } else {
+            throw new ClientBackendException(ErrorCode.UNKNOWN_SERVER_ERROR);
+        }
+    }
+
+    @Override
+    @Transactional
+    public void processDeleteImage(Long imageId) {
         var imageEntity = imageRepository.findById(imageId).orElseThrow(() ->
                 new ClientBackendException(ErrorCode.PRODUCT_NOT_FOUND));
         fileUpload.deleteFile(imageEntity.getReference());
 
         imageRepository.deleteById(imageId);
-        } else {
-            throw new ClientBackendException(ErrorCode.UNKNOWN_SERVER_ERROR);
-        }
     }
 }
