@@ -17,10 +17,13 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Objects;
 import java.util.UUID;
 
 @Slf4j
@@ -35,7 +38,7 @@ public class UserServiceImpl implements UserService {
     @Override
     @Transactional
     public UserResponseDto userRegistration(UserRequestDto requestDto) {
-        if(userRepository.existsByEmail(requestDto.email())){
+        if (userRepository.existsByEmail(requestDto.email())) {
             throw new ClientBackendException(ErrorCode.EMAIL_ALREADY_EXISTS);
         }
         UserEntity userEntity = userMapper.toEntity(requestDto);
@@ -86,15 +89,23 @@ public class UserServiceImpl implements UserService {
 
     @Override
     @Transactional
-    public void patchPassword(UUID userReference, UserPasswordRequestDto requestDto) {
-        if (requestDto.oldPassword().equals(requestDto.newPassword())){
-            throw new ClientBackendException(ErrorCode.NEW_PASSWORD_SAME_AS_OLD_PASSWORD);
-        }
-        var user = userRepository.findByReference(userReference).orElseThrow(() ->
-                new ClientBackendException(ErrorCode.USER_NOT_FOUND));
+    public void patchPassword(UserPasswordRequestDto requestDto) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
-        if (passwordEncoder.matches(requestDto.oldPassword(), user.getPassword())){
-            user.setPassword(passwordEncoder.encode(requestDto.newPassword()));
-        } else { throw new ClientBackendException(ErrorCode.PASSWORD_NOT_EXISTS);}
+        if (Objects.nonNull(authentication) && authentication.isAuthenticated()) {
+            if (requestDto.oldPassword().equals(requestDto.newPassword())) {
+                throw new ClientBackendException(ErrorCode.NEW_PASSWORD_SAME_AS_OLD_PASSWORD);
+            }
+            var user = userRepository.findByEmail(authentication.getName()).orElseThrow(() ->
+                    new ClientBackendException(ErrorCode.USER_NOT_FOUND));
+
+            if (passwordEncoder.matches(requestDto.oldPassword(), user.getPassword())) {
+                user.setPassword(passwordEncoder.encode(requestDto.newPassword()));
+            } else {
+                throw new ClientBackendException(ErrorCode.PASSWORD_NOT_EXISTS);
+            }
+        } else {
+            throw new ClientBackendException(ErrorCode.UNKNOWN_SERVER_ERROR);
+        }
     }
 }

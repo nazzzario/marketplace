@@ -23,5 +23,5 @@ public interface UserService {
 
     Page<UserResponseDto> getUserByStatusProduct(ProductStatusEnum status, Pageable pageable);
 
-    void patchPassword(UUID userReference, UserPasswordRequestDto requestDto);
+    void patchPassword(UserPasswordRequestDto requestDto);
 }

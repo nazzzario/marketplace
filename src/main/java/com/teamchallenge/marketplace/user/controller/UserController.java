@@ -108,22 +108,19 @@ public class UserController {
         return new ResponseEntity<>(patchedUser, HttpStatus.OK);
     }
 
-    @Operation(summary = "Edit user information", description = "Change user data by it reference. " +
-            "1. GET user by reference\n2.Pass user data with updated fields")
+    @Operation(summary = "Change password", description = "Change user password")
 
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Patched user"),
+            @ApiResponse(responseCode = "200", description = "Patched user password"),
             @ApiResponse(responseCode = "401", description = "Unauthenticated",
                     content = {@Content(mediaType = "application/json", schema = @Schema(implementation = ExceptionResponseDto.class))}),
             @ApiResponse(responseCode = "403", description = "Access denied",
                     content = {@Content(mediaType = "application/json", schema = @Schema(implementation = ExceptionResponseDto.class))})
     })
-    @PreAuthorize("@userSecurity.checkReference(#userReference)")
-    @PatchMapping("private/users/{userReference}/password")
+    @PatchMapping("private/users/password")
     public ResponseEntity<Void> patchUserPassword(
-            @PathVariable UUID userReference,
             @Valid @RequestBody UserPasswordRequestDto requestDto){
-        userService.patchPassword(userReference, requestDto);
+        userService.patchPassword(requestDto);
 
         return ResponseEntity.noContent().build();
     }
