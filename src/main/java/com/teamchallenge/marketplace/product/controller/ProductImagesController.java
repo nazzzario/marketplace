@@ -42,9 +42,11 @@ public class ProductImagesController {
             @Parameter(description = "Product reference", required = true)
             @PathVariable(name = "productReference") UUID productReference,
             @Parameter(description = "Image can be *.jpg, *.png, *.webp", required = true)
-            @RequestPart("image") MultipartFile image
+            @RequestPart("image") MultipartFile image,
+            @Parameter(description = "Is image product cover image")
+            @RequestParam(required = false, defaultValue = "false") boolean isTitleImage
     ) {
-        UserProductImageDto responseDto = imageService.createImage(productReference, image);
+        UserProductImageDto responseDto = imageService.createImage(productReference, image, isTitleImage);
 
         return new ResponseEntity<>(responseDto, HttpStatus.OK);
     }

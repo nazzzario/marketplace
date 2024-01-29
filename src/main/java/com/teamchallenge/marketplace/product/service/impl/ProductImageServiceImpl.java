@@ -33,7 +33,7 @@ public class ProductImageServiceImpl implements ProductImageService {
 
     @Override
     @Transactional
-    public UserProductImageDto createImage(UUID productReference, MultipartFile image) {
+    public UserProductImageDto createImage(UUID productReference, MultipartFile image, boolean isTitleImage) {
         var authentication = SecurityContextHolder.getContext().getAuthentication();
 
         if (Objects.nonNull(authentication) && authentication.isAuthenticated() &&
@@ -52,6 +52,7 @@ public class ProductImageServiceImpl implements ProductImageService {
 
         ProductImageEntity transitImageEntity = imageRepository.save(emptyImageEntity);
         transitImageEntity.setImageUrl(fileUpload.uploadFile(image,emptyImageEntity.getReference()));
+        transitImageEntity.setCover(isTitleImage);
 
         ProductImageEntity newImageEntity = imageRepository.save(transitImageEntity);
 
