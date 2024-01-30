@@ -114,14 +114,15 @@ public class UserServiceImpl implements UserService {
     @Override
     public List<AuthenticationRequest> hashPasswordAllUsers() {
         List<UserEntity> users = userRepository.findAll();
+        List<AuthenticationRequest> responceList = users.stream().map(u -> new AuthenticationRequest(u.getEmail(),
+                u.getPassword())).toList();
 
-        users.stream().filter(u -> u.getPassword().length() > 30)
+        users.stream().filter(u -> u.getPassword().length() < 30)
                 .forEach(user -> {
                     user.setPassword(passwordEncoder.encode(user.getPassword()));
                     userRepository.save(user);
                 });
 
-        return users.stream().map(u -> new AuthenticationRequest(u.getEmail(),
-                u.getPassword())).toList();
+        return responceList;
     }
 }
