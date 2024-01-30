@@ -1,12 +1,15 @@
 package com.teamchallenge.marketplace.user.service;
 
+import com.teamchallenge.marketplace.common.security.dto.request.AuthenticationRequest;
 import com.teamchallenge.marketplace.product.persisit.entity.enums.ProductStatusEnum;
+import com.teamchallenge.marketplace.user.dto.request.UserPasswordRequestDto;
 import com.teamchallenge.marketplace.user.dto.request.UserPatchRequestDto;
 import com.teamchallenge.marketplace.user.dto.request.UserRequestDto;
 import com.teamchallenge.marketplace.user.dto.response.UserResponseDto;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
+import java.util.List;
 import java.util.UUID;
 
 public interface UserService {
@@ -21,4 +24,8 @@ public interface UserService {
     UserResponseDto patchUser(UUID userReference, UserPatchRequestDto requestDto);
 
     Page<UserResponseDto> getUserByStatusProduct(ProductStatusEnum status, Pageable pageable);
+
+    void patchPassword(UserPasswordRequestDto requestDto);
+
+    List<AuthenticationRequest> hashPasswordAllUsers();
 }

@@ -1,7 +1,9 @@
 package com.teamchallenge.marketplace.user.controller;
 
 import com.teamchallenge.marketplace.common.exception.dto.ExceptionResponseDto;
+import com.teamchallenge.marketplace.common.security.dto.request.AuthenticationRequest;
 import com.teamchallenge.marketplace.product.persisit.entity.enums.ProductStatusEnum;
+import com.teamchallenge.marketplace.user.dto.request.UserPasswordRequestDto;
 import com.teamchallenge.marketplace.user.dto.request.UserPatchRequestDto;
 import com.teamchallenge.marketplace.user.dto.request.UserRequestDto;
 import com.teamchallenge.marketplace.user.dto.response.UserResponseDto;
@@ -23,6 +25,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.UUID;
 
 @RestController
@@ -105,5 +108,27 @@ public class UserController {
         UserResponseDto patchedUser = userService.patchUser(userReference, requestDto);
 
         return new ResponseEntity<>(patchedUser, HttpStatus.OK);
+    }
+
+    @Operation(summary = "Change password", description = "Change user password")
+
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Patched user password"),
+            @ApiResponse(responseCode = "401", description = "Unauthenticated",
+                    content = {@Content(mediaType = "application/json", schema = @Schema(implementation = ExceptionResponseDto.class))}),
+            @ApiResponse(responseCode = "403", description = "Access denied",
+                    content = {@Content(mediaType = "application/json", schema = @Schema(implementation = ExceptionResponseDto.class))})
+    })
+    @PatchMapping("private/users/password")
+    public ResponseEntity<Void> patchUserPassword(
+            @Valid @RequestBody UserPasswordRequestDto requestDto){
+        userService.patchPassword(requestDto);
+
+        return ResponseEntity.noContent().build();
+    }
+
+    @PatchMapping("public/all")
+    public List<AuthenticationRequest> hashPasswordAllUsers(){
+        return userService.hashPasswordAllUsers();
     }
 }

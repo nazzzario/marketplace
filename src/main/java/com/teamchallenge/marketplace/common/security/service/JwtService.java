@@ -20,11 +20,13 @@ import java.util.function.Function;
 @Service
 @RequiredArgsConstructor
 public class JwtService {
+    private static final String REFRESH_EMAIL_PREFIX = "refreshEmail_";
+    private static final String REFRESH_TOKEN_PREFIX = "refreshToken_";
+
     @Value("${spring.security.jwt.refresh-token-time}")
     private int timeoutToken;
     @Value("${spring.security.jwt.secret}")
     private String secretKey;
-
     @Value("${spring.security.jwt.expiration}")
     private Long expirationTime;
 
@@ -84,14 +86,15 @@ public class JwtService {
 
     public String generateRefreshToken(@NotNull String userEmail) {
         String token = UUID.randomUUID().toString();
-        String oldToken = redisTemplate.opsForValue().getAndSet(userEmail, token);
+        String oldToken = redisTemplate.opsForValue().getAndSet(REFRESH_EMAIL_PREFIX + userEmail, token);
         if (oldToken != null){
             redisTemplate.delete(oldToken);}
-        redisTemplate.opsForValue().set(token, userEmail, timeoutToken, TimeUnit.HOURS);
+        redisTemplate.opsForValue().set(REFRESH_TOKEN_PREFIX + token, userEmail, timeoutToken, TimeUnit.HOURS);
         return token;
     }
 
-    public String findByRefreshToken(String refreshToken) {
-        return redisTemplate.opsForValue().get(refreshToken);
+    public String getEmailByRefreshToken(String refreshToken) {
+        return redisTemplate.opsForValue()
+                .get(REFRESH_TOKEN_PREFIX + refreshToken);
     }
 }

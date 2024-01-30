@@ -1,0 +1,1 @@
+ALTER TABLE public.tbl_user ALTER COLUMN password TYPE character varying(100);
