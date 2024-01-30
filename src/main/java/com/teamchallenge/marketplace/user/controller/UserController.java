@@ -1,7 +1,6 @@
 package com.teamchallenge.marketplace.user.controller;
 
 import com.teamchallenge.marketplace.common.exception.dto.ExceptionResponseDto;
-import com.teamchallenge.marketplace.common.security.dto.request.AuthenticationRequest;
 import com.teamchallenge.marketplace.product.persisit.entity.enums.ProductStatusEnum;
 import com.teamchallenge.marketplace.user.dto.request.UserPasswordRequestDto;
 import com.teamchallenge.marketplace.user.dto.request.UserPatchRequestDto;
@@ -25,7 +24,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
 import java.util.UUID;
 
 @RestController
@@ -125,10 +123,5 @@ public class UserController {
         userService.patchPassword(requestDto);
 
         return ResponseEntity.noContent().build();
-    }
-
-    @PatchMapping("public/all")
-    public List<AuthenticationRequest> hashPasswordAllUsers(){
-        return userService.hashPasswordAllUsers();
     }
 }
