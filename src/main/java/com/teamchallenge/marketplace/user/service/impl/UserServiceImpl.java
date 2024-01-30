@@ -2,6 +2,7 @@ package com.teamchallenge.marketplace.user.service.impl;
 
 import com.teamchallenge.marketplace.common.exception.ClientBackendException;
 import com.teamchallenge.marketplace.common.exception.ErrorCode;
+import com.teamchallenge.marketplace.common.security.dto.request.AuthenticationRequest;
 import com.teamchallenge.marketplace.product.persisit.entity.enums.ProductStatusEnum;
 import com.teamchallenge.marketplace.user.dto.request.UserPasswordRequestDto;
 import com.teamchallenge.marketplace.user.dto.request.UserPatchRequestDto;
@@ -23,6 +24,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
 
@@ -107,5 +109,19 @@ public class UserServiceImpl implements UserService {
         } else {
             throw new ClientBackendException(ErrorCode.UNKNOWN_SERVER_ERROR);
         }
+    }
+
+    @Override
+    public List<AuthenticationRequest> hashPasswordAllUsers() {
+        List<UserEntity> users = userRepository.findAll();
+
+        users.stream().filter(u -> u.getPassword().length() > 30)
+                .forEach(user -> {
+                    user.setPassword(passwordEncoder.encode(user.getPassword()));
+                    userRepository.save(user);
+                });
+
+        return users.stream().map(u -> new AuthenticationRequest(u.getEmail(),
+                u.getPassword())).toList();
     }
 }

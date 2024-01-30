@@ -102,7 +102,7 @@ public class AuthenticationController {
     public ResponseEntity<AuthenticationResponse> refreshtoken(@Valid @RequestBody TokenRefreshRequest token) {
 
 
-        UserEntity userEntity = userRepository.findByEmail(jwtService.findByRefreshToken(token.refreshToken().toString())).orElseThrow();
+        UserEntity userEntity = userRepository.findByEmail(jwtService.getEmailByRefreshToken(token.refreshToken().toString())).orElseThrow();
         String accessToken = jwtService.generateAccessToken(UserAccount.fromUserEntityToCustomUserDetails(userEntity));
         String refreshToken = jwtService.generateRefreshToken(userEntity.getEmail());
 

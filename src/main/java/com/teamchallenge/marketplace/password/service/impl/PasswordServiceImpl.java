@@ -10,6 +10,7 @@ import com.teamchallenge.marketplace.user.persisit.entity.UserEntity;
 import com.teamchallenge.marketplace.user.persisit.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -26,6 +27,7 @@ public class PasswordServiceImpl implements PasswordService {
     private final EmailService emailService;
     private final UserRepository userRepository;
     private final RedisTemplate<String, Object> redisTemplate;
+    private final PasswordEncoder passwordEncoder;
 
 
     @Override
@@ -37,7 +39,7 @@ public class PasswordServiceImpl implements PasswordService {
         UserEntity userByReference = userRepository.findByEmail(userEmailFromCache)
                 .orElseThrow(() -> new ClientBackendException(ErrorCode.USER_NOT_FOUND));
 
-        if (userByReference.getPassword().equals(requestDto.newPassword())) {
+        if (passwordEncoder.matches(requestDto.newPassword(), userByReference.getPassword())) {
             throw new ClientBackendException(ErrorCode.NEW_PASSWORD_SAME_AS_OLD_PASSWORD);
         }
 
