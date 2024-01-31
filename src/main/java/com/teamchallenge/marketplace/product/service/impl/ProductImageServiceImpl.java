@@ -35,7 +35,7 @@ public class ProductImageServiceImpl implements ProductImageService {
 
     @Override
     @Transactional
-    public UserProductImageDto createImage(UUID productReference, MultipartFile image) {
+    public UserProductImageDto createImage(UUID productReference, MultipartFile image, boolean isTitleImage) {
         var authentication = SecurityContextHolder.getContext().getAuthentication();
 
         if (Objects.nonNull(authentication) && authentication.isAuthenticated() &&
@@ -56,6 +56,7 @@ public class ProductImageServiceImpl implements ProductImageService {
 
         ProductImageEntity transitImageEntity = imageRepository.save(emptyImageEntity);
         transitImageEntity.setImageUrl(fileUpload.uploadFile(image,emptyImageEntity.getReference()));
+        transitImageEntity.setCover(isTitleImage);
 
         ProductImageEntity newImageEntity = imageRepository.save(transitImageEntity);
 
@@ -105,14 +106,24 @@ public class ProductImageServiceImpl implements ProductImageService {
                 (authentication.getAuthorities().contains(new SimpleGrantedAuthority(
                         RoleEnum.ADMIN.name())) ||
                 userRepository.existsByEmailAndProductsImagesId(authentication.getName(),
-                        imageId))){
+                        imageId)){
+            var imageEntity = imageRepository.findById(imageId).orElseThrow(() ->
+                    new ClientBackendException(ErrorCode.PRODUCT_NOT_FOUND));
+            fileUpload.deleteFile(imageEntity.getReference());
+
+            imageRepository.deleteById(imageId);
+        } else {
+            throw new ClientBackendException(ErrorCode.UNKNOWN_SERVER_ERROR);
+        }
+    }
+
+    @Override
+    @Transactional
+    public void processDeleteImage(Long imageId) {
         var imageEntity = imageRepository.findById(imageId).orElseThrow(() ->
                 new ClientBackendException(ErrorCode.PRODUCT_NOT_FOUND));
         fileUpload.deleteFile(imageEntity.getReference());
 
         imageRepository.deleteById(imageId);
-        } else {
-            throw new ClientBackendException(ErrorCode.UNKNOWN_SERVER_ERROR);
-        }
     }
 }

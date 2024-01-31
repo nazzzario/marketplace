@@ -36,10 +36,11 @@ public interface ProductMapper {
     @Mapping(target = "reference", source = "productEntity.reference")
     ProductResponseDto toResponseDto(ProductEntity productEntity, UserEntity userEntity);
 
+    @Mapping(target = "titleImage", expression = "java(getProductCoverImage(productEntity))")
     @Mapping(target = "ownerPhoneNumber", source = "userEntity.phoneNumber")
     @Mapping(target = "ownerUsername", source = "userEntity.username")
     @Mapping(target = "reference", source = "productEntity.reference")
-    ProductNewestResponseDto toNewestResponseDto(ProductEntity productEntity, UserEntity userEntity, String titleImage);
+    ProductNewestResponseDto toNewestResponseDto(ProductEntity productEntity, UserEntity userEntity);
 
     @Mapping(target = "status", ignore = true)
     @Mapping(target = "reference", ignore = true)
@@ -74,5 +75,13 @@ public interface ProductMapper {
 
     default String productImageToImageUrl(ProductImageEntity productImageEntity){
         return productImageEntity.getImageUrl();
+    }
+
+    default String getProductCoverImage(ProductEntity entity){
+        return entity.getImages().stream()
+                .filter(ProductImageEntity::isCover)
+                .findFirst()
+                .map(ProductImageEntity::getImageUrl)
+                .orElse("cover image not presented");
     }
 }

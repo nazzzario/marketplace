@@ -7,11 +7,13 @@ import org.springframework.web.multipart.MultipartFile;
 import java.util.UUID;
 
 public interface ProductImageService {
-    UserProductImageDto createImage(UUID productReference, MultipartFile image);
+    UserProductImageDto createImage(UUID productReference, MultipartFile image, boolean isTitleImage);
 
     UserProductImageDto uploadImages(Long imageId, MultipartFile image);
 
     void deleteImage(Long imageId);
 
     void deleteImage(ProductImageEntity entity);
+
+    void processDeleteImage(Long imageId);
 }

@@ -90,8 +90,7 @@ public class ProductServiceImpl implements ProductService {
 
         var productsSortedByCreatedDate = productRepository.findByOrderByCreatedDate(pageRequest);
 
-        return productsSortedByCreatedDate.map(p -> productMapper.toNewestResponseDto(p, p.getOwner(),
-                "https://res.cloudinary.com/teamchallenge-marketplace/image/upload/v1700688145/ebhoewptmxbynarrqhqw.jpg"));
+        return productsSortedByCreatedDate.map(p -> productMapper.toNewestResponseDto(p, p.getOwner()));
     }
 
     @Override

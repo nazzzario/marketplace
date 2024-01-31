@@ -26,14 +26,14 @@ cloudinary:
 
 product:
   sizeListImage: 6
+  periodWarning: 5
   disable:
     size: 6
   active:
-    periodsDeadline: 30,60
+    periodsDeadline: 30
   delete:
     periodDeadline: 180
-    periodWarning: 5
-  cron: 0 * * * * ?
+  cron: 0 0 9 ? * MON
 
 mail:
   template:
