@@ -34,7 +34,9 @@ public interface ProductMapper {
     @Mapping(target = "ownerPhoneNumber", source = "userEntity.phoneNumber")
     @Mapping(target = "ownerUsername", source = "userEntity.username")
     @Mapping(target = "reference", source = "productEntity.reference")
-    ProductResponseDto toResponseDto(ProductEntity productEntity, UserEntity userEntity);
+    @Mapping(target = "viewCountOfPeriod", source = "viewCountOfPeriod")
+    ProductResponseDto toResponseDto(ProductEntity productEntity, UserEntity userEntity,
+                                     int viewCountOfPeriod);
 
     @Mapping(target = "titleImage", expression = "java(getProductCoverImage(productEntity))")
     @Mapping(target = "ownerPhoneNumber", source = "userEntity.phoneNumber")

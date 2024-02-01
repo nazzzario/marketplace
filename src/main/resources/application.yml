@@ -25,6 +25,9 @@ cloudinary:
   secret: ${API_SECRET}
 
 product:
+  view:
+    sizeProducts: 10
+    fixedDelay: 30
   sizeListImage: 6
   periodWarning: 5
   disable:

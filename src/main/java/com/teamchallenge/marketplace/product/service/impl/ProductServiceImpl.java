@@ -15,6 +15,7 @@ import com.teamchallenge.marketplace.user.persisit.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.hibernate.annotations.BatchSize;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.*;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.data.redis.core.RedisTemplate;
@@ -35,6 +36,9 @@ public class ProductServiceImpl implements ProductService {
 
     private static final String VIEWS_KEY = "productViews";
 
+    @Value("${product.view.sizeProducts}")
+    private long sizeProductView;
+
     private final ProductRepository productRepository;
     private final UserRepository userRepository;
     private final RedisTemplate<String, String> redisTemplate;
@@ -48,7 +52,9 @@ public class ProductServiceImpl implements ProductService {
         ProductEntity productEntity = productRepository.findByReference(reference)
                 .orElseThrow(() -> new ClientBackendException(ErrorCode.PRODUCT_NOT_FOUND));
         incrementProductViews(reference);
-        return productMapper.toResponseDto(productEntity, productEntity.getOwner());
+        return productMapper.toResponseDto(productEntity, productEntity.getOwner(),
+                Integer.parseInt(Objects.requireNonNull(redisTemplate.opsForHash()
+                        .get(VIEWS_KEY, productEntity.getReference())).toString()));
     }
 
     @Override
@@ -68,7 +74,8 @@ public class ProductServiceImpl implements ProductService {
     @BatchSize(size = 10)
     public List<ProductResponseDto> getAllProducts() {
         return productRepository.findAll().stream()
-                .map(p -> productMapper.toResponseDto(p, p.getOwner()))
+                .map(p -> productMapper.toResponseDto(p, p.getOwner(), Integer.parseInt(Objects.requireNonNull(redisTemplate.opsForHash()
+                        .get(VIEWS_KEY, p.getReference())).toString())))
                 .toList();
     }
 
@@ -79,7 +86,9 @@ public class ProductServiceImpl implements ProductService {
         }
 
         return productRepository.findAll(searchProductsLikeTitleAndCity(productTitle, city), PageRequest.of(page, size))
-                .map(p -> productMapper.toResponseDto(p, p.getOwner()));
+                .map(p -> productMapper.toResponseDto(p, p.getOwner(),
+                        Integer.parseInt(Objects.requireNonNull(redisTemplate.opsForHash()
+                        .get(VIEWS_KEY, p.getReference())).toString())));
     }
 
     // TODO: 11/22/23 cover image
@@ -106,7 +115,9 @@ public class ProductServiceImpl implements ProductService {
         PageRequest pageRequest = PageRequest.of(page, size, Sort.by(sortField.getFiledName()).descending());
 
         return productRepository.findAll(getProductByCategoryWithFilters(category, city, states), pageRequest)
-                .map(p -> productMapper.toResponseDto(p, p.getOwner()));
+                .map(p -> productMapper.toResponseDto(p, p.getOwner(),
+                        Integer.parseInt(Objects.requireNonNull(redisTemplate.opsForHash()
+                        .get(VIEWS_KEY, p.getReference())).toString())));
     }
 
     @Override
@@ -115,22 +126,26 @@ public class ProductServiceImpl implements ProductService {
                 new ClientBackendException(ErrorCode.USER_NOT_FOUND));
 
         return productRepository.findByOwnerAndStatus(user, status, pageable)
-                .map(productEntity -> productMapper.toResponseDto(productEntity,user));
+                .map(productEntity -> productMapper.toResponseDto(productEntity,user,
+                        Integer.parseInt(Objects.requireNonNull(redisTemplate.opsForHash()
+                        .get(VIEWS_KEY, productEntity.getReference())).toString())));
     }
+
 
     public void incrementProductViews(UUID productUUID) {
         redisTemplate.opsForHash().increment(VIEWS_KEY, String.valueOf(productUUID), 1);
+        Long size = redisTemplate.opsForStream().size(VIEWS_KEY);
+        if (size != null && size > sizeProductView) updateDatabase();
     }
 
-    @Scheduled(fixedDelay = 30, timeUnit = TimeUnit.MINUTES)
-    @Transactional
+    @Scheduled(fixedDelayString = "${product.view.fixedDelay}", timeUnit = TimeUnit.HOURS)
     public void updateDatabase() {
         Map<Object, Object> viewsMap = redisTemplate.opsForHash().entries(VIEWS_KEY);
 
         if (!viewsMap.isEmpty()) {
             for (Map.Entry<Object, Object> entry : viewsMap.entrySet()) {
                 UUID productUUID = UUID.fromString((String) entry.getKey());
-                Integer views = Integer.parseInt((String) entry.getValue());
+                int views = Integer.parseInt((String) entry.getValue());
 
                 Optional<ProductEntity> byReference = productRepository.findByReference(productUUID);
                 if (byReference.isPresent()) {
