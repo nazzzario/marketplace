@@ -112,16 +112,9 @@ public class UserProductServiceImpl implements UserProductService {
         if (Objects.nonNull(authentication) && authentication.isAuthenticated() &&
                 userRepository.existsByEmailAndProductsReference(authentication.getName(),
                         productReference) && !status.equals(ProductStatusEnum.NEW)){
-            String email = authentication.getName();
-            UserEntity userEntity = userRepository.findByEmail(email)
-                    .orElseThrow(() -> new ClientBackendException(ErrorCode.USER_NOT_FOUND));
 
             ProductEntity productEntity = productRepository.findByReference(productReference)
                     .orElseThrow(() -> new ClientBackendException(ErrorCode.PRODUCT_NOT_FOUND));
-
-            if (status.equals(ProductStatusEnum.DISABLED) && isExhaustedLimit(userEntity)){
-                throw new ClientBackendException(ErrorCode.LIMIT_IS_EXHAUSTED);
-            }
 
             return productMapper.toResponseDto(getProductAndChangeStatus(productEntity, status,
                     getCorrectPeriod(status)));
@@ -149,11 +142,6 @@ public class UserProductServiceImpl implements UserProductService {
         } else {
             return periodDisabled;
         }
-    }
-
-    private boolean isExhaustedLimit(UserEntity userEntity) {
-        return productRepository.countByOwnerAndStatus(userEntity,
-                ProductStatusEnum.DISABLED) >= sizeProductDisabled;
     }
 
     /**
