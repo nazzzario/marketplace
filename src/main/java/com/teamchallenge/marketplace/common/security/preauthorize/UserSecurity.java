@@ -1,6 +1,8 @@
 package com.teamchallenge.marketplace.common.security.preauthorize;
 
 import com.teamchallenge.marketplace.common.security.bean.UserAccount;
+import com.teamchallenge.marketplace.user.persisit.entity.enums.RoleEnum;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 
@@ -12,7 +14,13 @@ public class UserSecurity {
 
 
     public boolean checkReference(UUID userReference) {
-        UUID principalReference = ((UserAccount) SecurityContextHolder.getContext().getAuthentication().getPrincipal()).getReference();
-        return Objects.equals(userReference, principalReference);
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (Objects.nonNull(authentication) && authentication.isAuthenticated()) {
+            UUID principalReference = ((UserAccount) authentication.getPrincipal()).getReference();
+            return authentication.getAuthorities().stream().anyMatch(role -> role.getAuthority()
+                    .equals(RoleEnum.ADMIN.name())) ||
+                    Objects.equals(userReference, principalReference);
+        }
+        return false;
     }
 }
