@@ -7,7 +7,10 @@ import com.teamchallenge.marketplace.product.dto.response.ProductNewestResponseD
 import com.teamchallenge.marketplace.product.dto.response.ProductResponseDto;
 import com.teamchallenge.marketplace.product.mapper.ProductMapper;
 import com.teamchallenge.marketplace.product.persisit.entity.ProductEntity;
-import com.teamchallenge.marketplace.product.persisit.entity.enums.*;
+import com.teamchallenge.marketplace.product.persisit.entity.enums.ProductCategoriesEnum;
+import com.teamchallenge.marketplace.product.persisit.entity.enums.ProductStateEnum;
+import com.teamchallenge.marketplace.product.persisit.entity.enums.ProductStatusEnum;
+import com.teamchallenge.marketplace.product.persisit.entity.enums.SortingFieldEnum;
 import com.teamchallenge.marketplace.product.persisit.repository.ProductRepository;
 import com.teamchallenge.marketplace.product.service.ProductService;
 import com.teamchallenge.marketplace.user.persisit.entity.UserEntity;
@@ -23,7 +26,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
-import java.util.concurrent.TimeUnit;
 
 import static com.teamchallenge.marketplace.common.specification.CustomSpecification.fieldEqual;
 import static com.teamchallenge.marketplace.common.specification.CustomSpecification.searchLikeString;
@@ -118,19 +120,19 @@ public class ProductServiceImpl implements ProductService {
                 .map(productEntity -> productMapper.toResponseDto(productEntity,user));
     }
 
+
     public void incrementProductViews(UUID productUUID) {
         redisTemplate.opsForHash().increment(VIEWS_KEY, String.valueOf(productUUID), 1);
     }
 
-    @Scheduled(fixedDelay = 30, timeUnit = TimeUnit.MINUTES)
-    @Transactional
+    @Scheduled(cron = "${product.view.cron}")
     public void updateDatabase() {
         Map<Object, Object> viewsMap = redisTemplate.opsForHash().entries(VIEWS_KEY);
 
         if (!viewsMap.isEmpty()) {
             for (Map.Entry<Object, Object> entry : viewsMap.entrySet()) {
                 UUID productUUID = UUID.fromString((String) entry.getKey());
-                Integer views = Integer.parseInt((String) entry.getValue());
+                int views = Integer.parseInt((String) entry.getValue());
 
                 Optional<ProductEntity> byReference = productRepository.findByReference(productUUID);
                 if (byReference.isPresent()) {

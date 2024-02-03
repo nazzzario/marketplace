@@ -25,6 +25,8 @@ cloudinary:
   secret: ${API_SECRET}
 
 product:
+  view:
+    cron: 0 0 0 * * ?
   sizeListImage: 6
   periodWarning: 5
   disable:
