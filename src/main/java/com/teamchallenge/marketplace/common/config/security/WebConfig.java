@@ -1,9 +1,5 @@
 package com.teamchallenge.marketplace.common.config.security;
 
-import com.teamchallenge.marketplace.common.exception.ClientBackendException;
-import com.teamchallenge.marketplace.common.exception.ErrorCode;
-import com.teamchallenge.marketplace.common.security.bean.UserAccount;
-import com.teamchallenge.marketplace.user.persisit.repository.UserRepository;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
@@ -22,7 +18,7 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 @RequiredArgsConstructor
 public class WebConfig {
 
-    private final UserRepository userRepository;
+    private final UserDetailsService userDetailsService;
 
     @Bean
     public WebMvcConfigurer configureCors() {
@@ -38,16 +34,9 @@ public class WebConfig {
     }
 
     @Bean
-    public UserDetailsService userDetailsService() {
-        return username -> userRepository.findByEmail(username)
-                .map(UserAccount::fromUserEntityToCustomUserDetails)
-                .orElseThrow(() -> new ClientBackendException(ErrorCode.USER_NOT_FOUND));
-    }
-
-    @Bean
     public AuthenticationProvider authenticationProvider(){
         DaoAuthenticationProvider authProvider = new DaoAuthenticationProvider();
-        authProvider.setUserDetailsService(userDetailsService());
+        authProvider.setUserDetailsService(userDetailsService);
         authProvider.setPasswordEncoder(passwordEncoder());
         return authProvider;
     }
