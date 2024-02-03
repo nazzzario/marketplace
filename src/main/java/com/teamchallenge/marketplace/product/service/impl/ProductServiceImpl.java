@@ -18,7 +18,6 @@ import com.teamchallenge.marketplace.user.persisit.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.hibernate.annotations.BatchSize;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.*;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.data.redis.core.RedisTemplate;
@@ -37,9 +36,6 @@ import static com.teamchallenge.marketplace.common.specification.CustomSpecifica
 public class ProductServiceImpl implements ProductService {
 
     private static final String VIEWS_KEY = "productViews";
-
-    @Value("${product.view.sizeProducts}")
-    private long sizeProductView;
 
     private final ProductRepository productRepository;
     private final UserRepository userRepository;
