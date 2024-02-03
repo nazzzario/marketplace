@@ -45,7 +45,7 @@ public class PasswordServiceImpl implements PasswordService {
 
         redisTemplate.delete(PASSWORD_RESET_TOKEN_PREFIX + resetToken);
 
-        userByReference.setPassword(requestDto.newPassword());
+        userByReference.setPassword(passwordEncoder.encode(requestDto.newPassword()));
 
     }
 
