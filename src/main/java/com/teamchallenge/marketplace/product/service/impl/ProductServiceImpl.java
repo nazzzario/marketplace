@@ -54,9 +54,7 @@ public class ProductServiceImpl implements ProductService {
         ProductEntity productEntity = productRepository.findByReference(reference)
                 .orElseThrow(() -> new ClientBackendException(ErrorCode.PRODUCT_NOT_FOUND));
         incrementProductViews(reference);
-        return productMapper.toResponseDto(productEntity, productEntity.getOwner(),
-                Integer.parseInt(Objects.requireNonNull(redisTemplate.opsForHash()
-                        .get(VIEWS_KEY, productEntity.getReference())).toString()));
+        return productMapper.toResponseDto(productEntity, productEntity.getOwner());
     }
 
     @Override
@@ -76,8 +74,7 @@ public class ProductServiceImpl implements ProductService {
     @BatchSize(size = 10)
     public List<ProductResponseDto> getAllProducts() {
         return productRepository.findAll().stream()
-                .map(p -> productMapper.toResponseDto(p, p.getOwner(), Integer.parseInt(Objects.requireNonNull(redisTemplate.opsForHash()
-                        .get(VIEWS_KEY, p.getReference())).toString())))
+                .map(p -> productMapper.toResponseDto(p, p.getOwner()))
                 .toList();
     }
 
@@ -88,9 +85,7 @@ public class ProductServiceImpl implements ProductService {
         }
 
         return productRepository.findAll(searchProductsLikeTitleAndCity(productTitle, city), PageRequest.of(page, size))
-                .map(p -> productMapper.toResponseDto(p, p.getOwner(),
-                        Integer.parseInt(Objects.requireNonNull(redisTemplate.opsForHash()
-                        .get(VIEWS_KEY, p.getReference())).toString())));
+                .map(p -> productMapper.toResponseDto(p, p.getOwner()));
     }
 
     // TODO: 11/22/23 cover image
@@ -117,9 +112,7 @@ public class ProductServiceImpl implements ProductService {
         PageRequest pageRequest = PageRequest.of(page, size, Sort.by(sortField.getFiledName()).descending());
 
         return productRepository.findAll(getProductByCategoryWithFilters(category, city, states), pageRequest)
-                .map(p -> productMapper.toResponseDto(p, p.getOwner(),
-                        Integer.parseInt(Objects.requireNonNull(redisTemplate.opsForHash()
-                        .get(VIEWS_KEY, p.getReference())).toString())));
+                .map(p -> productMapper.toResponseDto(p, p.getOwner()));
     }
 
     @Override
@@ -128,9 +121,7 @@ public class ProductServiceImpl implements ProductService {
                 new ClientBackendException(ErrorCode.USER_NOT_FOUND));
 
         return productRepository.findByOwnerAndStatus(user, status, pageable)
-                .map(productEntity -> productMapper.toResponseDto(productEntity,user,
-                        Integer.parseInt(Objects.requireNonNull(redisTemplate.opsForHash()
-                        .get(VIEWS_KEY, productEntity.getReference())).toString())));
+                .map(productEntity -> productMapper.toResponseDto(productEntity,user));
     }
 
 
