@@ -20,7 +20,6 @@ public record ProductResponseDto(UUID reference,
                                  ProductStateEnum state,
                                  ProductStatusEnum status,
                                  long viewCount,
-                                 int viewCountOfPeriod,
                                  LocalDate publishDate,
                                  List<String> images) {
 }
