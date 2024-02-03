@@ -108,4 +108,24 @@ public class UserProductController {
 
         return new ResponseEntity<>(productResponse, HttpStatus.CREATED);
     }
+
+    @Operation(summary = "Raise ad of product", description = "Product owner can raise ad of product by its reference")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "201", description = "Product patched successfully"),
+            @ApiResponse(responseCode = "401", description = "Unauthenticated",
+                    content = {@Content(mediaType = "application/json", schema = @Schema(implementation = ExceptionResponseDto.class))}),
+            @ApiResponse(responseCode = "403", description = "Access denied",
+                    content = {@Content(mediaType = "application/json", schema = @Schema(implementation = ExceptionResponseDto.class))}),
+            @ApiResponse(responseCode = "404", description = "Product not found",
+                    content = {@Content(mediaType = "application/json", schema = @Schema(implementation = ExceptionResponseDto.class))})
+    })
+    @PatchMapping("/{productReference}/active/raise")
+    public ResponseEntity<Void> raiseAddProduct(
+            @Parameter(description = "Product reference", required = true)
+            @PathVariable(name = "productReference") UUID productReference
+    ) {
+        productService.raiseAdProduct(productReference);
+
+        return ResponseEntity.noContent().build();
+    }
 }

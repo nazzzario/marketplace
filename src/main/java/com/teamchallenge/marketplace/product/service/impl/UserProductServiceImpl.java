@@ -2,6 +2,7 @@ package com.teamchallenge.marketplace.product.service.impl;
 
 import com.teamchallenge.marketplace.common.exception.ClientBackendException;
 import com.teamchallenge.marketplace.common.exception.ErrorCode;
+import com.teamchallenge.marketplace.product.constant.ProductConstants;
 import com.teamchallenge.marketplace.product.dto.request.ProductRequestDto;
 import com.teamchallenge.marketplace.product.dto.response.UserProductResponseDto;
 import com.teamchallenge.marketplace.product.mapper.UserProductMapper;
@@ -17,12 +18,16 @@ import com.teamchallenge.marketplace.user.persisit.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.UUID;
 
 @Service
@@ -39,7 +44,7 @@ public class UserProductServiceImpl implements UserProductService {
     private final UserRepository userRepository;
     private final UserProductMapper productMapper;
     private final ProductImageService productImageService;
-
+    private final RedisTemplate<String, String> redisTemplate;
 
     @Override
     public UserProductResponseDto createOrGetNewProduct() {
@@ -51,7 +56,8 @@ public class UserProductServiceImpl implements UserProductService {
         ProductEntity productEntity = productRepository.findByOwnerAndStatus(userEntity, ProductStatusEnum.NEW,
                 PageRequest.of(0, 6)).stream().findFirst().orElse(null);
 
-        return productMapper.toResponseDto(Objects.requireNonNullElseGet(productEntity, () -> getNewProduct(userEntity)));
+        return productMapper.toResponseDto(Objects.requireNonNullElseGet(productEntity, () -> getNewProduct(userEntity)),
+                false);
 
     }
 
@@ -61,13 +67,15 @@ public class UserProductServiceImpl implements UserProductService {
 
         if (Objects.nonNull(authentication) && authentication.isAuthenticated() &&
                 userRepository.existsByEmailAndProductsReference(authentication.getName(),
-                        productReference)){
-        ProductEntity productEntity = productRepository.findByReference(productReference)
-                .orElseThrow(() -> new ClientBackendException(ErrorCode.PRODUCT_NOT_FOUND));
+                        productReference)) {
+            ProductEntity productEntity = productRepository.findByReference(productReference)
+                    .orElseThrow(() -> new ClientBackendException(ErrorCode.PRODUCT_NOT_FOUND));
 
-        productMapper.patchMerge(requestDto, productEntity);
+            productMapper.patchMerge(requestDto, productEntity);
 
-        return productMapper.toResponseDto(productRepository.save(productEntity));
+            return productMapper.toResponseDto(productRepository.save(productEntity),
+                    redisTemplate.opsForHash().hasKey(ProductConstants.RAISE_ADD_PREFIX,
+                            productEntity.getReference()));
         } else {
             throw new ClientBackendException(ErrorCode.UNKNOWN_SERVER_ERROR);
         }
@@ -80,9 +88,9 @@ public class UserProductServiceImpl implements UserProductService {
 
         if (Objects.nonNull(authentication) && authentication.isAuthenticated() &&
                 userRepository.existsByEmailAndProductsReference(authentication.getName(),
-                        productReference)){
-        ProductEntity productEntity = productRepository.findByReference(productReference)
-                .orElseThrow(() -> new ClientBackendException(ErrorCode.PRODUCT_NOT_FOUND));
+                        productReference)) {
+            ProductEntity productEntity = productRepository.findByReference(productReference)
+                    .orElseThrow(() -> new ClientBackendException(ErrorCode.PRODUCT_NOT_FOUND));
 
             userRepository.findByFavoriteProducts(productEntity).forEach(user ->
                     user.getFavoriteProducts().remove(productEntity));
@@ -111,13 +119,14 @@ public class UserProductServiceImpl implements UserProductService {
         var authentication = SecurityContextHolder.getContext().getAuthentication();
         if (Objects.nonNull(authentication) && authentication.isAuthenticated() &&
                 userRepository.existsByEmailAndProductsReference(authentication.getName(),
-                        productReference) && !status.equals(ProductStatusEnum.NEW)){
+                        productReference) && !status.equals(ProductStatusEnum.NEW)) {
 
             ProductEntity productEntity = productRepository.findByReference(productReference)
                     .orElseThrow(() -> new ClientBackendException(ErrorCode.PRODUCT_NOT_FOUND));
 
             return productMapper.toResponseDto(getProductAndChangeStatus(productEntity, status,
-                    getCorrectPeriod(status)));
+                    getCorrectPeriod(status)), redisTemplate.opsForHash().hasKey(
+                            ProductConstants.RAISE_ADD_PREFIX, productEntity.getReference()));
         } else {
             throw new ClientBackendException(ErrorCode.UNKNOWN_SERVER_ERROR);
         }
@@ -131,13 +140,51 @@ public class UserProductServiceImpl implements UserProductService {
         return productRepository.save(product);
     }
 
+    @Override
+    public void raiseAdProduct(UUID productReference) {
+        var authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (Objects.nonNull(authentication) &&
+                authentication.isAuthenticated() &&
+                userRepository.existsByEmailAndProductsReference(authentication.getName(),
+                        productReference) &&
+                Boolean.FALSE.equals(redisTemplate.opsForHash().hasKey(
+                        ProductConstants.RAISE_ADD_PREFIX, productReference))) {
+            redisTemplate.opsForHash().increment(ProductConstants.RAISE_ADD_PREFIX,
+                    productReference, 1);
+        }
+    }
+
+    @Scheduled(cron = "${product.raise.cron}")
+    private void updateDatabase() {
+        Map<Object, Object> adRaiseMap = redisTemplate.opsForHash().entries(
+                ProductConstants.RAISE_ADD_PREFIX);
+
+        if (!adRaiseMap.isEmpty()) {
+            for (Map.Entry<Object, Object> entry : adRaiseMap.entrySet()) {
+                UUID productUUID = UUID.fromString((String) entry.getKey());
+                int count = Integer.parseInt((String) entry.getValue());
+
+                Optional<ProductEntity> byReference = productRepository
+                        .findByReference(productUUID);
+                if (byReference.isPresent()) {
+                    ProductEntity productEntity = byReference.get();
+                    productEntity.setAdRaiseCount(productEntity.getAdRaiseCount() + count);
+                }
+            }
+        }
+
+        redisTemplate.delete(ProductConstants.RAISE_ADD_PREFIX);
+    }
+
+
     /**
      * Period with status Active get period from variable.
      * It with status Disabled get period from variable.
      *
-     * @param status Status of product. */
+     * @param status Status of product.
+     */
     private int getCorrectPeriod(ProductStatusEnum status) {
-        if (status.equals(ProductStatusEnum.ACTIVE)){
+        if (status.equals(ProductStatusEnum.ACTIVE)) {
             return periodsActive;
         } else {
             return periodDisabled;
@@ -148,17 +195,17 @@ public class UserProductServiceImpl implements UserProductService {
      * Create new product with values of first product with status active or default.
      *
      * @param userEntity User is authentication.
-     * */
+     */
     private ProductEntity getNewProduct(UserEntity userEntity) {
         ProductEntity newProductEntity;
 
         ProductEntity firstActiveProduct = productRepository.findByOwnerAndStatus(userEntity,
-                ProductStatusEnum.ACTIVE, PageRequest.of(0, 6))
+                        ProductStatusEnum.ACTIVE, PageRequest.of(0, 6))
                 .stream().findFirst().orElse(null);
 
-        if (firstActiveProduct != null){
+        if (firstActiveProduct != null) {
             newProductEntity = productMapper.toNewEntity(firstActiveProduct);
-        }else {
+        } else {
             newProductEntity = new ProductEntity();
             newProductEntity.setProductTitle("Title");
             newProductEntity.setProductDescription("Description");
