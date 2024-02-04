@@ -2,7 +2,6 @@ package com.teamchallenge.marketplace.product.service.impl;
 
 import com.teamchallenge.marketplace.common.exception.ClientBackendException;
 import com.teamchallenge.marketplace.common.exception.ErrorCode;
-import com.teamchallenge.marketplace.product.constant.ProductConstants;
 import com.teamchallenge.marketplace.product.dto.response.UserProductResponseDto;
 import com.teamchallenge.marketplace.product.mapper.UserProductMapper;
 import com.teamchallenge.marketplace.product.persisit.entity.enums.ProductStatusEnum;
@@ -22,6 +21,8 @@ import java.util.Objects;
 @Service
 @RequiredArgsConstructor
 public class ShowUserProductServiceImpl implements ShowUserProductService {
+    private static final String RAISE_ADD_PREFIX = "raiseAd_";
+
     private final ProductRepository productRepository;
     private final UserRepository userRepository;
     private final UserProductMapper productMapper;
@@ -36,8 +37,7 @@ public class ShowUserProductServiceImpl implements ShowUserProductService {
                     .orElseThrow(() -> new ClientBackendException(ErrorCode.USER_NOT_FOUND));
             return productRepository.findByOwnerAndStatus(userEntity, status, pageable)
                     .map(product ->  productMapper.toResponseDto(product,
-                            redisTemplate.opsForHash().hasKey(ProductConstants.RAISE_ADD_PREFIX,
-                            product.getReference())));
+                            redisTemplate.opsForHash().hasKey(RAISE_ADD_PREFIX, product.getReference().toString())));
         } else {
             throw new ClientBackendException(ErrorCode.UNKNOWN_SERVER_ERROR);
         }
@@ -53,8 +53,8 @@ public class ShowUserProductServiceImpl implements ShowUserProductService {
                     .orElseThrow(() -> new ClientBackendException(ErrorCode.USER_NOT_FOUND));
             return productRepository.findByFavoritismId(userEntity.getId(), pageable)
                     .map(product ->  productMapper.toResponseDto(product,
-                            redisTemplate.opsForHash().hasKey(ProductConstants.RAISE_ADD_PREFIX,
-                                    product.getReference())));
+                            redisTemplate.opsForHash().hasKey(RAISE_ADD_PREFIX,
+                                    product.getReference().toString())));
         } else {
             throw new ClientBackendException(ErrorCode.UNKNOWN_SERVER_ERROR);
         }

@@ -111,7 +111,9 @@ public class UserProductController {
 
     @Operation(summary = "Raise ad of product", description = "Product owner can raise ad of product by its reference")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "201", description = "Product patched successfully"),
+            @ApiResponse(responseCode = "204", description = "Product patched successfully"),
+            @ApiResponse(responseCode = "400", description = "Invalid input",
+                    content = {@Content(mediaType = "application/json", schema = @Schema(implementation = ExceptionResponseDto.class))}),
             @ApiResponse(responseCode = "401", description = "Unauthenticated",
                     content = {@Content(mediaType = "application/json", schema = @Schema(implementation = ExceptionResponseDto.class))}),
             @ApiResponse(responseCode = "403", description = "Access denied",

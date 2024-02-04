@@ -55,8 +55,15 @@ public class ProductController {
             @ApiResponse(responseCode = "200", description = "Product returned")
     })
     @GetMapping
-    public ResponseEntity<List<ProductResponseDto>> getAllProducts() {
-        List<ProductResponseDto> allProducts = productService.getAllProducts();
+    public ResponseEntity<Page<ProductResponseDto>> getAllProducts(
+            @RequestParam(defaultValue = "0") Integer page,
+            @RequestParam(defaultValue = "6") Integer size,
+            @RequestParam(name = "sort", defaultValue = "DATE", required = false) SortingFieldEnum sort,
+            @Parameter(description = "The direction can be asc or desc", name = "direction", schema = @Schema(defaultValue = "desc"))
+            @RequestParam(defaultValue = "desc") String direction
+    ) {
+        Page<ProductResponseDto> allProducts = productService.getAllProducts(sort, direction, PageRequest.of(page, size,
+                Sort.Direction.fromString(direction), sort.getFiledName()));
 
         return new ResponseEntity<>(allProducts, HttpStatus.OK);
     }

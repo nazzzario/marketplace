@@ -40,6 +40,7 @@ public interface UserProductMapper {
     void patchMerge(ProductRequestDto requestDto, @MappingTarget ProductEntity competition);
 
     @Mapping(target = "reference", source = "productEntity.reference")
+    @Mapping(target = "isRaiseAd", source = "isRaiseAd")
     @Mapping(target = "images",
             expression = "java(toListOfImageDto(productEntity.getImages()))")
     UserProductResponseDto toResponseDto(ProductEntity productEntity, boolean isRaiseAd);

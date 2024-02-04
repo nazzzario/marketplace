@@ -21,7 +21,17 @@ import java.util.*;
 public interface ProductRepository extends JpaRepository<ProductEntity, Long>,
                                            PagingAndSortingRepository<ProductEntity, Long>,
                                            JpaSpecificationExecutor<ProductEntity> {
+    String SQL_REQUEST = "select p from ProductEntity p order by (p.viewCount + p.adRaiseCount) desc";
+
     void deleteByReference(UUID reference);
+
+    @Query("select p from ProductEntity p order by (p.viewCount + p.adRaiseCount) desc")
+    @EntityGraph(attributePaths = {"owner", "images"})
+    Page<ProductEntity> getAllByAllCountDesc(Pageable pageable);
+
+    @Query("select p from ProductEntity p order by (p.viewCount + p.adRaiseCount) asc")
+    @EntityGraph(attributePaths = {"owner", "images"})
+    Page<ProductEntity> getAllByAllCountAsc(Pageable pageable);
 
     @EntityGraph(attributePaths = "images")
     Optional<ProductEntity> findByReference(@NonNull UUID reference);

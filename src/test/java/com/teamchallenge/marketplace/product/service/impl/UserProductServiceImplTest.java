@@ -21,6 +21,8 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
+import org.springframework.data.redis.core.HashOperations;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -50,6 +52,10 @@ class UserProductServiceImplTest {
     private ShowUserProductService productService;
 
     @MockBean
+    private RedisTemplate<String, String> redisTemplate;
+    @MockBean
+    private HashOperations<String,Object, Object> hashOperations;
+    @MockBean
     private ProductRepository productRepository;
     @MockBean
     private UserRepository userRepository;
@@ -65,7 +71,8 @@ class UserProductServiceImplTest {
     UserProductImageDto imageDto = new UserProductImageDto("url", UUID.fromString("550e8400-e29b-41d4-a716-446655440000"),1L);
     UserProductResponseDto responseDto = new UserProductResponseDto(reference,
             ProductCategoriesEnum.CLOTHE, "Kiev","Clothe", "Clothe",
-            ProductStateEnum.USED, ProductStatusEnum.ACTIVE, 1, 30 ,LocalDate.parse("2024-01-01"), List.of(imageDto));
+            ProductStateEnum.USED, ProductStatusEnum.ACTIVE, 1, 1, false,
+            30 ,LocalDate.parse("2024-01-01"), List.of(imageDto));
     PageImpl<UserProductResponseDto> pageDto = new PageImpl<>(List.of(responseDto), pageable, 1);
     SecurityContext securityContext;
 
@@ -77,9 +84,11 @@ class UserProductServiceImplTest {
         SecurityContextHolder.setContext(securityContext);
 
         when(authenticationMock.isAuthenticated()).thenReturn(true);
+        when(redisTemplate.opsForHash()).thenReturn(hashOperations);
+        when(hashOperations.hasKey(anyString(), any(UUID.class))).thenReturn(true);
         when(authenticationMock.getName()).thenReturn("fucke@user");
         when(userRepository.findByEmail(anyString())).thenReturn(Optional.of(userEntity));
-        when(productMapper.toResponseDto(any(ProductEntity.class))).thenReturn(responseDto);
+        when(productMapper.toResponseDto(any(ProductEntity.class), anyBoolean())).thenReturn(responseDto);
     }
 
     @SneakyThrows

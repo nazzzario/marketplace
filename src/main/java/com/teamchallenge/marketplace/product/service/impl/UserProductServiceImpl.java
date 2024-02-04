@@ -2,7 +2,6 @@ package com.teamchallenge.marketplace.product.service.impl;
 
 import com.teamchallenge.marketplace.common.exception.ClientBackendException;
 import com.teamchallenge.marketplace.common.exception.ErrorCode;
-import com.teamchallenge.marketplace.product.constant.ProductConstants;
 import com.teamchallenge.marketplace.product.dto.request.ProductRequestDto;
 import com.teamchallenge.marketplace.product.dto.response.UserProductResponseDto;
 import com.teamchallenge.marketplace.product.mapper.UserProductMapper;
@@ -19,20 +18,19 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.redis.core.RedisTemplate;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Map;
 import java.util.Objects;
-import java.util.Optional;
 import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
 public class UserProductServiceImpl implements UserProductService {
+    private static final String RAISE_ADD_PREFIX = "raiseAd_";
+
     @Value("${product.active.periodsDeadline}")
     private int periodsActive;
     @Value("${product.delete.periodDeadline}")
@@ -74,8 +72,8 @@ public class UserProductServiceImpl implements UserProductService {
             productMapper.patchMerge(requestDto, productEntity);
 
             return productMapper.toResponseDto(productRepository.save(productEntity),
-                    redisTemplate.opsForHash().hasKey(ProductConstants.RAISE_ADD_PREFIX,
-                            productEntity.getReference()));
+                    redisTemplate.opsForHash().hasKey(RAISE_ADD_PREFIX,
+                            productEntity.getReference().toString()));
         } else {
             throw new ClientBackendException(ErrorCode.UNKNOWN_SERVER_ERROR);
         }
@@ -97,6 +95,8 @@ public class UserProductServiceImpl implements UserProductService {
 
             productEntity.getImages().forEach(image -> productImageService.processDeleteImage(image.getId()));
 
+            redisTemplate.opsForHash().delete(RAISE_ADD_PREFIX, productEntity.getReference().toString());
+
             productRepository.delete(productEntity);
         } else {
             throw new ClientBackendException(ErrorCode.UNKNOWN_SERVER_ERROR);
@@ -110,6 +110,8 @@ public class UserProductServiceImpl implements UserProductService {
                 user.getFavoriteProducts().remove(productEntity));
 
         productEntity.getImages().forEach(image -> productImageService.processDeleteImage(image.getId()));
+
+        redisTemplate.opsForHash().delete(RAISE_ADD_PREFIX, productEntity.getReference().toString());
 
         productRepository.delete(productEntity);
     }
@@ -125,8 +127,8 @@ public class UserProductServiceImpl implements UserProductService {
                     .orElseThrow(() -> new ClientBackendException(ErrorCode.PRODUCT_NOT_FOUND));
 
             return productMapper.toResponseDto(getProductAndChangeStatus(productEntity, status,
-                    getCorrectPeriod(status)), redisTemplate.opsForHash().hasKey(
-                            ProductConstants.RAISE_ADD_PREFIX, productEntity.getReference()));
+                    getCorrectPeriod(status)), redisTemplate.opsForHash().hasKey(RAISE_ADD_PREFIX,
+                    productEntity.getReference().toString()));
         } else {
             throw new ClientBackendException(ErrorCode.UNKNOWN_SERVER_ERROR);
         }
@@ -147,35 +149,11 @@ public class UserProductServiceImpl implements UserProductService {
                 authentication.isAuthenticated() &&
                 userRepository.existsByEmailAndProductsReference(authentication.getName(),
                         productReference) &&
-                Boolean.FALSE.equals(redisTemplate.opsForHash().hasKey(
-                        ProductConstants.RAISE_ADD_PREFIX, productReference))) {
-            redisTemplate.opsForHash().increment(ProductConstants.RAISE_ADD_PREFIX,
-                    productReference, 1);
-        }
+                Boolean.FALSE.equals(redisTemplate.opsForHash().hasKey(RAISE_ADD_PREFIX,
+                        productReference.toString()))) {
+            redisTemplate.opsForHash().increment(RAISE_ADD_PREFIX, productReference.toString(), 1);
+        } else {throw  new ClientBackendException(ErrorCode.LIMIT_IS_EXHAUSTED);}
     }
-
-    @Scheduled(cron = "${product.raise.cron}")
-    private void updateDatabase() {
-        Map<Object, Object> adRaiseMap = redisTemplate.opsForHash().entries(
-                ProductConstants.RAISE_ADD_PREFIX);
-
-        if (!adRaiseMap.isEmpty()) {
-            for (Map.Entry<Object, Object> entry : adRaiseMap.entrySet()) {
-                UUID productUUID = UUID.fromString((String) entry.getKey());
-                int count = Integer.parseInt((String) entry.getValue());
-
-                Optional<ProductEntity> byReference = productRepository
-                        .findByReference(productUUID);
-                if (byReference.isPresent()) {
-                    ProductEntity productEntity = byReference.get();
-                    productEntity.setAdRaiseCount(productEntity.getAdRaiseCount() + count);
-                }
-            }
-        }
-
-        redisTemplate.delete(ProductConstants.RAISE_ADD_PREFIX);
-    }
-
 
     /**
      * Period with status Active get period from variable.

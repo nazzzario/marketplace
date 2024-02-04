@@ -17,7 +17,7 @@ public interface ProductService {
 
     void createProduct(ProductRequestDto requestDto, UUID userReference);
 
-    List<ProductResponseDto> getAllProducts();
+    Page<ProductResponseDto> getAllProducts(SortingFieldEnum sort, String direction, Pageable pageable);
 
     Page<ProductResponseDto> getProductsByProductTitle(String productTitle, String city,
                                                        Integer page, Integer size);
