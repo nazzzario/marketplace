@@ -7,7 +7,10 @@ import com.teamchallenge.marketplace.product.dto.response.ProductNewestResponseD
 import com.teamchallenge.marketplace.product.dto.response.ProductResponseDto;
 import com.teamchallenge.marketplace.product.mapper.ProductMapper;
 import com.teamchallenge.marketplace.product.persisit.entity.ProductEntity;
-import com.teamchallenge.marketplace.product.persisit.entity.enums.*;
+import com.teamchallenge.marketplace.product.persisit.entity.enums.ProductCategoriesEnum;
+import com.teamchallenge.marketplace.product.persisit.entity.enums.ProductStateEnum;
+import com.teamchallenge.marketplace.product.persisit.entity.enums.ProductStatusEnum;
+import com.teamchallenge.marketplace.product.persisit.entity.enums.SortingFieldEnum;
 import com.teamchallenge.marketplace.product.persisit.repository.ProductRepository;
 import com.teamchallenge.marketplace.product.service.ProductService;
 import com.teamchallenge.marketplace.user.persisit.entity.UserEntity;
@@ -18,12 +21,10 @@ import org.hibernate.annotations.BatchSize;
 import org.springframework.data.domain.*;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.data.redis.core.RedisTemplate;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
-import java.util.concurrent.TimeUnit;
 
 import static com.teamchallenge.marketplace.common.specification.CustomSpecification.fieldEqual;
 import static com.teamchallenge.marketplace.common.specification.CustomSpecification.searchLikeString;
@@ -66,10 +67,17 @@ public class ProductServiceImpl implements ProductService {
     @Override
     @Transactional(readOnly = true)
     @BatchSize(size = 10)
-    public List<ProductResponseDto> getAllProducts() {
-        return productRepository.findAll().stream()
-                .map(p -> productMapper.toResponseDto(p, p.getOwner()))
-                .toList();
+    public Page<ProductResponseDto> getAllProducts(SortingFieldEnum sort, String direction, Pageable pageable) {
+        Page<ProductEntity> page;
+        if (sort.equals(SortingFieldEnum.ALL) && direction.equals("desc")){
+            page = productRepository.getAllByAllCountDesc(pageable);
+        } else if(sort.equals(SortingFieldEnum.ALL)){
+            page = productRepository.getAllByAllCountAsc(pageable);
+        } else {
+            page = productRepository.findAll(pageable);
+        }
+
+        return page.map(product -> productMapper.toResponseDto(product, product.getOwner()));
     }
 
     @Override
@@ -118,29 +126,9 @@ public class ProductServiceImpl implements ProductService {
                 .map(productEntity -> productMapper.toResponseDto(productEntity,user));
     }
 
+
     public void incrementProductViews(UUID productUUID) {
         redisTemplate.opsForHash().increment(VIEWS_KEY, String.valueOf(productUUID), 1);
-    }
-
-    @Scheduled(fixedDelay = 30, timeUnit = TimeUnit.MINUTES)
-    @Transactional
-    public void updateDatabase() {
-        Map<Object, Object> viewsMap = redisTemplate.opsForHash().entries(VIEWS_KEY);
-
-        if (!viewsMap.isEmpty()) {
-            for (Map.Entry<Object, Object> entry : viewsMap.entrySet()) {
-                UUID productUUID = UUID.fromString((String) entry.getKey());
-                Integer views = Integer.parseInt((String) entry.getValue());
-
-                Optional<ProductEntity> byReference = productRepository.findByReference(productUUID);
-                if (byReference.isPresent()) {
-                    ProductEntity productEntity = byReference.get();
-                    productEntity.setViewCount(productEntity.getViewCount() + views);
-                }
-            }
-        }
-
-        redisTemplate.delete(VIEWS_KEY);
     }
 
     @SuppressWarnings(value = "unchecked")

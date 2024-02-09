@@ -28,6 +28,7 @@ public interface ProductMapper {
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "createdDate", ignore = true)
     @Mapping(target = "images", ignore = true)
+    @Mapping(target = "adRaiseCount", ignore = true)
     ProductEntity toEntity(ProductRequestDto requestDto);
 
 
@@ -49,6 +50,7 @@ public interface ProductMapper {
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "createdDate", ignore = true)
     @Mapping(target = "images", ignore = true)
+    @Mapping(target = "adRaiseCount", ignore = true)
     @BeanMapping(nullValuePropertyMappingStrategy = IGNORE)
     void patchMerge(ProductRequestDto requestDto, @MappingTarget ProductEntity competition);
 
@@ -59,6 +61,7 @@ public interface ProductMapper {
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "createdDate", ignore = true)
     @Mapping(target = "images", ignore = true)
+    @Mapping(target = "adRaiseCount", ignore = true)
     @BeanMapping(nullValuePropertyMappingStrategy = SET_TO_NULL)
     void putMerge(ProductRequestDto requestDto, @MappingTarget ProductEntity competition);
 

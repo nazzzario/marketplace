@@ -55,6 +55,8 @@ public class ProductEntity extends BaseEntity {
 
     private long viewCount;
 
+    private long adRaiseCount;
+
     @PrePersist
     public void publishDate() {
         publishDate = LocalDate.now();

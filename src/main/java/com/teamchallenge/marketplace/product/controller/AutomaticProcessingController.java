@@ -32,7 +32,7 @@ public class AutomaticProcessingController {
             @ApiResponse(responseCode = "404", description = "Product by UUID not found",
                     content = {@Content(mediaType = "application/json", schema = @Schema(implementation = ExceptionResponseDto.class))})
     })
-    @PostMapping("/change/{code}")
+    @PutMapping("/change/{code}")
     public ResponseEntity<Void> changeStatus(
             @Parameter(description = "Code start", required = true)
             @PathVariable(name = "code") Integer code
@@ -46,7 +46,7 @@ public class AutomaticProcessingController {
 
     @Operation(summary = "Automatic delete product with status Disabled", description = "Automatic delete older product with" +
             " deadline date in the archive", responses = {
-            @ApiResponse(responseCode = "204", description = "Product change status"),
+            @ApiResponse(responseCode = "204", description = "Delete product"),
             @ApiResponse(responseCode = "400", description = "Invalid input",
                     content = {@Content(mediaType = "application/json", schema = @Schema(implementation = ExceptionResponseDto.class))}),
             @ApiResponse(responseCode = "404", description = "Product by UUID not found",
@@ -54,12 +54,52 @@ public class AutomaticProcessingController {
     })
     @DeleteMapping("/delete/{code}")
     public ResponseEntity<Void> deleteDisableProduct(
-            @Parameter(description = "Product reference", required = true)
+            @Parameter(description = "Code start", required = true)
             @PathVariable(name = "code") Integer code
     ) {
         if (code != CODE){throw new ClientBackendException(ErrorCode.UNKNOWN_SERVER_ERROR);
         }
         productService.deleteDisabledOldProduct();
+
+        return ResponseEntity.noContent().build();
+    }
+
+    @Operation(summary = "Automatic update database from raise ad", description = "Automatic update database from raise ad" +
+            " of product with status ACTIVE", responses = {
+            @ApiResponse(responseCode = "204", description = "Update database"),
+            @ApiResponse(responseCode = "400", description = "Invalid input",
+                    content = {@Content(mediaType = "application/json", schema = @Schema(implementation = ExceptionResponseDto.class))}),
+            @ApiResponse(responseCode = "404", description = "Product by UUID not found",
+                    content = {@Content(mediaType = "application/json", schema = @Schema(implementation = ExceptionResponseDto.class))})
+    })
+    @PatchMapping("/active/raise/{code}")
+    public ResponseEntity<Void> updateDatabaseFromRaiseAd(
+            @Parameter(description = "Code start", required = true)
+            @PathVariable(name = "code") Integer code
+    ) {
+        if (code != CODE){throw new ClientBackendException(ErrorCode.UNKNOWN_SERVER_ERROR);
+        }
+        productService.updateDatabaseFromRaiseAd();
+
+        return ResponseEntity.noContent().build();
+    }
+
+    @Operation(summary = "Automatic update database from view", description = "Automatic update database from view" +
+            " of product with status ACTIVE", responses = {
+            @ApiResponse(responseCode = "204", description = "Update database"),
+            @ApiResponse(responseCode = "400", description = "Invalid input",
+                    content = {@Content(mediaType = "application/json", schema = @Schema(implementation = ExceptionResponseDto.class))}),
+            @ApiResponse(responseCode = "404", description = "Product by UUID not found",
+                    content = {@Content(mediaType = "application/json", schema = @Schema(implementation = ExceptionResponseDto.class))})
+    })
+    @PatchMapping("/active/view/{code}")
+    public ResponseEntity<Void> updateDatabaseFromView(
+            @Parameter(description = "Code start", required = true)
+            @PathVariable(name = "code") Integer code
+    ) {
+        if (code != CODE){throw new ClientBackendException(ErrorCode.UNKNOWN_SERVER_ERROR);
+        }
+        productService.updateDatabaseFromView();
 
         return ResponseEntity.noContent().build();
     }

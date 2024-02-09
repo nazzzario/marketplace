@@ -5,7 +5,9 @@ import lombok.Getter;
 @Getter
 public enum SortingFieldEnum {
     DATE("publishDate"),
-    POPULARITY("viewCount");
+    POPULARITY("viewCount"),
+    RAISE("adRaiseCount"),
+    ALL("publishDate");
 
     private final String filedName;
 

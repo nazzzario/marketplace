@@ -18,6 +18,8 @@ public record UserProductResponseDto(UUID reference,
                                      ProductStateEnum state,
                                      ProductStatusEnum status,
                                      long viewCount,
+                                     long adRaiseCount,
+                                     boolean isRaiseAd,
                                      int timePeriod,
                                      LocalDate publishDate,
                                      List<UserProductImageDto> images) {

@@ -12,6 +12,7 @@ import com.teamchallenge.marketplace.user.persisit.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
@@ -20,9 +21,12 @@ import java.util.Objects;
 @Service
 @RequiredArgsConstructor
 public class ShowUserProductServiceImpl implements ShowUserProductService {
+    private static final String RAISE_ADD_PREFIX = "raiseAd_";
+
     private final ProductRepository productRepository;
     private final UserRepository userRepository;
     private final UserProductMapper productMapper;
+    private final RedisTemplate<String, String> redisTemplate;
 
     @Override
     public Page<UserProductResponseDto> getProductsWithStatusByUser(ProductStatusEnum status, Pageable pageable) {
@@ -32,7 +36,8 @@ public class ShowUserProductServiceImpl implements ShowUserProductService {
             UserEntity userEntity = userRepository.findByEmail(email)
                     .orElseThrow(() -> new ClientBackendException(ErrorCode.USER_NOT_FOUND));
             return productRepository.findByOwnerAndStatus(userEntity, status, pageable)
-                    .map(productMapper::toResponseDto);
+                    .map(product ->  productMapper.toResponseDto(product,
+                            redisTemplate.opsForHash().hasKey(RAISE_ADD_PREFIX, product.getReference().toString())));
         } else {
             throw new ClientBackendException(ErrorCode.UNKNOWN_SERVER_ERROR);
         }
@@ -47,7 +52,9 @@ public class ShowUserProductServiceImpl implements ShowUserProductService {
             UserEntity userEntity = userRepository.findByEmail(email)
                     .orElseThrow(() -> new ClientBackendException(ErrorCode.USER_NOT_FOUND));
             return productRepository.findByFavoritismId(userEntity.getId(), pageable)
-                    .map(productMapper::toResponseDto);
+                    .map(product ->  productMapper.toResponseDto(product,
+                            redisTemplate.opsForHash().hasKey(RAISE_ADD_PREFIX,
+                                    product.getReference().toString())));
         } else {
             throw new ClientBackendException(ErrorCode.UNKNOWN_SERVER_ERROR);
         }
