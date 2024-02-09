@@ -48,34 +48,44 @@ public class AutomaticChangeProductServiceImpl implements AutomaticChangeProduct
      * we check whether there is space in the archive, if there is no space,
      * we delete older products.
      * For use: cron = "${product.cron}".
-     * */
+     */
     @Scheduled(cron = Scheduled.CRON_DISABLED)
     @Async
     @Override
-    public void changeStatusFromActiveToDisabled(){
-        var userActiveProducts = productRepository
+    public void changeStatusFromActiveToDisabled() {
+
+        var activeProducts = productRepository
                 .findByStatusAndTimePeriodAndPublishDateBefore(ProductStatusEnum.ACTIVE,
-                        periodActiveDeadline, getDeadlineDate(periodActiveDeadline))
+                        periodActiveDeadline, getDeadlineDate(periodActiveDeadline));
+
+        var userDisabledProduct = productRepository.findByProductDisabledIn(
+                        activeProducts, ProductStatusEnum.DISABLED, 3)
                 .stream().collect(Collectors.groupingBy(ProductEntity::getOwner));
+
+        var userActiveProducts = activeProducts.stream().collect(
+                Collectors.groupingBy(ProductEntity::getOwner));
+
+        userDisabledProduct.forEach((user, list) -> {
+            long sizeActive = userActiveProducts.entrySet().stream()
+                    .filter(e -> e.getKey().getEmail().equals(user.getEmail()))
+                    .mapToLong(e -> e.getValue().size()).sum();
+
+            deleteOldEntity(list,
+                    (sizeActive + list.size() - 3),
+                    user.getEmail());
+        });
 
         userActiveProducts.forEach(this::processChangeStatus);
     }
 
     private void processChangeStatus(UserEntity user, List<ProductEntity> products) {
-        long countDisabled = productRepository.countByOwnerAndStatus(user,
-                ProductStatusEnum.DISABLED);
-        if(countDisabled > 0 && (products.size() + countDisabled) > sizeProductDisabled){
-            deleteOldEntity(productRepository.findByStatusAndOwner(ProductStatusEnum.DISABLED,
-                    user), (products.size() + countDisabled - sizeProductDisabled),
-                    user.getEmail());
-        }
 
         StringBuilder message = new StringBuilder();
 
         message.append("<h2>Ми перевели статус ваших повідомлень з активного в архів:</h2>")
                 .append(UL);
 
-        products.forEach(product ->{
+        products.forEach(product -> {
             productService.getProductAndChangeStatus(product, ProductStatusEnum.DISABLED,
                     periodDeleteDeadline);
             message.append(LI).append(product.getProductDescription()).append(LI_CLOSE);
@@ -88,7 +98,7 @@ public class AutomaticChangeProductServiceImpl implements AutomaticChangeProduct
     }
 
     private void deleteOldEntity(List<ProductEntity> products, long sizeDeleteEntity, String email) {
-        if (sizeDeleteEntity > 0){
+        if (sizeDeleteEntity > 0) {
             StringBuilder message = new StringBuilder();
 
             message.append("<h2>Ми видалили з архіву ваші старі повідомлення:</h2>")
@@ -111,11 +121,11 @@ public class AutomaticChangeProductServiceImpl implements AutomaticChangeProduct
     /**
      * Delete older product with deadline date in the archive.
      * For use: cron = "${product.cron}".
-     * */
+     */
     @Scheduled(cron = Scheduled.CRON_DISABLED)
     @Async
     @Override
-    public void deleteDisabledOldProduct(){
+    public void deleteDisabledOldProduct() {
         var userDisabledProducts = productRepository
                 .findByStatusAndPublishDateBefore(ProductStatusEnum.DISABLED,
                         getDeadlineDate(periodDeleteDeadline)).stream().collect(Collectors

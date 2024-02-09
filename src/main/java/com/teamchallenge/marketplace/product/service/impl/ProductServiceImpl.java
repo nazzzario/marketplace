@@ -66,13 +66,18 @@ public class ProductServiceImpl implements ProductService {
 
     @Override
     @Transactional(readOnly = true)
+    @BatchSize(size = 10)
     public Page<ProductResponseDto> getAllProducts(SortingFieldEnum sort, String direction, Pageable pageable) {
-        Page<ProductEntity> allCount = direction.equals("desc") ? productRepository.getAllByAllCountDesc(pageable)
-                : productRepository.getAllByAllCountAsc(pageable);
-        return (sort.equals(SortingFieldEnum.ALL)
-                ? allCount
-                : productRepository.findAll(pageable))
-                .map(product -> productMapper.toResponseDto(product, product.getOwner()));
+        Page<ProductEntity> page;
+        if (sort.equals(SortingFieldEnum.ALL) && direction.equals("desc")){
+            page = productRepository.getAllByAllCountDesc(pageable);
+        } else if(sort.equals(SortingFieldEnum.ALL)){
+            page = productRepository.getAllByAllCountAsc(pageable);
+        } else {
+            page = productRepository.findAll(pageable);
+        }
+
+        return page.map(product -> productMapper.toResponseDto(product, product.getOwner()));
     }
 
     @Override

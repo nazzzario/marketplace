@@ -19,17 +19,28 @@ import java.time.LocalDate;
 import java.util.*;
 
 public interface ProductRepository extends JpaRepository<ProductEntity, Long>,
-                                           PagingAndSortingRepository<ProductEntity, Long>,
-                                           JpaSpecificationExecutor<ProductEntity> {
-    String SQL_REQUEST = "select p from ProductEntity p order by (p.viewCount + p.adRaiseCount) desc";
+        PagingAndSortingRepository<ProductEntity, Long>,
+        JpaSpecificationExecutor<ProductEntity> {
+
+    /**
+     * Get products with status disabled by owner with products with status active
+     * and limit in archive
+     */
+    String SQL_REQUEST = """
+            select distinct p from ProductEntity p where p.status = :status and p.owner in
+            (select pd.owner from ProductEntity pd where pd.status = :status
+            group by pd.owner having count(pd) > 0 and (count(pd) +
+            (select count(pa) from ProductEntity pa where pa.owner = pd.owner and
+            pa in :products group by pa.owner) - :size) > 0)
+            """;
 
     void deleteByReference(UUID reference);
 
-    @Query("select p from ProductEntity p order by (p.viewCount + p.adRaiseCount) desc")
+    @Query("select distinct p from ProductEntity p order by (p.viewCount + p.adRaiseCount) desc")
     @EntityGraph(attributePaths = {"owner", "images"})
     Page<ProductEntity> getAllByAllCountDesc(Pageable pageable);
 
-    @Query("select p from ProductEntity p order by (p.viewCount + p.adRaiseCount) asc")
+    @Query("select distinct p from ProductEntity p order by (p.viewCount + p.adRaiseCount) asc")
     @EntityGraph(attributePaths = {"owner", "images"})
     Page<ProductEntity> getAllByAllCountAsc(Pageable pageable);
 
@@ -62,4 +73,10 @@ public interface ProductRepository extends JpaRepository<ProductEntity, Long>,
     List<ProductEntity> findByStatusAndTimePeriodAndPublishDateBefore(ProductStatusEnum status, Integer days, LocalDate deadlineDate);
 
     List<ProductEntity> findByStatusAndOwner(ProductStatusEnum status, UserEntity user);
+
+    @EntityGraph(attributePaths = {"owner", "images"})
+    @Query(SQL_REQUEST)
+    List<ProductEntity> findByProductDisabledIn(@Param("products") List<ProductEntity> activeProducts,
+                                                @Param("status") ProductStatusEnum status,
+                                                @Param("size") long size);
 }
