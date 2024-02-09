@@ -21,7 +21,6 @@ import org.hibernate.annotations.BatchSize;
 import org.springframework.data.domain.*;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.data.redis.core.RedisTemplate;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -68,10 +67,17 @@ public class ProductServiceImpl implements ProductService {
     @Override
     @Transactional(readOnly = true)
     @BatchSize(size = 10)
-    public List<ProductResponseDto> getAllProducts() {
-        return productRepository.findAll().stream()
-                .map(p -> productMapper.toResponseDto(p, p.getOwner()))
-                .toList();
+    public Page<ProductResponseDto> getAllProducts(SortingFieldEnum sort, String direction, Pageable pageable) {
+        Page<ProductEntity> page;
+        if (sort.equals(SortingFieldEnum.ALL) && direction.equals("desc")){
+            page = productRepository.getAllByAllCountDesc(pageable);
+        } else if(sort.equals(SortingFieldEnum.ALL)){
+            page = productRepository.getAllByAllCountAsc(pageable);
+        } else {
+            page = productRepository.findAll(pageable);
+        }
+
+        return page.map(product -> productMapper.toResponseDto(product, product.getOwner()));
     }
 
     @Override
@@ -123,26 +129,6 @@ public class ProductServiceImpl implements ProductService {
 
     public void incrementProductViews(UUID productUUID) {
         redisTemplate.opsForHash().increment(VIEWS_KEY, String.valueOf(productUUID), 1);
-    }
-
-    @Scheduled(cron = "${product.view.cron}")
-    public void updateDatabase() {
-        Map<Object, Object> viewsMap = redisTemplate.opsForHash().entries(VIEWS_KEY);
-
-        if (!viewsMap.isEmpty()) {
-            for (Map.Entry<Object, Object> entry : viewsMap.entrySet()) {
-                UUID productUUID = UUID.fromString((String) entry.getKey());
-                int views = Integer.parseInt((String) entry.getValue());
-
-                Optional<ProductEntity> byReference = productRepository.findByReference(productUUID);
-                if (byReference.isPresent()) {
-                    ProductEntity productEntity = byReference.get();
-                    productEntity.setViewCount(productEntity.getViewCount() + views);
-                }
-            }
-        }
-
-        redisTemplate.delete(VIEWS_KEY);
     }
 
     @SuppressWarnings(value = "unchecked")

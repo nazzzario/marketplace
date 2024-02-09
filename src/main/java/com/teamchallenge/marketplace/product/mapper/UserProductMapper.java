@@ -25,6 +25,7 @@ public interface UserProductMapper {
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "createdDate", ignore = true)
     @Mapping(target = "images", ignore = true)
+    @Mapping(target = "adRaiseCount", ignore = true)
     ProductEntity toNewEntity(ProductEntity requestDto);
 
     @Mapping(target = "status", ignore = true)
@@ -34,13 +35,15 @@ public interface UserProductMapper {
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "createdDate", ignore = true)
     @Mapping(target = "images", ignore = true)
+    @Mapping(target = "adRaiseCount", ignore = true)
     @BeanMapping(nullValuePropertyMappingStrategy = IGNORE)
     void patchMerge(ProductRequestDto requestDto, @MappingTarget ProductEntity competition);
 
     @Mapping(target = "reference", source = "productEntity.reference")
+    @Mapping(target = "isRaiseAd", source = "isRaiseAd")
     @Mapping(target = "images",
             expression = "java(toListOfImageDto(productEntity.getImages()))")
-    UserProductResponseDto toResponseDto(ProductEntity productEntity);
+    UserProductResponseDto toResponseDto(ProductEntity productEntity, boolean isRaiseAd);
 
     UserProductImageDto toImageDto(ProductImageEntity imageEntity);
 
