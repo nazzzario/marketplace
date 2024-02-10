@@ -31,7 +31,6 @@ import java.util.UUID;
 @Service
 @RequiredArgsConstructor
 public class UserProductServiceImpl implements UserProductService {
-    private static final String RAISE_AD_PREFIX = "raiseAd_";
 
     @Value("${product.active.periodsDeadline}")
     private int periodsActive;
@@ -66,8 +65,9 @@ public class UserProductServiceImpl implements UserProductService {
         var authentication = SecurityContextHolder.getContext().getAuthentication();
 
         if (Objects.nonNull(authentication) && authentication.isAuthenticated() &&
-                (authentication.getAuthorities().stream().anyMatch(role -> role.getAuthority()
-                        .matches(RoleEnum.ADMIN.name())) ||
+                (authentication.getAuthorities().stream().anyMatch(role ->
+                        role.getAuthority().equals(RoleEnum.ADMIN.name()) ||
+                        role.getAuthority().equals(RoleEnum.ROOT.name())) ||
                 userRepository.existsByEmailAndProductsReference(authentication.getName(),
                         productReference))) {
             ProductEntity productEntity = productRepository.findByReference(productReference)
@@ -89,8 +89,9 @@ public class UserProductServiceImpl implements UserProductService {
         var authentication = SecurityContextHolder.getContext().getAuthentication();
 
         if (Objects.nonNull(authentication) && authentication.isAuthenticated() &&
-                (authentication.getAuthorities().stream().anyMatch(role -> role.getAuthority()
-                        .matches(RoleEnum.ADMIN.name())) ||
+                (authentication.getAuthorities().stream().anyMatch(role ->
+                        role.getAuthority().equals(RoleEnum.ADMIN.name()) ||
+                                role.getAuthority().equals(RoleEnum.ROOT.name())) ||
                 userRepository.existsByEmailAndProductsReference(authentication.getName(),
                         productReference))) {
             ProductEntity productEntity = productRepository.findByReference(productReference)
@@ -126,8 +127,9 @@ public class UserProductServiceImpl implements UserProductService {
     public UserProductResponseDto changeStatusProduct(UUID productReference, ProductStatusEnum status, int period) {
         var authentication = SecurityContextHolder.getContext().getAuthentication();
         if (Objects.nonNull(authentication) && authentication.isAuthenticated() &&
-                (authentication.getAuthorities().stream().anyMatch(role -> role.getAuthority()
-                        .matches(RoleEnum.ADMIN.name())) ||
+                (authentication.getAuthorities().stream().anyMatch(role ->
+                        role.getAuthority().equals(RoleEnum.ADMIN.name()) ||
+                                role.getAuthority().equals(RoleEnum.ROOT.name())) ||
                 userRepository.existsByEmailAndProductsReference(authentication.getName(),
                         productReference) && !status.equals(ProductStatusEnum.NEW))) {
 

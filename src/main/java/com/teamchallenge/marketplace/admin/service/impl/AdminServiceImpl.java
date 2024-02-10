@@ -22,6 +22,7 @@ public class AdminServiceImpl implements AdminService {
 
     private final UserRepository userRepository;
     private final UserProductService productService;
+
     @Override
     public void blockUser(UUID userReference) {
         var role = ((UserAccount) SecurityContextHolder.getContext().getAuthentication()
@@ -29,7 +30,7 @@ public class AdminServiceImpl implements AdminService {
         var user = userRepository.findByReference(userReference).orElseThrow(() ->
                 new ClientBackendException(ErrorCode.USER_NOT_FOUND));
 
-        if (role.equals(RoleEnum.ROOT) || user.getRole().equals(RoleEnum.USER)){
+        if (role.equals(RoleEnum.ROOT) || user.getRole().equals(RoleEnum.USER)) {
             user.setNonLocked(false);
             userRepository.save(user);
         }
@@ -43,7 +44,7 @@ public class AdminServiceImpl implements AdminService {
                 new ClientBackendException(ErrorCode.USER_NOT_FOUND));
 
         if ((role.equals(RoleEnum.ROOT) && isNotOneUserWithRoleRoot(user)) ||
-                user.getRole().equals(RoleEnum.USER)){
+                user.getRole().equals(RoleEnum.USER)) {
             var products = productService.getAllProductByUser(user);
 
             products.forEach(productService::processDeleteProduct);
@@ -56,8 +57,11 @@ public class AdminServiceImpl implements AdminService {
         var user = userRepository.findByReference(userReference).orElseThrow(() ->
                 new ClientBackendException(ErrorCode.USER_NOT_FOUND));
 
-        if (isNotOneUserWithRoleRoot(user)){
+        if (isNotOneUserWithRoleRoot(user)) {
             user.setRole(role);
+            userRepository.save(user);
+        } else {
+            throw new ClientBackendException(ErrorCode.NOT_ONE_ROOT);
         }
     }
 

@@ -29,6 +29,7 @@ public enum ErrorCode {
             400),
     PASSWORD_NOT_EXISTS("400-008", "Password not exists",
             400),
+    NOT_ONE_ROOT("400-009", "Not one user with role ROOT", 400),
     FORBIDDEN("403-001",
             "Forbidden",
             403),
