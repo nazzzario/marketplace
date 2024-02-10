@@ -16,10 +16,29 @@ public class UserSecurity {
     public boolean checkReference(UUID userReference) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         if (Objects.nonNull(authentication) && authentication.isAuthenticated()) {
-            UUID principalReference = ((UserAccount) authentication.getPrincipal()).getReference();
-            return authentication.getAuthorities().stream().anyMatch(role -> role.getAuthority()
-                    .equals(RoleEnum.ADMIN.name())) ||
-                    Objects.equals(userReference, principalReference);
+            UserAccount account = (UserAccount) authentication.getPrincipal();
+            return account.getRole().equals(RoleEnum.ROOT) ||
+                    account.getRole().equals(RoleEnum.ADMIN) ||
+                    Objects.equals(userReference, account.getReference());
+        }
+        return false;
+    }
+
+    public boolean checkAdminRights(){
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (Objects.nonNull(authentication) && authentication.isAuthenticated()) {
+            UserAccount account = (UserAccount) authentication.getPrincipal();
+            return account.getRole().equals(RoleEnum.ROOT) ||
+                    account.getRole().equals(RoleEnum.ADMIN);
+        }
+        return false;
+    }
+
+    public boolean checkRootRights(){
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (Objects.nonNull(authentication) && authentication.isAuthenticated()) {
+            UserAccount account = (UserAccount) authentication.getPrincipal();
+            return account.getRole().equals(RoleEnum.ROOT);
         }
         return false;
     }

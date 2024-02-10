@@ -79,4 +79,7 @@ public interface ProductRepository extends JpaRepository<ProductEntity, Long>,
     List<ProductEntity> findByProductDisabledIn(@Param("products") List<ProductEntity> activeProducts,
                                                 @Param("status") ProductStatusEnum status,
                                                 @Param("size") long size);
+
+    @EntityGraph(attributePaths = "images")
+    List<ProductEntity> findByOwner(UserEntity user);
 }

@@ -38,8 +38,9 @@ public class ProductImageServiceImpl implements ProductImageService {
         var authentication = SecurityContextHolder.getContext().getAuthentication();
 
         if (Objects.nonNull(authentication) && (authentication.isAuthenticated() &&
-                (authentication.getAuthorities().stream().anyMatch(role -> role.getAuthority()
-                        .matches(RoleEnum.ADMIN.name())) ||
+                (authentication.getAuthorities().stream().anyMatch(role ->
+                        role.getAuthority().equals(RoleEnum.ADMIN.name()) ||
+                                role.getAuthority().equals(RoleEnum.ROOT.name())) ||
                         userRepository.existsByEmailAndProductsReference(authentication.getName(),
                                 productReference)))) {
             ProductEntity productEntity = productRepository.findByReference(productReference)
@@ -72,8 +73,9 @@ public class ProductImageServiceImpl implements ProductImageService {
         var authentication = SecurityContextHolder.getContext().getAuthentication();
 
         if (Objects.nonNull(authentication) && (authentication.isAuthenticated() &&
-                (authentication.getAuthorities().stream().anyMatch(role -> role.getAuthority()
-                        .matches(RoleEnum.ADMIN.name())) ||
+                (authentication.getAuthorities().stream().anyMatch(role ->
+                        role.getAuthority().equals(RoleEnum.ADMIN.name()) ||
+                                role.getAuthority().equals(RoleEnum.ROOT.name())) ||
                         userRepository.existsByEmailAndProductsImagesId(authentication.getName(),
                                 imageId)))) {
             var imageEntity = imageRepository.findById(imageId).orElseThrow(() ->
@@ -103,8 +105,9 @@ public class ProductImageServiceImpl implements ProductImageService {
         var authentication = SecurityContextHolder.getContext().getAuthentication();
 
         if (Objects.nonNull(authentication) && (authentication.isAuthenticated() &&
-                (authentication.getAuthorities().stream().anyMatch(role -> role.getAuthority()
-                        .matches(RoleEnum.ADMIN.name())) ||
+                (authentication.getAuthorities().stream().anyMatch(role ->
+                        role.getAuthority().equals(RoleEnum.ADMIN.name()) ||
+                                role.getAuthority().equals(RoleEnum.ROOT.name())) ||
                         userRepository.existsByEmailAndProductsImagesId(authentication.getName(),
                                 imageId)))) {
             var imageEntity = imageRepository.findById(imageId).orElseThrow(() ->

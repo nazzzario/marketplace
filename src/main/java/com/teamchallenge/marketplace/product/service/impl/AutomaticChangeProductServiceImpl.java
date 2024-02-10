@@ -59,7 +59,7 @@ public class AutomaticChangeProductServiceImpl implements AutomaticChangeProduct
                         periodActiveDeadline, getDeadlineDate(periodActiveDeadline));
 
         var userDisabledProduct = productRepository.findByProductDisabledIn(
-                        activeProducts, ProductStatusEnum.DISABLED, 3)
+                        activeProducts, ProductStatusEnum.DISABLED, sizeProductDisabled)
                 .stream().collect(Collectors.groupingBy(ProductEntity::getOwner));
 
         var userActiveProducts = activeProducts.stream().collect(
@@ -71,7 +71,7 @@ public class AutomaticChangeProductServiceImpl implements AutomaticChangeProduct
                     .mapToLong(e -> e.getValue().size()).sum();
 
             deleteOldEntity(list,
-                    (sizeActive + list.size() - 3),
+                    (sizeActive + list.size() - sizeProductDisabled),
                     user.getEmail());
         });
 
