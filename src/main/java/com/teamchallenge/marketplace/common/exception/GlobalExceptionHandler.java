@@ -1,6 +1,7 @@
 package com.teamchallenge.marketplace.common.exception;
 
 import com.teamchallenge.marketplace.common.exception.dto.ExceptionResponseDto;
+import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -20,6 +21,8 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
 import java.time.LocalDateTime;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
@@ -40,7 +43,6 @@ public class GlobalExceptionHandler {
     @Value("${user.timeout}")
     private long timeout;
 
-    private final HttpServletRequest httpServletRequest;
     private final RedisTemplate<String, String> redisTemplate;
 
     @ExceptionHandler(ClientBackendException.class)
@@ -99,20 +101,19 @@ public class GlobalExceptionHandler {
     }
 
     private String getEmailOrPhone(HttpServletRequest request) {
-        StringBuilder jb = new StringBuilder();
         String line;
-        try {
-            BufferedReader reader = request.getReader();
-            while ((line = reader.readLine()) != null)
-                jb.append(line);
-        } catch (Exception e) { throw new ClientBackendException(ErrorCode.FORBIDDEN); }
 
         try {
-            JSONObject jsonObject = new JSONObject(jb.toString());
+            BufferedReader reader = new BufferedReader(new InputStreamReader(request.getInputStream()));
+            line = reader.lines().reduce("", (accumulator, actual) -> accumulator + actual);
+        } catch (Exception e) { throw new ClientBackendException(ErrorCode.UNKNOWN_SERVER_ERROR); }
+
+        try {
+            JSONObject jsonObject = new JSONObject(line);
             return Optional.ofNullable(jsonObject.getString("email"))
                     .orElse(jsonObject.getString("phone"));
         } catch (JSONException e) {
-            throw new ClientBackendException(ErrorCode.FORBIDDEN);
+            throw new ClientBackendException(ErrorCode.UNKNOWN_SERVER_ERROR);
         }
     }
 
