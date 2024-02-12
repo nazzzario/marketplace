@@ -2,7 +2,6 @@ package com.teamchallenge.marketplace.common.security.controller;
 
 import com.teamchallenge.marketplace.common.exception.ClientBackendException;
 import com.teamchallenge.marketplace.common.exception.ErrorCode;
-import com.teamchallenge.marketplace.common.exception.GlobalExceptionHandler;
 import com.teamchallenge.marketplace.common.exception.dto.ExceptionResponseDto;
 import com.teamchallenge.marketplace.common.security.bean.UserAccount;
 import com.teamchallenge.marketplace.common.security.dto.request.AuthenticationRequest;
@@ -10,6 +9,7 @@ import com.teamchallenge.marketplace.common.security.dto.request.AuthenticationR
 import com.teamchallenge.marketplace.common.security.dto.request.TokenRefreshRequest;
 import com.teamchallenge.marketplace.common.security.dto.response.AuthenticationResponse;
 import com.teamchallenge.marketplace.common.security.service.JwtService;
+import com.teamchallenge.marketplace.common.security.service.SecurityAttempts;
 import com.teamchallenge.marketplace.user.persisit.entity.UserEntity;
 import com.teamchallenge.marketplace.user.persisit.repository.UserRepository;
 import io.swagger.v3.oas.annotations.Operation;
@@ -33,7 +33,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.Optional;
-import java.util.concurrent.TimeUnit;
 
 @RestController
 @RequiredArgsConstructor
@@ -41,10 +40,11 @@ import java.util.concurrent.TimeUnit;
 @Tag(name = "Authentication")
 public class AuthenticationController {
 
-    public static final String REFRESH_TOKEN_PREFIX = "RefreshToken";
-    public static final String VALUE_ZERO = "0";
+    public static final String REFRESH_TOKEN_PREFIX = "RefreshToken_";
     public static final String X_FORWARDED_FOR = "X-FORWARDED-FOR";
     public static final String LIMIT_IP_PREFIX = "LimitIp_";
+    public static final String EXCEPTION_PREFIX = "Exception_";
+    public static final String LIMIT_PREFIX = "Limit_";
 
     @Value("${user.limitation}")
     private int limitation;
@@ -54,6 +54,7 @@ public class AuthenticationController {
     private final AuthenticationManager authenticationManager;
     private final JwtService jwtService;
     private final UserRepository userRepository;
+    private final SecurityAttempts attempts;
     private final RedisTemplate<String, String> redisTemplate;
 
     @PostMapping("/auth")
@@ -70,14 +71,16 @@ public class AuthenticationController {
     @PreAuthorize("isAnonymous()")
     public ResponseEntity<AuthenticationResponse> authenticate(@Valid @RequestBody AuthenticationRequest request) {
 
-        if (Boolean.parseBoolean(redisTemplate.opsForValue().get(GlobalExceptionHandler.LIMIT_EMAIL_PREFIX
-                + request.email()))) {
-            throw new ClientBackendException(ErrorCode.FORBIDDEN);
+        if (attempts.attemptExhausted(LIMIT_PREFIX, EXCEPTION_PREFIX, request.email(),
+                limitation, timeout)) {
+            throw new ClientBackendException(ErrorCode.ATTEMPTS_IS_EXHAUSTED);
         }
 
         authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(request.email(), request.password())
         );
+
+        redisTemplate.opsForHash().delete(EXCEPTION_PREFIX, request.email());
 
         UserEntity userEntity = userRepository.findByEmail(request.email()).orElseThrow();
         String accessToken = jwtService.generateAccessToken(UserAccount.fromUserEntityToCustomUserDetails(userEntity));
@@ -101,14 +104,16 @@ public class AuthenticationController {
     @PreAuthorize("isAnonymous()")
     public ResponseEntity<AuthenticationResponse> authenticate(@Valid @RequestBody AuthenticationRequestPhone request) {
 
-        if (Boolean.parseBoolean(redisTemplate.opsForValue().get(GlobalExceptionHandler.LIMIT_EMAIL_PREFIX
-                + request.phone()))) {
-            throw new ClientBackendException(ErrorCode.FORBIDDEN);
+        if (attempts.attemptExhausted(LIMIT_PREFIX, EXCEPTION_PREFIX, request.phone(),
+                limitation, timeout)) {
+            throw new ClientBackendException(ErrorCode.ATTEMPTS_IS_EXHAUSTED);
         }
 
         authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(request.phone(), request.password())
         );
+
+        redisTemplate.opsForHash().delete(EXCEPTION_PREFIX, request.phone());
 
         UserEntity userEntity = userRepository.findByPhoneNumber(request.phone()).orElseThrow();
         String accessToken = jwtService.generateAccessToken(UserAccount.fromUserEntityToCustomUserDetails(userEntity));
@@ -133,8 +138,9 @@ public class AuthenticationController {
 
         String ip = Optional.ofNullable(request.getHeader(X_FORWARDED_FOR)).orElse(request.getRemoteAddr());
 
-        if (Boolean.parseBoolean(redisTemplate.opsForValue().get(LIMIT_IP_PREFIX + ip))) {
-            throw new ClientBackendException(ErrorCode.FORBIDDEN);
+        if (attempts.attemptExhausted(LIMIT_IP_PREFIX, REFRESH_TOKEN_PREFIX, ip,
+                limitation, timeout)) {
+            throw new ClientBackendException(ErrorCode.ATTEMPTS_IS_EXHAUSTED);
         }
 
         String email = jwtService.getEmailByRefreshToken(token.refreshToken().toString());
@@ -143,6 +149,8 @@ public class AuthenticationController {
             UserEntity userEntity = userRepository.findByEmail(email).orElseThrow(
                     () -> new ClientBackendException(ErrorCode.USER_NOT_FOUND));
 
+            redisTemplate.opsForHash().delete(EXCEPTION_PREFIX, ip);
+
             String accessToken = jwtService.generateAccessToken(UserAccount.fromUserEntityToCustomUserDetails(userEntity));
             String refreshToken = jwtService.generateRefreshToken(userEntity.getEmail());
 
@@ -150,14 +158,6 @@ public class AuthenticationController {
             return new ResponseEntity<>(new AuthenticationResponse(userEntity.getReference(), accessToken, refreshToken),
                     HttpStatus.OK);
         } else {
-            redisTemplate.opsForHash().increment(REFRESH_TOKEN_PREFIX, ip, 1);
-
-            if (Integer.parseInt(Optional.ofNullable((String) redisTemplate.opsForHash().get(REFRESH_TOKEN_PREFIX, ip))
-                    .orElse(VALUE_ZERO)) >= limitation) {
-                redisTemplate.opsForValue().set(LIMIT_IP_PREFIX + ip, Boolean.TRUE.toString(), timeout, TimeUnit.MINUTES);
-                redisTemplate.opsForHash().delete(REFRESH_TOKEN_PREFIX, ip);
-            }
-
             throw new ClientBackendException(ErrorCode.INVALID_SEARCH_INPUT);
         }
     }
