@@ -25,6 +25,12 @@ cloudinary:
   secret: ${API_SECRET}
 
 user:
+  root:
+    credentials:
+      username: root
+      email: root@root.com
+      password: root
+      phone: "+380680000000"
   limitation: 3
   timeout: 15
 
