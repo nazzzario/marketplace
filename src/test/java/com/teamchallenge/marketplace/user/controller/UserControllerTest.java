@@ -1,5 +1,6 @@
 package com.teamchallenge.marketplace.user.controller;
 
+import com.teamchallenge.marketplace.common.security.bean.RootUserInitializer;
 import com.teamchallenge.marketplace.product.persisit.entity.enums.ProductStatusEnum;
 import com.teamchallenge.marketplace.user.service.UserService;
 import lombok.SneakyThrows;
@@ -29,6 +30,8 @@ class UserControllerTest {
     private MockMvc mockMvc;
     @MockBean
     private UserService userService;
+    @MockBean
+    RootUserInitializer rootUser;
 
     @SneakyThrows
     @WithMockUser
