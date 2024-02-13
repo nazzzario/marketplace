@@ -34,6 +34,8 @@ public class UserAccount implements UserDetails {
 
     private RoleEnum role;
 
+    private boolean isNonLocked;
+
     public static UserAccount fromUserEntityToCustomUserDetails(UserEntity user) {
         return UserAccount.builder()
                 .id(user.getId())
@@ -41,6 +43,7 @@ public class UserAccount implements UserDetails {
                 .username(user.getEmail())
                 .password(user.getPassword())
                 .role(user.getRole())
+                .isNonLocked(user.isNonLocked())
                 .build();
     }
 
@@ -57,7 +60,7 @@ public class UserAccount implements UserDetails {
 
     @Override
     public boolean isAccountNonLocked() {
-        return true;
+        return isNonLocked;
     }
 
     @Override

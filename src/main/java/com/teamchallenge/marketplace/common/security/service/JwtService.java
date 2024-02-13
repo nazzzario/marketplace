@@ -24,7 +24,7 @@ public class JwtService {
     private static final String REFRESH_TOKEN_PREFIX = "refreshToken_";
 
     @Value("${spring.security.jwt.refresh-token-time}")
-    private int timeoutToken;
+    private int timeoutRefreshToken;
     @Value("${spring.security.jwt.secret}")
     private String secretKey;
     @Value("${spring.security.jwt.expiration}")
@@ -89,7 +89,7 @@ public class JwtService {
         String oldToken = redisTemplate.opsForValue().getAndSet(REFRESH_EMAIL_PREFIX + userEmail, token);
         if (oldToken != null){
             redisTemplate.delete(oldToken);}
-        redisTemplate.opsForValue().set(REFRESH_TOKEN_PREFIX + token, userEmail, timeoutToken, TimeUnit.HOURS);
+        redisTemplate.opsForValue().set(REFRESH_TOKEN_PREFIX + token, userEmail, timeoutRefreshToken, TimeUnit.DAYS);
         return token;
     }
 

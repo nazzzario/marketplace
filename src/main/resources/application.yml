@@ -24,6 +24,16 @@ cloudinary:
   key: ${API_KEY}
   secret: ${API_SECRET}
 
+user:
+  root:
+    credentials:
+      username: root
+      email: root@root.com
+      password: root
+      phone: "+380680000000"
+  limitation: 3
+  timeout: 15
+
 product:
   view:
     cron: 0 0 0 * * ?

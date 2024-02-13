@@ -9,6 +9,7 @@ import com.teamchallenge.marketplace.product.persisit.entity.ProductImageEntity;
 import com.teamchallenge.marketplace.product.persisit.repository.ProductImageRepository;
 import com.teamchallenge.marketplace.product.persisit.repository.ProductRepository;
 import com.teamchallenge.marketplace.product.service.ProductImageService;
+import com.teamchallenge.marketplace.user.persisit.entity.enums.RoleEnum;
 import com.teamchallenge.marketplace.user.persisit.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
@@ -36,31 +37,34 @@ public class ProductImageServiceImpl implements ProductImageService {
     public UserProductImageDto createImage(UUID productReference, MultipartFile image, boolean isTitleImage) {
         var authentication = SecurityContextHolder.getContext().getAuthentication();
 
-        if (Objects.nonNull(authentication) && authentication.isAuthenticated() &&
-        userRepository.existsByEmailAndProductsReference(authentication.getName(),
-                productReference)){
-        ProductEntity productEntity = productRepository.findByReference(productReference)
-                .orElseThrow(() -> new ClientBackendException(ErrorCode.PRODUCT_NOT_FOUND));
+        if (Objects.nonNull(authentication) && (authentication.isAuthenticated() &&
+                (authentication.getAuthorities().stream().anyMatch(role ->
+                        role.getAuthority().equals(RoleEnum.ADMIN.name()) ||
+                                role.getAuthority().equals(RoleEnum.ROOT.name())) ||
+                        userRepository.existsByEmailAndProductsReference(authentication.getName(),
+                                productReference)))) {
+            ProductEntity productEntity = productRepository.findByReference(productReference)
+                    .orElseThrow(() -> new ClientBackendException(ErrorCode.PRODUCT_NOT_FOUND));
 
-        if (productEntity.getImages().size() >= sizeListImage){
-            throw new ClientBackendException(ErrorCode.LIMIT_IS_EXHAUSTED);
+            if (productEntity.getImages().size() >= sizeListImage) {
+                throw new ClientBackendException(ErrorCode.LIMIT_IS_EXHAUSTED);
+            }
+
+            ProductImageEntity emptyImageEntity = new ProductImageEntity();
+            emptyImageEntity.setImageUrl("");
+            emptyImageEntity.setProduct(productEntity);
+
+            ProductImageEntity transitImageEntity = imageRepository.save(emptyImageEntity);
+            transitImageEntity.setImageUrl(fileUpload.uploadFile(image, emptyImageEntity.getReference()));
+            transitImageEntity.setCover(isTitleImage);
+
+            ProductImageEntity newImageEntity = imageRepository.save(transitImageEntity);
+
+            return new UserProductImageDto(newImageEntity.getImageUrl(), newImageEntity.getReference(),
+                    newImageEntity.getId());
+
         }
-
-        ProductImageEntity emptyImageEntity = new ProductImageEntity();
-        emptyImageEntity.setImageUrl("");
-        emptyImageEntity.setProduct(productEntity);
-
-        ProductImageEntity transitImageEntity = imageRepository.save(emptyImageEntity);
-        transitImageEntity.setImageUrl(fileUpload.uploadFile(image,emptyImageEntity.getReference()));
-        transitImageEntity.setCover(isTitleImage);
-
-        ProductImageEntity newImageEntity = imageRepository.save(transitImageEntity);
-
-        return new UserProductImageDto(newImageEntity.getImageUrl(), newImageEntity.getReference(),
-                newImageEntity.getId());
-        } else {
-            throw new ClientBackendException(ErrorCode.UNKNOWN_SERVER_ERROR);
-        }
+        throw new ClientBackendException(ErrorCode.UNKNOWN_SERVER_ERROR);
     }
 
     @Override
@@ -68,23 +72,27 @@ public class ProductImageServiceImpl implements ProductImageService {
     public UserProductImageDto uploadImages(Long imageId, MultipartFile image) {
         var authentication = SecurityContextHolder.getContext().getAuthentication();
 
-        if (Objects.nonNull(authentication) && authentication.isAuthenticated() &&
-                userRepository.existsByEmailAndProductsImagesId(authentication.getName(),
-                        imageId)){
-        var imageEntity = imageRepository.findById(imageId).orElseThrow(() ->
-                new ClientBackendException(ErrorCode.PRODUCT_NOT_FOUND));
-        imageEntity.setImageUrl(fileUpload.uploadFile(image, imageEntity.getReference()));
+        if (Objects.nonNull(authentication) && (authentication.isAuthenticated() &&
+                (authentication.getAuthorities().stream().anyMatch(role ->
+                        role.getAuthority().equals(RoleEnum.ADMIN.name()) ||
+                                role.getAuthority().equals(RoleEnum.ROOT.name())) ||
+                        userRepository.existsByEmailAndProductsImagesId(authentication.getName(),
+                                imageId)))) {
+            var imageEntity = imageRepository.findById(imageId).orElseThrow(() ->
+                    new ClientBackendException(ErrorCode.PRODUCT_NOT_FOUND));
+            imageEntity.setImageUrl(fileUpload.uploadFile(image, imageEntity.getReference()));
 
-        var updateImageEntity = imageRepository.save(imageEntity);
+            var updateImageEntity = imageRepository.save(imageEntity);
 
-        return new UserProductImageDto(updateImageEntity.getImageUrl(),
-                updateImageEntity.getReference(), updateImageEntity.getId());
+            return new UserProductImageDto(updateImageEntity.getImageUrl(),
+                    updateImageEntity.getReference(), updateImageEntity.getId());
         } else {
             throw new ClientBackendException(ErrorCode.UNKNOWN_SERVER_ERROR);
         }
     }
 
     @Override
+    @Transactional
     public void deleteImage(ProductImageEntity entity) {
         fileUpload.deleteFile(entity.getReference());
 
@@ -96,9 +104,12 @@ public class ProductImageServiceImpl implements ProductImageService {
     public void deleteImage(Long imageId) {
         var authentication = SecurityContextHolder.getContext().getAuthentication();
 
-        if (Objects.nonNull(authentication) && authentication.isAuthenticated() &&
-                userRepository.existsByEmailAndProductsImagesId(authentication.getName(),
-                        imageId)){
+        if (Objects.nonNull(authentication) && (authentication.isAuthenticated() &&
+                (authentication.getAuthorities().stream().anyMatch(role ->
+                        role.getAuthority().equals(RoleEnum.ADMIN.name()) ||
+                                role.getAuthority().equals(RoleEnum.ROOT.name())) ||
+                        userRepository.existsByEmailAndProductsImagesId(authentication.getName(),
+                                imageId)))) {
             var imageEntity = imageRepository.findById(imageId).orElseThrow(() ->
                     new ClientBackendException(ErrorCode.PRODUCT_NOT_FOUND));
             fileUpload.deleteFile(imageEntity.getReference());

@@ -22,12 +22,11 @@ import java.util.stream.Collectors;
 @RestControllerAdvice
 @RequiredArgsConstructor
 public class GlobalExceptionHandler {
-
-    private final HttpServletRequest httpServletRequest;
+    private static final String EXCEPTION_CAUSED_BY_CLASS = "Exception caused by class: {}";
 
     @ExceptionHandler(ClientBackendException.class)
     public ResponseEntity<ExceptionResponseDto> handleClientException(ClientBackendException ex, HttpServletRequest request) {
-        log.error("Exception caused by class: {}", ex.getClass().getName(), ex);
+        log.error(EXCEPTION_CAUSED_BY_CLASS, ex.getClass().getName(), ex);
         ErrorCode.ErrorData errorData = ex.getErrorCode().getErrorData();
         ExceptionResponseDto errorResponse = ExceptionResponseDto.builder()
                 .time(LocalDateTime.now().toString())
@@ -44,7 +43,7 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(AccessDeniedException.class)
     public ResponseEntity<ExceptionResponseDto> handleAccessException(AccessDeniedException ex, HttpServletRequest request){
-        log.error("Exception caused by class: {}", ex.getClass().getName(), ex);
+        log.error(EXCEPTION_CAUSED_BY_CLASS, ex.getClass().getName(), ex);
         ExceptionResponseDto errorResponse = ExceptionResponseDto.builder()
                 .time(LocalDateTime.now().toString())
                 .errorCode(null)
@@ -59,7 +58,7 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(AuthenticationException.class)
     public ResponseEntity<ExceptionResponseDto> handleAuthException(AuthenticationException ex, HttpServletRequest request){
-        log.error("Exception caused by class: {}", ex.getClass().getName(), ex);
+        log.error(EXCEPTION_CAUSED_BY_CLASS, ex.getClass().getName(), ex);
         ExceptionResponseDto errorResponse = ExceptionResponseDto.builder()
                 .time(LocalDateTime.now().toString())
                 .errorCode(null)
@@ -75,7 +74,7 @@ public class GlobalExceptionHandler {
     // TODO: 11/1/23 add more specific exception handling 
     @ExceptionHandler({IllegalArgumentException.class, HttpMessageNotReadableException.class})
     public ResponseEntity<ExceptionResponseDto> handleIllegalArgumentException(RuntimeException ex, HttpServletRequest request){
-        log.error("Exception caused by class: {}", ex.getClass().getName(), ex);
+        log.error(EXCEPTION_CAUSED_BY_CLASS, ex.getClass().getName(), ex);
         ExceptionResponseDto errorResponse = ExceptionResponseDto.builder()
                 .time(LocalDateTime.now().toString())
                 .errorCode(null)
@@ -91,7 +90,7 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ExceptionResponseDto> handleExceptions(Exception ex, HttpServletRequest request) {
-        log.error("Exception caused by class: {}", ex.getClass().getName(), ex);
+        log.error(EXCEPTION_CAUSED_BY_CLASS, ex.getClass().getName(), ex);
         ExceptionResponseDto errorResponse = ExceptionResponseDto.builder()
                 .time(LocalDateTime.now().toString())
                 .errorCode(null)
@@ -106,7 +105,7 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<ExceptionResponseDto> handleValidationExceptions(MethodArgumentNotValidException ex, HttpServletRequest request) {
-        log.error("Exception caused by class: {}", ex.getClass().getName(), ex);
+        log.error(EXCEPTION_CAUSED_BY_CLASS, ex.getClass().getName(), ex);
         String errorMessage = ex.getBindingResult()
                 .getFieldErrors()
                 .stream()

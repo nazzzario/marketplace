@@ -3,6 +3,7 @@ package com.teamchallenge.marketplace.user.persisit.repository;
 import com.teamchallenge.marketplace.product.persisit.entity.ProductEntity;
 import com.teamchallenge.marketplace.product.persisit.entity.enums.ProductStatusEnum;
 import com.teamchallenge.marketplace.user.persisit.entity.UserEntity;
+import com.teamchallenge.marketplace.user.persisit.entity.enums.RoleEnum;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -34,4 +35,6 @@ public interface UserRepository extends JpaRepository<UserEntity, Long> {
     boolean existsByEmailAndProductsImagesId(String email, Long imageId);
 
     List<UserEntity> findByFavoriteProducts(ProductEntity productEntity);
+
+    long countByRole(RoleEnum roleEnum);
 }

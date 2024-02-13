@@ -34,7 +34,9 @@ public class UserFavoriteProductServiceImpl implements UserFavoriteProductServic
             ProductEntity productEntity = productRepository.findByReference(productReference)
                     .orElseThrow(() -> new ClientBackendException(ErrorCode.PRODUCT_NOT_FOUND));
 
-            userEntity.getFavoriteProducts().add(productEntity);
+            if (userEntity != null && productEntity != null) {
+                userEntity.getFavoriteProducts().add(productEntity);
+            }
         } else {
             throw new ClientBackendException(ErrorCode.CANNOT_ADD_PRODUCT_TO_FAVORITE);
         }
@@ -58,4 +60,5 @@ public class UserFavoriteProductServiceImpl implements UserFavoriteProductServic
             throw new ClientBackendException(ErrorCode.CANNOT_ADD_PRODUCT_TO_FAVORITE);
         }
     }
+
 }
