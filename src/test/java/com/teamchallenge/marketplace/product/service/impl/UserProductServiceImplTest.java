@@ -1,5 +1,6 @@
 package com.teamchallenge.marketplace.product.service.impl;
 
+import com.teamchallenge.marketplace.common.security.bean.RootUserInitializer;
 import com.teamchallenge.marketplace.product.dto.response.UserProductImageDto;
 import com.teamchallenge.marketplace.product.dto.response.UserProductResponseDto;
 import com.teamchallenge.marketplace.product.mapper.UserProductMapper;
@@ -63,6 +64,8 @@ class UserProductServiceImplTest {
     private UserProductMapper productMapper;
     @MockBean
     private Authentication authenticationMock;
+    @MockBean
+    RootUserInitializer rootUser;
 
     UserEntity userEntity = new UserEntity();
     PageRequest pageable = PageRequest.of(0, 6, Sort.by("id"));

@@ -1,5 +1,6 @@
 package com.teamchallenge.marketplace.product.service.impl;
 
+import com.teamchallenge.marketplace.common.security.bean.RootUserInitializer;
 import com.teamchallenge.marketplace.product.dto.response.ProductResponseDto;
 import com.teamchallenge.marketplace.product.mapper.ProductMapper;
 import com.teamchallenge.marketplace.product.persisit.entity.ProductEntity;
@@ -45,6 +46,8 @@ class ProductServiceImplTest {
     private RedisTemplate<String, String> redisTemplate;
     @MockBean
     private ProductMapper productMapper;
+    @MockBean
+    RootUserInitializer rootUser;
 
     @Test
     void getProductByReferenceUser() {
