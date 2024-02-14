@@ -6,7 +6,6 @@ import com.teamchallenge.marketplace.common.exception.ErrorCode;
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
@@ -22,8 +21,6 @@ import java.nio.charset.StandardCharsets;
 @Service
 @RequiredArgsConstructor
 public class EmailServiceImpl implements EmailService {
-    @Value("${mail.template.path.user}")
-    private String userTemplatePath;
 
     private final JavaMailSender javaMailSender;
 
@@ -55,8 +52,8 @@ public class EmailServiceImpl implements EmailService {
     }
 
     @Override
-    public String buildMsgForUser(String message) {
-        String emailTemplate = readHtmlTemplateFromFile(userTemplatePath);
+    public String buildMsgForUser(String path, String message) {
+        String emailTemplate = readHtmlTemplateFromFile(path);
 
         emailTemplate = emailTemplate.replace("{{message}}", message);
         return emailTemplate;

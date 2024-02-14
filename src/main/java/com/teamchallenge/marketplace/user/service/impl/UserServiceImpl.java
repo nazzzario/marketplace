@@ -1,7 +1,9 @@
 package com.teamchallenge.marketplace.user.service.impl;
 
+import com.teamchallenge.marketplace.common.email.service.EmailService;
 import com.teamchallenge.marketplace.common.exception.ClientBackendException;
 import com.teamchallenge.marketplace.common.exception.ErrorCode;
+import com.teamchallenge.marketplace.common.security.service.SecurityAttempts;
 import com.teamchallenge.marketplace.product.persisit.entity.enums.ProductStatusEnum;
 import com.teamchallenge.marketplace.user.dto.request.UserPasswordRequestDto;
 import com.teamchallenge.marketplace.user.dto.request.UserPatchRequestDto;
@@ -15,6 +17,7 @@ import com.teamchallenge.marketplace.user.service.UserService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.Authentication;
@@ -25,15 +28,29 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Objects;
 import java.util.UUID;
+import java.util.concurrent.ThreadLocalRandom;
 
 @Slf4j
 @Service
 @RequiredArgsConstructor
 public class UserServiceImpl implements UserService {
+    private static final String EXCEPTION_PREFIX = "Exception_";
+    private static final String LIMIT_PREFIX = "Limit_";
+
+    @Value("${user.max.value}")
+    private int maxValue;
+    @Value("${user.limitation}")
+    private int limitation;
+    @Value("${user.timeout}")
+    private long timeout;
+    @Value("${mail.template.path.user}")
+    private String userTemplatePath;
 
     private final UserRepository userRepository;
     private final UserMapper userMapper;
+    private final SecurityAttempts attempts;
     private final PasswordEncoder passwordEncoder;
+    private final EmailService emailService;
 
     @Override
     @Transactional
@@ -85,6 +102,28 @@ public class UserServiceImpl implements UserService {
     public Page<UserResponseDto> getUserByStatusProduct(ProductStatusEnum status, Pageable pageable) {
         return userRepository.findDistinctByProductsStatus(status, pageable)
                 .map(userMapper::toResponseDto);
+    }
+
+    @Override
+    public void sendVerificationCode(String email, String ip) {
+        if (attempts.attemptExhausted(LIMIT_PREFIX, EXCEPTION_PREFIX, ip,
+                limitation, timeout) || attempts.isSingleAttempt(LIMIT_PREFIX, timeout)) {
+            throw new ClientBackendException(ErrorCode.ATTEMPTS_IS_EXHAUSTED);
+        }
+        emailService.sendEmail(email, emailService.buildMsgForUser(userTemplatePath,
+                getMessageAboutVerificationCode()), "Веріфікаційний код для підтвердження пошти.");
+    }
+
+    private String getMessageAboutVerificationCode() {
+        return new StringBuilder("<h2>Ми надіслали код для підтвердження пошти.</h2>")
+                .append("<h3>Код: ").append(getVerificationCode()).append("</h3>")
+                .append("<h3>Введіть цей код в форму</h3>").toString();
+    }
+
+    private String getVerificationCode() {
+        int randomNumber = ThreadLocalRandom.current().nextInt(maxValue);
+        String format = "%0" + String.valueOf(maxValue).length() + "d";
+        return String.format(format, randomNumber);
     }
 
     @Override

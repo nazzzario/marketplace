@@ -33,6 +33,8 @@ user:
       phone: "+380680000000"
   limitation: 3
   timeout: 15
+  max:
+    value: 999999
 
 product:
   view:

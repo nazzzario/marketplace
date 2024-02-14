@@ -24,4 +24,6 @@ public interface UserService {
     Page<UserResponseDto> getUserByStatusProduct(ProductStatusEnum status, Pageable pageable);
 
     void patchPassword(UserPasswordRequestDto requestDto);
+
+    void sendVerificationCode(String email, String ip);
 }

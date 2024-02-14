@@ -31,4 +31,18 @@ public class SecurityAttempts {
 
         return false;
     }
+
+    public void delete(String exceptionPrefix, String key) {
+        redisTemplate.opsForHash().delete(exceptionPrefix, key);
+    }
+
+    public boolean isSingleAttempt(String blockedPrefix, long timeout) {
+        if (Boolean.parseBoolean(redisTemplate.opsForValue().get(blockedPrefix))) {
+            return true;
+        }
+
+        redisTemplate.opsForValue().set(blockedPrefix, Boolean.TRUE.toString(), timeout, TimeUnit.MINUTES);
+
+        return false;
+    }
 }

@@ -16,8 +16,9 @@ public interface EmailService {
     /**
      * Builds a message for a user.
      *
+     * @param path    The path of html document
      * @param message The message text to be sent in the email.
      * @return A formatted html-message string for user.
      */
-    String buildMsgForUser(String message);
+    String buildMsgForUser(String path, String message);
 }

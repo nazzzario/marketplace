@@ -1,6 +1,7 @@
 package com.teamchallenge.marketplace.user.controller;
 
 import com.teamchallenge.marketplace.common.exception.dto.ExceptionResponseDto;
+import com.teamchallenge.marketplace.password.dto.request.PasswordResetTokenRequestDto;
 import com.teamchallenge.marketplace.product.persisit.entity.enums.ProductStatusEnum;
 import com.teamchallenge.marketplace.user.dto.request.UserPasswordRequestDto;
 import com.teamchallenge.marketplace.user.dto.request.UserPatchRequestDto;
@@ -14,6 +15,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -24,6 +26,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Optional;
 import java.util.UUID;
 
 @RestController
@@ -31,6 +34,7 @@ import java.util.UUID;
 @RequestMapping("/api/v1/")
 @Tag(name = "User")
 public class UserController {
+    private static final String X_FORWARDED_FOR = "X-FORWARDED-FOR";
 
     private final UserService userService;
 
@@ -86,6 +90,21 @@ public class UserController {
         UserResponseDto createdUser = userService.userRegistration(requestDto);
 
         return new ResponseEntity<>(createdUser, HttpStatus.CREATED);
+    }
+
+    @Operation(summary = "Send verification code", description = "Send user verification code")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "201", description = "User created"),
+            @ApiResponse(responseCode = "403", description = "Invalid user data",
+                    content = {@Content(mediaType = "application/json", schema = @Schema(implementation = ExceptionResponseDto.class))}),
+    })
+    @PostMapping("public/users/send/code")
+    public ResponseEntity<Void> sendVerificationCode(@Valid PasswordResetTokenRequestDto email, HttpServletRequest request){
+        String ip = Optional.ofNullable(request.getHeader(X_FORWARDED_FOR)).orElse(request.getRemoteAddr());
+
+        userService.sendVerificationCode(email.email(), ip);
+
+        return ResponseEntity.noContent().build();
     }
 
     @Operation(summary = "Edit user information", description = "Change user data by it reference. " +
