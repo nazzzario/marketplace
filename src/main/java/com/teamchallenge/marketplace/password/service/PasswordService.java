@@ -5,7 +5,7 @@ import com.teamchallenge.marketplace.password.dto.request.PasswordResetTokenRequ
 
 public interface PasswordService {
 
-    void changeForgottenPassword(String resetToken, PasswordResetRequestDto requestDto);
+    void changeForgottenPassword(String resetToken, PasswordResetRequestDto requestDto, String ip);
 
-    void sendResetPasswordToken(PasswordResetTokenRequestDto resetRequestDto);
+    void sendResetPasswordToken(PasswordResetTokenRequestDto resetRequestDto, String ip);
 }

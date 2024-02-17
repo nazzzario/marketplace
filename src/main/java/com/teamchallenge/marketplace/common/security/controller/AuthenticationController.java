@@ -21,7 +21,6 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -40,11 +39,11 @@ import java.util.Optional;
 @Tag(name = "Authentication")
 public class AuthenticationController {
 
-    public static final String REFRESH_TOKEN_PREFIX = "RefreshToken_";
-    public static final String X_FORWARDED_FOR = "X-FORWARDED-FOR";
-    public static final String LIMIT_IP_PREFIX = "LimitIp_";
-    public static final String EXCEPTION_PREFIX = "Exception_";
-    public static final String LIMIT_PREFIX = "Limit_";
+    private static final String REFRESH_TOKEN_PREFIX = "RefreshToken_";
+    private static final String X_FORWARDED_FOR = "X-FORWARDED-FOR";
+    private static final String LIMIT_IP_PREFIX = "LimitIp_";
+    private static final String EXCEPTION_AUTH_PREFIX = "ExceptionAuth_";
+    private static final String LIMIT_AUTH_PREFIX = "LimitAuth_";
 
     @Value("${user.limitation}")
     private int limitation;
@@ -55,7 +54,6 @@ public class AuthenticationController {
     private final JwtService jwtService;
     private final UserRepository userRepository;
     private final SecurityAttempts attempts;
-    private final RedisTemplate<String, String> redisTemplate;
 
     @PostMapping("/auth")
     @Operation(summary = "Authenticate user", description = "Input user credentials to get JWT token and refresh token")
@@ -71,16 +69,18 @@ public class AuthenticationController {
     @PreAuthorize("isAnonymous()")
     public ResponseEntity<AuthenticationResponse> authenticate(@Valid @RequestBody AuthenticationRequest request) {
 
-        if (attempts.attemptExhausted(LIMIT_PREFIX, EXCEPTION_PREFIX, request.email(),
-                limitation, timeout)) {
+        if (attempts.isAttemptExhausted(LIMIT_AUTH_PREFIX, request.email())) {
             throw new ClientBackendException(ErrorCode.ATTEMPTS_IS_EXHAUSTED);
         }
+
+        attempts.incrementCounterAttempt(LIMIT_AUTH_PREFIX, EXCEPTION_AUTH_PREFIX, request.email(),
+                limitation, timeout);
 
         authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(request.email(), request.password())
         );
 
-        redisTemplate.opsForHash().delete(EXCEPTION_PREFIX, request.email());
+        attempts.delete(EXCEPTION_AUTH_PREFIX, request.email());
 
         UserEntity userEntity = userRepository.findByEmail(request.email()).orElseThrow();
         String accessToken = jwtService.generateAccessToken(UserAccount.fromUserEntityToCustomUserDetails(userEntity));
@@ -104,16 +104,18 @@ public class AuthenticationController {
     @PreAuthorize("isAnonymous()")
     public ResponseEntity<AuthenticationResponse> authenticate(@Valid @RequestBody AuthenticationRequestPhone request) {
 
-        if (attempts.attemptExhausted(LIMIT_PREFIX, EXCEPTION_PREFIX, request.phone(),
-                limitation, timeout)) {
+        if (attempts.isAttemptExhausted(LIMIT_AUTH_PREFIX, request.phone())) {
             throw new ClientBackendException(ErrorCode.ATTEMPTS_IS_EXHAUSTED);
         }
+
+        attempts.incrementCounterAttempt(LIMIT_AUTH_PREFIX, EXCEPTION_AUTH_PREFIX, request.phone(),
+                limitation, timeout);
 
         authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(request.phone(), request.password())
         );
 
-        redisTemplate.opsForHash().delete(EXCEPTION_PREFIX, request.phone());
+        attempts.delete(EXCEPTION_AUTH_PREFIX, request.phone());
 
         UserEntity userEntity = userRepository.findByPhoneNumber(request.phone()).orElseThrow();
         String accessToken = jwtService.generateAccessToken(UserAccount.fromUserEntityToCustomUserDetails(userEntity));
@@ -138,10 +140,12 @@ public class AuthenticationController {
 
         String ip = Optional.ofNullable(request.getHeader(X_FORWARDED_FOR)).orElse(request.getRemoteAddr());
 
-        if (attempts.attemptExhausted(LIMIT_IP_PREFIX, REFRESH_TOKEN_PREFIX, ip,
-                limitation, timeout)) {
+        if (attempts.isAttemptExhausted(LIMIT_IP_PREFIX, ip)) {
             throw new ClientBackendException(ErrorCode.ATTEMPTS_IS_EXHAUSTED);
         }
+
+        attempts.incrementCounterAttempt(LIMIT_IP_PREFIX, REFRESH_TOKEN_PREFIX, ip,
+                limitation, timeout);
 
         String email = jwtService.getEmailByRefreshToken(token.refreshToken().toString());
 
@@ -149,7 +153,7 @@ public class AuthenticationController {
             UserEntity userEntity = userRepository.findByEmail(email).orElseThrow(
                     () -> new ClientBackendException(ErrorCode.USER_NOT_FOUND));
 
-            redisTemplate.opsForHash().delete(EXCEPTION_PREFIX, ip);
+            attempts.delete(EXCEPTION_AUTH_PREFIX, ip);
 
             String accessToken = jwtService.generateAccessToken(UserAccount.fromUserEntityToCustomUserDetails(userEntity));
             String refreshToken = jwtService.generateRefreshToken(userEntity.getEmail());

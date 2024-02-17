@@ -32,7 +32,9 @@ user:
       password: root
       phone: "+380680000000"
   limitation: 3
-  timeout: 15
+  timeout: 2
+  max:
+    value: 9999
 
 product:
   view:

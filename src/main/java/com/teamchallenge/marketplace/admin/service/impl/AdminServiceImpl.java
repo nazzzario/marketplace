@@ -31,7 +31,7 @@ public class AdminServiceImpl implements AdminService {
                 new ClientBackendException(ErrorCode.USER_NOT_FOUND));
 
         if (role.equals(RoleEnum.ROOT) || user.getRole().equals(RoleEnum.USER)) {
-            user.setNonLocked(false);
+            user.setNonLocked(!user.isNonLocked());
             userRepository.save(user);
         }
     }

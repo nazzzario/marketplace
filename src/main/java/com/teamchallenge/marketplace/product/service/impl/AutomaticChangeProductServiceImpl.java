@@ -37,6 +37,9 @@ public class AutomaticChangeProductServiceImpl implements AutomaticChangeProduct
     private long sizeProductDisabled;
     @Value("${product.active.periodsDeadline}")
     private int periodActiveDeadline;
+    @Value("${mail.template.path.user}")
+    private String userTemplatePath;
+
 
     private final ProductRepository productRepository;
     private final UserProductService productService;
@@ -92,7 +95,7 @@ public class AutomaticChangeProductServiceImpl implements AutomaticChangeProduct
         });
 
         message.append(UL_CLOSE).append(CONDITIONS);
-        emailService.sendEmail(user.getEmail(), emailService.buildMsgForUser(message.toString()),
+        emailService.sendEmail(user.getEmail(), emailService.buildMsgForUser(userTemplatePath, message.toString()),
                 "Автоматичний переведення просрочених повідомлень");
 
     }
@@ -109,7 +112,7 @@ public class AutomaticChangeProductServiceImpl implements AutomaticChangeProduct
                         message.append(LI).append(product.getProductDescription()).append(LI_CLOSE);
                     });
             message.append("<h3>Це потрібно для внесення в архів нових повідомлень</h3>");
-            emailService.sendEmail(email, emailService.buildMsgForUser(message.toString()),
+            emailService.sendEmail(email, emailService.buildMsgForUser(userTemplatePath, message.toString()),
                     "Автоматичне видалення зайвих повідомлень");
         }
     }
@@ -145,7 +148,7 @@ public class AutomaticChangeProductServiceImpl implements AutomaticChangeProduct
         });
         message.append(UL_CLOSE).append(CONDITIONS);
 
-        emailService.sendEmail(email, emailService.buildMsgForUser(message.toString()),
+        emailService.sendEmail(email, emailService.buildMsgForUser(userTemplatePath, message.toString()),
                 "Автоматичний видалення просрочених повідомлень");
     }
 

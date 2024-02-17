@@ -24,7 +24,8 @@ public class AdminController {
 
     private final AdminService adminService;
 
-    @Operation(summary = "Block user by the admin", description = "Block user by the admin")
+    @Operation(summary = "Block, unblock user by the admin", description = "If user unblock request block user or " +
+            "user block request unblock user by the admin")
 
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Patched user"),
