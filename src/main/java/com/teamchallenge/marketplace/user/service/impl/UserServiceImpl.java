@@ -35,7 +35,8 @@ import java.util.concurrent.ThreadLocalRandom;
 @RequiredArgsConstructor
 public class UserServiceImpl implements UserService {
     private static final String EXCEPTION_PREFIX = "Exception_";
-    private static final String LIMIT_PREFIX = "Limit_";
+    private static final String LIMIT_VERIFICATION_PREFIX = "LimitVerification_";
+    public static final String VERIFICATION_CODE = "VerificationCode_";
 
     @Value("${user.max.value}")
     private int maxValue;
@@ -55,14 +56,29 @@ public class UserServiceImpl implements UserService {
     @Override
     @Transactional
     public UserResponseDto userRegistration(UserRequestDto requestDto) {
+        if (attempts.isAttemptExhausted(LIMIT_VERIFICATION_PREFIX, requestDto.email())){
+            throw new ClientBackendException(ErrorCode.ATTEMPTS_IS_EXHAUSTED);
+        }
+
         if (userRepository.existsByEmail(requestDto.email())) {
             throw new ClientBackendException(ErrorCode.EMAIL_ALREADY_EXISTS);
         }
+
+        if (attempts.isNotVerificationCode(VERIFICATION_CODE + requestDto.email(),
+                requestDto.verificationCode())){
+            attempts.incrementCounterAttempt(LIMIT_VERIFICATION_PREFIX, EXCEPTION_PREFIX,
+                    requestDto.email(), limitation, timeout);
+            throw new ClientBackendException(ErrorCode.IS_NOT_VERIFICATION);
+        }
+
+        attempts.deleteVerificationCode(VERIFICATION_CODE + requestDto.email());
+
         UserEntity userEntity = userMapper.toEntity(requestDto);
         userEntity.setPassword(passwordEncoder.encode(requestDto.password()));
         userEntity.setRole(RoleEnum.USER);
         UserEntity savedUser = userRepository.save(userEntity);
 
+        attempts.delete(LIMIT_VERIFICATION_PREFIX, requestDto.email());
         return userMapper.toResponseDto(savedUser);
     }
 
@@ -105,18 +121,26 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    @Transactional
     public void sendVerificationCode(String email, String ip) {
-        if (attempts.attemptExhausted(LIMIT_PREFIX, EXCEPTION_PREFIX, ip,
-                limitation, timeout) || attempts.isSingleAttempt(LIMIT_PREFIX, timeout)) {
+        if (attempts.isAttemptExhausted(LIMIT_VERIFICATION_PREFIX, ip) ||
+                attempts.isUsedSingleAttempt(LIMIT_VERIFICATION_PREFIX, email, timeout)) {
             throw new ClientBackendException(ErrorCode.ATTEMPTS_IS_EXHAUSTED);
         }
+
+        attempts.incrementCounterAttempt(LIMIT_VERIFICATION_PREFIX, EXCEPTION_PREFIX, ip,
+                limitation, timeout);
+
+        String code = getVerificationCode();
+        attempts.setVerificationCode(VERIFICATION_CODE + email, code, timeout);
         emailService.sendEmail(email, emailService.buildMsgForUser(userTemplatePath,
-                getMessageAboutVerificationCode()), "Веріфікаційний код для підтвердження пошти.");
+                getMessageAboutVerificationCode(code)),
+                "Веріфікаційний код для підтвердження пошти.");
     }
 
-    private String getMessageAboutVerificationCode() {
+    private String getMessageAboutVerificationCode(String code) {
         return new StringBuilder("<h2>Ми надіслали код для підтвердження пошти.</h2>")
-                .append("<h3>Код: ").append(getVerificationCode()).append("</h3>")
+                .append("<h3>Код: ").append(code).append("</h3>")
                 .append("<h3>Введіть цей код в форму</h3>").toString();
     }
 

@@ -94,12 +94,12 @@ public class UserController {
 
     @Operation(summary = "Send verification code", description = "Send user verification code")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "201", description = "User created"),
+            @ApiResponse(responseCode = "203", description = "Send code"),
             @ApiResponse(responseCode = "403", description = "Invalid user data",
                     content = {@Content(mediaType = "application/json", schema = @Schema(implementation = ExceptionResponseDto.class))}),
     })
     @PostMapping("public/users/send/code")
-    public ResponseEntity<Void> sendVerificationCode(@Valid PasswordResetTokenRequestDto email, HttpServletRequest request){
+    public ResponseEntity<Void> sendVerificationCode(@Valid @RequestBody PasswordResetTokenRequestDto email, HttpServletRequest request){
         String ip = Optional.ofNullable(request.getHeader(X_FORWARDED_FOR)).orElse(request.getRemoteAddr());
 
         userService.sendVerificationCode(email.email(), ip);
