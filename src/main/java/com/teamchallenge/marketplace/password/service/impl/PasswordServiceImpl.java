@@ -27,7 +27,6 @@ public class PasswordServiceImpl implements PasswordService {
     private static final String PASSWORD_RESET_TOKEN_PREFIX = "passwordResetToken:";
     private static final String LIMIT_RESET_PREFIX = "LimitReset_";
     private static final String EXCEPTION_RESET_PREFIX = "ExceptionReset_";
-    private static final String EXCEPTION_SEND_RESET_PREFIX = "ExceptionSendReset_";
 
     @Value("${user.limitation}")
     private int limitation;
@@ -68,17 +67,13 @@ public class PasswordServiceImpl implements PasswordService {
         userByReference.setPassword(passwordEncoder.encode(requestDto.newPassword()));
 
         attempts.delete(EXCEPTION_RESET_PREFIX, ip);
-        attempts.delete(EXCEPTION_SEND_RESET_PREFIX, ip);
     }
 
     @Override
-    public void sendResetPasswordToken(PasswordResetTokenRequestDto resetRequestDto, String ip) {
-        if (attempts.isAttemptExhausted(LIMIT_RESET_PREFIX, ip)) {
+    public void sendResetPasswordToken(PasswordResetTokenRequestDto resetRequestDto) {
+        if (attempts.isUsedSingleAttempt(LIMIT_RESET_PREFIX, resetRequestDto.email(), timeout)) {
             throw new ClientBackendException(ErrorCode.ATTEMPTS_IS_EXHAUSTED);
         }
-
-        attempts.incrementCounterAttempt(LIMIT_RESET_PREFIX, EXCEPTION_SEND_RESET_PREFIX, ip,
-                limitation, timeout);
 
         String userEmail = resetRequestDto.email();
         if (!userRepository.existsByEmail(userEmail)) {
