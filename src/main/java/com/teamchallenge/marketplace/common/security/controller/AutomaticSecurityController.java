@@ -25,13 +25,9 @@ public class AutomaticSecurityController {
     private static final int CODE = 1234;
     private final AutomaticSecurityServiceImpl automaticService;
 
-    @Operation(summary = "Automatic change status product", description = "Select all expired products with users." +
-            " For each user, we check whether there is space in the archive, if there is no space," +
-            " we delete older products.",responses = {
-            @ApiResponse(responseCode = "204", description = "Product change status"),
+    @Operation(summary = "Automatic reset attempts", description = "Automatic reset attempts.", responses = {
+            @ApiResponse(responseCode = "204", description = "Automatic reset attempts."),
             @ApiResponse(responseCode = "400", description = "Invalid input",
-                    content = {@Content(mediaType = "application/json", schema = @Schema(implementation = ExceptionResponseDto.class))}),
-            @ApiResponse(responseCode = "404", description = "Product by UUID not found",
                     content = {@Content(mediaType = "application/json", schema = @Schema(implementation = ExceptionResponseDto.class))})
     })
     @PutMapping("/reset/{code}")
