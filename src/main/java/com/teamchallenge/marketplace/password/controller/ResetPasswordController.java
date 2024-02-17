@@ -42,9 +42,7 @@ public class ResetPasswordController {
             @Parameter(description = "Email to reset user password", required = true)
             @Valid @RequestBody PasswordResetTokenRequestDto resetRequestDto, HttpServletRequest request) {
 
-        String ip = Optional.ofNullable(request.getHeader(X_FORWARDED_FOR)).orElse(request.getRemoteAddr());
-
-        passwordService.sendResetPasswordToken(resetRequestDto, ip);
+        passwordService.sendResetPasswordToken(resetRequestDto);
 
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }

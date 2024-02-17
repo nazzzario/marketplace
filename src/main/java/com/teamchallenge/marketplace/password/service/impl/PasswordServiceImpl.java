@@ -42,13 +42,18 @@ public class PasswordServiceImpl implements PasswordService {
 
     @Override
     @Transactional
-    public void changeForgottenPassword(String resetToken, PasswordResetRequestDto requestDto, String ip) {
-        if (attempts.attemptExhausted(LIMIT_RESET_PREFIX, EXCEPTION_RESET_PREFIX, ip, limitation, timeout)) {
+    public void changeForgottenPassword(String resetToken, PasswordResetRequestDto requestDto,
+                                        String ip) {
+        if (attempts.isAttemptExhausted(LIMIT_RESET_PREFIX, ip)) {
             throw new ClientBackendException(ErrorCode.ATTEMPTS_IS_EXHAUSTED);
         }
 
-        String userEmailFromCache = (String) Optional.ofNullable(redisTemplate.opsForValue().get(PASSWORD_RESET_TOKEN_PREFIX + resetToken))
-                .orElseThrow(() -> new ClientBackendException(ErrorCode.PASSWORD_RESET_TOKEN_NOT_EXISTS));
+        attempts.incrementCounterAttempt(LIMIT_RESET_PREFIX, EXCEPTION_RESET_PREFIX, ip,
+                limitation, timeout);
+
+        String userEmailFromCache = (String) Optional.ofNullable(redisTemplate.opsForValue()
+                        .get(PASSWORD_RESET_TOKEN_PREFIX + resetToken)).orElseThrow(() ->
+                new ClientBackendException(ErrorCode.PASSWORD_RESET_TOKEN_NOT_EXISTS));
 
         UserEntity userByReference = userRepository.findByEmail(userEmailFromCache)
                 .orElseThrow(() -> new ClientBackendException(ErrorCode.USER_NOT_FOUND));
@@ -61,11 +66,12 @@ public class PasswordServiceImpl implements PasswordService {
 
         userByReference.setPassword(passwordEncoder.encode(requestDto.newPassword()));
 
+        attempts.delete(EXCEPTION_RESET_PREFIX, ip);
     }
 
     @Override
-    public void sendResetPasswordToken(PasswordResetTokenRequestDto resetRequestDto, String ip) {
-        if (attempts.attemptExhausted(LIMIT_RESET_PREFIX, EXCEPTION_RESET_PREFIX, ip, limitation, timeout)) {
+    public void sendResetPasswordToken(PasswordResetTokenRequestDto resetRequestDto) {
+        if (attempts.isUsedSingleAttempt(LIMIT_RESET_PREFIX, resetRequestDto.email(), timeout)) {
             throw new ClientBackendException(ErrorCode.ATTEMPTS_IS_EXHAUSTED);
         }
 
@@ -75,7 +81,8 @@ public class PasswordServiceImpl implements PasswordService {
         }
 
         String passwordResetToken = UUID.randomUUID().toString();
-        redisTemplate.opsForValue().set(PASSWORD_RESET_TOKEN_PREFIX + passwordResetToken, userEmail, Duration.ofMinutes(5));
+        redisTemplate.opsForValue().set(PASSWORD_RESET_TOKEN_PREFIX + passwordResetToken,
+                userEmail, Duration.ofMinutes(5));
 
         emailService.sendPasswordResetToken(userEmail, passwordResetToken);
     }

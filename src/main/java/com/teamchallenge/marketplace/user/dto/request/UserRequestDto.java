@@ -15,6 +15,7 @@ public record UserRequestDto(
         @Email(regexp = Constants.EMAIL_REGEXP,
                 flags = Pattern.Flag.CASE_INSENSITIVE, message = "Invalid email")
         String email,
+        String verificationCode,
         @ValidUkrainianPhoneNumber
         String phoneNumber,
         @Size(min = 8, message = "Password min length is 8")

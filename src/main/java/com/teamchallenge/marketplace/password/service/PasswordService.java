@@ -7,5 +7,5 @@ public interface PasswordService {
 
     void changeForgottenPassword(String resetToken, PasswordResetRequestDto requestDto, String ip);
 
-    void sendResetPasswordToken(PasswordResetTokenRequestDto resetRequestDto, String ip);
+    void sendResetPasswordToken(PasswordResetTokenRequestDto resetRequestDto);
 }
