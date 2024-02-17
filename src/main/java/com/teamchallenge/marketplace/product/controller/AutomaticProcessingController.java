@@ -20,7 +20,7 @@ import org.springframework.web.bind.annotation.*;
 @Tag(name = "Automatic processing")
 public class AutomaticProcessingController {
 
-    public static final int CODE = 1234;
+    private static final int CODE = 1234;
     private final AutomaticChangeProductService productService;
 
     @Operation(summary = "Automatic change status product", description = "Select all expired products with users." +
