@@ -34,7 +34,7 @@ import java.util.concurrent.ThreadLocalRandom;
 @Service
 @RequiredArgsConstructor
 public class UserServiceImpl implements UserService {
-    private static final String EXCEPTION_PREFIX = "Exception_";
+    private static final String EXCEPTION_VERIFICATION_PREFIX = "ExceptionVerification_";
     private static final String LIMIT_VERIFICATION_PREFIX = "LimitVerification_";
     public static final String VERIFICATION_CODE = "VerificationCode_";
 
@@ -66,7 +66,7 @@ public class UserServiceImpl implements UserService {
 
         if (attempts.isNotVerificationCode(VERIFICATION_CODE + requestDto.email(),
                 requestDto.verificationCode())){
-            attempts.incrementCounterAttempt(LIMIT_VERIFICATION_PREFIX, EXCEPTION_PREFIX,
+            attempts.incrementCounterAttempt(LIMIT_VERIFICATION_PREFIX, EXCEPTION_VERIFICATION_PREFIX,
                     requestDto.email(), limitation, timeout);
             throw new ClientBackendException(ErrorCode.IS_NOT_VERIFICATION);
         }
@@ -128,7 +128,7 @@ public class UserServiceImpl implements UserService {
             throw new ClientBackendException(ErrorCode.ATTEMPTS_IS_EXHAUSTED);
         }
 
-        attempts.incrementCounterAttempt(LIMIT_VERIFICATION_PREFIX, EXCEPTION_PREFIX, ip,
+        attempts.incrementCounterAttempt(LIMIT_VERIFICATION_PREFIX, EXCEPTION_VERIFICATION_PREFIX, ip,
                 limitation, timeout);
 
         String code = getVerificationCode();
