@@ -32,6 +32,7 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class UserProductServiceImpl implements UserProductService {
 
+    private static final String COMPLAINT_PREFIX = "Complaint_";
     @Value("${product.active.periodsDeadline}")
     private int periodsActive;
     @Value("${product.delete.periodDeadline}")
@@ -163,6 +164,13 @@ public class UserProductServiceImpl implements UserProductService {
                         productReference.toString()))) {
             redisTemplate.opsForHash().increment(RAISE_AD_PREFIX, productReference.toString(), 1);
         } else {throw  new ClientBackendException(ErrorCode.LIMIT_IS_EXHAUSTED);}
+    }
+
+    @Override
+    public String complaintProduct(UUID productReference, UUID userReference, String message) {
+        redisTemplate.opsForHash().put(COMPLAINT_PREFIX + productReference.toString(),
+                userReference.toString(), message);
+        return "Ми розгянемо вашу скаргу на протязі 4 годин, у робочі години";
     }
 
     @Override

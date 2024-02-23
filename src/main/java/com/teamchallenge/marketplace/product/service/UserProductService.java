@@ -31,4 +31,6 @@ public interface UserProductService {
     void raiseAdProduct(UUID productReference);
 
     List<ProductEntity> getAllProductByUser(UserEntity user);
+
+    String complaintProduct(UUID productReference, UUID userReference, String message);
 }
