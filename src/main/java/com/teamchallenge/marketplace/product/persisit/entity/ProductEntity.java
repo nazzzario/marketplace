@@ -27,6 +27,9 @@ public class ProductEntity extends BaseEntity {
     private String city;
 
     @NotNull
+    private String region;
+
+    @NotNull
     private String productTitle;
 
     @NotNull

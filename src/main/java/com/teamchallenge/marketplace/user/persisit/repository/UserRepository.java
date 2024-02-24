@@ -37,4 +37,8 @@ public interface UserRepository extends JpaRepository<UserEntity, Long> {
     List<UserEntity> findByFavoriteProducts(ProductEntity productEntity);
 
     long countByRole(RoleEnum roleEnum);
+
+    boolean existsByEmailAndProductsReferenceAndProductsStatus(String name,
+                                                               UUID productReference,
+                                                               ProductStatusEnum productStatusEnum);
 }

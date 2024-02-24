@@ -10,6 +10,7 @@ import java.util.UUID;
 public record ProductNewestResponseDto(UUID reference,
                                        ProductCategoriesEnum categoryName,
                                        String city,
+                                       String region,
                                        String productTitle,
                                        String productDescription,
                                        String ownerUsername,
