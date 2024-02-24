@@ -15,6 +15,8 @@ public record ProductRequestDto(
         ProductCategoriesEnum categoryName,
         @NotNull(message = "Product city cannot be null")
         String city,
+        @NotNull(message = "Product region cannot be null")
+        String region,
         @NotBlank(message = "Product title cannot be empty")
         @Size(min = 4, max = 30, message = "Product length between 4 and 30")
         String productTitle,

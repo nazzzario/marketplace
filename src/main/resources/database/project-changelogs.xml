@@ -16,4 +16,5 @@
     <changeSet id="009" author="Andrey Sitarskiy" context="change the column size password"><sqlFile path="database/changelogs/changelog.009.sql"/></changeSet>
     <changeSet id="010" author="Andrey Sitarskiy" context="add the column ad_raise_count"><sqlFile path="database/changelogs/changelog.010.sql"/></changeSet>
     <changeSet id="011" author="Andrey Sitarskiy" context="add the column is_non_locked"><sqlFile path="database/changelogs/changelog.011.sql"/></changeSet>
+    <changeSet id="012" author="Andrey Sitarskiy" context="add the column region"><sqlFile path="database/changelogs/changelog.012.sql"/></changeSet>
 </databaseChangeLog>

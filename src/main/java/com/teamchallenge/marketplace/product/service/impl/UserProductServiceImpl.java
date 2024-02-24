@@ -158,8 +158,8 @@ public class UserProductServiceImpl implements UserProductService {
         var authentication = SecurityContextHolder.getContext().getAuthentication();
         if (Objects.nonNull(authentication) &&
                 authentication.isAuthenticated() &&
-                userRepository.existsByEmailAndProductsReference(authentication.getName(),
-                        productReference) &&
+                userRepository.existsByEmailAndProductsReferenceAndProductsStatus(authentication.getName(),
+                        productReference, ProductStatusEnum.ACTIVE) &&
                 Boolean.FALSE.equals(redisTemplate.opsForHash().hasKey(RAISE_AD_PREFIX,
                         productReference.toString()))) {
             redisTemplate.opsForHash().increment(RAISE_AD_PREFIX, productReference.toString(), 1);
@@ -170,7 +170,7 @@ public class UserProductServiceImpl implements UserProductService {
     public String complaintProduct(UUID productReference, UUID userReference, String message) {
         redisTemplate.opsForHash().put(COMPLAINT_PREFIX + productReference.toString(),
                 userReference.toString(), message);
-        return "Ми розгянемо вашу скаргу на протязі 4 годин, у робочі години";
+        return "Дякуємо за звернення. Ми розлянемо вашу скаргу";
     }
 
     @Override
