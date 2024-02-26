@@ -13,6 +13,7 @@ import java.util.UUID;
 public record UserProductResponseDto(UUID reference,
                                      ProductCategoriesEnum categoryName,
                                      String city,
+                                     String region,
                                      String productTitle,
                                      String productDescription,
                                      ProductStateEnum state,

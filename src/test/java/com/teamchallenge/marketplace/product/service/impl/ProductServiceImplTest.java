@@ -56,7 +56,7 @@ class ProductServiceImplTest {
         PageImpl<ProductEntity> pageEntity = new PageImpl<>(List.of(new ProductEntity()), pageable, 1);
         UUID reference = UUID.randomUUID();
         var productDto = new ProductResponseDto(reference,
-                ProductCategoriesEnum.CLOTHE, "Kiev","Clothe", "Clothe",
+                ProductCategoriesEnum.CLOTHE, "Kiev", "Kiev","Clothe", "Clothe",
                 "User","0-00-000", ProductStateEnum.USED,
                 ProductStatusEnum.ACTIVE, 1, LocalDate.parse("2024-01-01"), List.of("image"));
 

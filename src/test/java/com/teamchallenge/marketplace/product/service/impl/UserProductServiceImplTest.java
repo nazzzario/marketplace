@@ -79,7 +79,7 @@ class UserProductServiceImplTest {
     }
     UserProductImageDto imageDto = new UserProductImageDto("url", UUID.fromString("550e8400-e29b-41d4-a716-446655440000"),1L);
     UserProductResponseDto responseDto = new UserProductResponseDto(reference,
-            ProductCategoriesEnum.CLOTHE, "Kiev","Clothe", "Clothe",
+            ProductCategoriesEnum.CLOTHE, "Kiev", "Kiev", "Clothe", "Clothe",
             ProductStateEnum.USED, ProductStatusEnum.ACTIVE, 1, 1, false,
             30 ,LocalDate.parse("2024-01-01"), List.of(imageDto));
     PageImpl<UserProductResponseDto> pageDto = new PageImpl<>(List.of(responseDto), pageable, 1);
