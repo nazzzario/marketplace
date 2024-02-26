@@ -88,7 +88,7 @@ public class JwtService {
         String token = UUID.randomUUID().toString();
         String oldToken = redisTemplate.opsForValue().getAndSet(REFRESH_EMAIL_PREFIX + userEmail, token);
         if (oldToken != null){
-            redisTemplate.delete(oldToken);}
+            redisTemplate.delete(REFRESH_TOKEN_PREFIX + oldToken);}
         redisTemplate.opsForValue().set(REFRESH_TOKEN_PREFIX + token, userEmail, timeoutRefreshToken, TimeUnit.DAYS);
         return token;
     }
