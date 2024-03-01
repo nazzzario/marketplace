@@ -36,6 +36,7 @@ import java.util.concurrent.ThreadLocalRandom;
 public class UserServiceImpl implements UserService {
     private static final String EXCEPTION_VERIFICATION_PREFIX = "ExceptionVerification_";
     private static final String LIMIT_VERIFICATION_PREFIX = "LimitVerification_";
+    private static final String LIMIT_REGISTRATION_PREFIX = "LimitRegistration_";
     public static final String VERIFICATION_CODE = "VerificationCode_";
 
     @Value("${user.max.value}")
@@ -56,7 +57,7 @@ public class UserServiceImpl implements UserService {
     @Override
     @Transactional
     public UserResponseDto userRegistration(UserRequestDto requestDto) {
-        if (attempts.isAttemptExhausted(LIMIT_VERIFICATION_PREFIX, requestDto.email())){
+        if (attempts.isAttemptExhausted(LIMIT_REGISTRATION_PREFIX, requestDto.email())){
             throw new ClientBackendException(ErrorCode.ATTEMPTS_IS_EXHAUSTED);
         }
 
@@ -66,7 +67,7 @@ public class UserServiceImpl implements UserService {
 
         if (attempts.isNotVerificationCode(VERIFICATION_CODE + requestDto.email(),
                 requestDto.verificationCode())){
-            attempts.incrementCounterAttempt(LIMIT_VERIFICATION_PREFIX, EXCEPTION_VERIFICATION_PREFIX,
+            attempts.incrementCounterAttempt(LIMIT_REGISTRATION_PREFIX, EXCEPTION_VERIFICATION_PREFIX,
                     requestDto.email(), limitation, timeout);
             throw new ClientBackendException(ErrorCode.IS_NOT_VERIFICATION);
         }
@@ -78,7 +79,7 @@ public class UserServiceImpl implements UserService {
         userEntity.setRole(RoleEnum.USER);
         UserEntity savedUser = userRepository.save(userEntity);
 
-        attempts.delete(LIMIT_VERIFICATION_PREFIX, requestDto.email());
+        attempts.delete(LIMIT_REGISTRATION_PREFIX, requestDto.email());
         return userMapper.toResponseDto(savedUser);
     }
 

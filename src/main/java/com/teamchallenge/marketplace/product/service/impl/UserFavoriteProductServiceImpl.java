@@ -27,18 +27,15 @@ public class UserFavoriteProductServiceImpl implements UserFavoriteProductServic
         var authentication = SecurityContextHolder.getContext().getAuthentication();
 
         if (Objects.nonNull(authentication) && authentication.isAuthenticated()) {
-            String email = authentication.getName();
-            UserEntity userEntity = userRepository.findByEmail(email)
+            UserEntity userEntity = userRepository.findByEmail(authentication.getName())
                     .orElseThrow(() -> new ClientBackendException(ErrorCode.USER_NOT_FOUND));
 
             ProductEntity productEntity = productRepository.findByReference(productReference)
                     .orElseThrow(() -> new ClientBackendException(ErrorCode.PRODUCT_NOT_FOUND));
 
-            if (userEntity != null && productEntity != null) {
-                userEntity.getFavoriteProducts().add(productEntity);
-            }
+            userEntity.getFavoriteProducts().add(productEntity);
         } else {
-            throw new ClientBackendException(ErrorCode.CANNOT_ADD_PRODUCT_TO_FAVORITE);
+            throw new ClientBackendException(ErrorCode.FORBIDDEN);
         }
     }
 
@@ -48,8 +45,7 @@ public class UserFavoriteProductServiceImpl implements UserFavoriteProductServic
         var authentication = SecurityContextHolder.getContext().getAuthentication();
 
         if (Objects.nonNull(authentication) && authentication.isAuthenticated()) {
-            String email = authentication.getName();
-            UserEntity userEntity = userRepository.findByEmail(email)
+            UserEntity userEntity = userRepository.findByEmail(authentication.getName())
                     .orElseThrow(() -> new ClientBackendException(ErrorCode.USER_NOT_FOUND));
 
             ProductEntity productEntity = productRepository.findByReference(productReference)
@@ -57,7 +53,7 @@ public class UserFavoriteProductServiceImpl implements UserFavoriteProductServic
 
             userEntity.getFavoriteProducts().remove(productEntity);
         } else {
-            throw new ClientBackendException(ErrorCode.CANNOT_ADD_PRODUCT_TO_FAVORITE);
+            throw new ClientBackendException(ErrorCode.FORBIDDEN);
         }
     }
 

@@ -1,9 +1,10 @@
 package com.teamchallenge.marketplace.admin.dto;
 
+import com.teamchallenge.marketplace.product.dto.response.ProductResponseDto;
+
 import java.util.List;
-import java.util.UUID;
 
 public record FolderComplaintDto(
-        UUID productReference,
-       List<ComplaintDto> complaints) {
+        ProductResponseDto product,
+        List<ComplaintDto> complaints) {
 }

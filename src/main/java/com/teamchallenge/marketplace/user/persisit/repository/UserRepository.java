@@ -41,4 +41,6 @@ public interface UserRepository extends JpaRepository<UserEntity, Long> {
     boolean existsByEmailAndProductsReferenceAndProductsStatus(String name,
                                                                UUID productReference,
                                                                ProductStatusEnum productStatusEnum);
+
+    Optional<UserEntity> findByProductsReference(UUID reference);
 }
