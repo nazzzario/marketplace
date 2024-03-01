@@ -39,7 +39,7 @@ public class ShowUserProductServiceImpl implements ShowUserProductService {
                     .map(product ->  productMapper.toResponseDto(product,
                             redisTemplate.opsForHash().hasKey(UserProductService.RAISE_AD_PREFIX, product.getReference().toString())));
         } else {
-            throw new ClientBackendException(ErrorCode.UNKNOWN_SERVER_ERROR);
+            throw new ClientBackendException(ErrorCode.FORBIDDEN);
         }
 
     }
@@ -56,7 +56,7 @@ public class ShowUserProductServiceImpl implements ShowUserProductService {
                             redisTemplate.opsForHash().hasKey(UserProductService.RAISE_AD_PREFIX,
                                     product.getReference().toString())));
         } else {
-            throw new ClientBackendException(ErrorCode.UNKNOWN_SERVER_ERROR);
+            throw new ClientBackendException(ErrorCode.FORBIDDEN);
         }
     }
 }

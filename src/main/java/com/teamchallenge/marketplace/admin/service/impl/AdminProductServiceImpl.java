@@ -6,6 +6,7 @@ import com.teamchallenge.marketplace.admin.service.AdminProductService;
 import com.teamchallenge.marketplace.common.exception.ClientBackendException;
 import com.teamchallenge.marketplace.common.exception.ErrorCode;
 import com.teamchallenge.marketplace.product.dto.response.UserProductResponseDto;
+import com.teamchallenge.marketplace.product.mapper.ProductMapper;
 import com.teamchallenge.marketplace.product.mapper.UserProductMapper;
 import com.teamchallenge.marketplace.product.persisit.entity.enums.ProductStatusEnum;
 import com.teamchallenge.marketplace.product.persisit.repository.ProductRepository;
@@ -28,7 +29,8 @@ public class AdminProductServiceImpl implements AdminProductService {
     public static final String COMPLAINT_PREFIX = "Complaint_";
     private final UserRepository userRepository;
     private final ProductRepository productRepository;
-    private final UserProductMapper productMapper;
+    private final UserProductMapper userProductMapper;
+    private final ProductMapper productMapper;
     private final RedisTemplate<String, String> redisTemplate;
 
     @Override
@@ -36,7 +38,7 @@ public class AdminProductServiceImpl implements AdminProductService {
         UserEntity userEntity = userRepository.findByReference(userReference)
                 .orElseThrow(() -> new ClientBackendException(ErrorCode.USER_NOT_FOUND));
         return productRepository.findByOwnerAndStatus(userEntity, status, pageable)
-                .map(product -> productMapper.toResponseDto(product,
+                .map(product -> userProductMapper.toResponseDto(product,
                         redisTemplate.opsForHash().hasKey(UserProductService.RAISE_AD_PREFIX, product.getReference().toString())));
     }
 
@@ -45,7 +47,7 @@ public class AdminProductServiceImpl implements AdminProductService {
         UserEntity userEntity = userRepository.findByReference(userReference)
                 .orElseThrow(() -> new ClientBackendException(ErrorCode.USER_NOT_FOUND));
         return productRepository.findByFavoritismId(userEntity.getId(), pageable)
-                .map(product -> productMapper.toResponseDto(product,
+                .map(product -> userProductMapper.toResponseDto(product,
                         redisTemplate.opsForHash().hasKey(UserProductService.RAISE_AD_PREFIX,
                                 product.getReference().toString())));
     }
@@ -61,7 +63,14 @@ public class AdminProductServiceImpl implements AdminProductService {
         if (keys != null) {
             return keys.stream()
                     .map(key -> new FolderComplaintDto(
-                                    UUID.fromString(key.replace(COMPLAINT_PREFIX, "")),
+                            productMapper.toResponseDto(
+                                    productRepository.findByReference(
+                                            UUID.fromString(key.replace(COMPLAINT_PREFIX, "")))
+                                            .orElseThrow(() -> new ClientBackendException(
+                                                    ErrorCode.PRODUCT_NOT_FOUND)),
+                                    userRepository.findByProductsReference(UUID.fromString(key.replace(
+                                            COMPLAINT_PREFIX, ""))).orElseThrow(() ->
+                                            new ClientBackendException(ErrorCode.USER_NOT_FOUND))),
                                     redisTemplate.opsForHash().entries(key).entrySet().stream()
                                             .map(complaint -> new ComplaintDto(
                                                     UUID.fromString((String) complaint.getKey()),

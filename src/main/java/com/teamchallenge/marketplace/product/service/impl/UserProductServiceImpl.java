@@ -65,23 +65,22 @@ public class UserProductServiceImpl implements UserProductService {
     public UserProductResponseDto patchProduct(ProductRequestDto requestDto, UUID productReference) {
         var authentication = SecurityContextHolder.getContext().getAuthentication();
 
-        if (Objects.nonNull(authentication) && authentication.isAuthenticated() &&
-                (authentication.getAuthorities().stream().anyMatch(role ->
-                        role.getAuthority().equals(RoleEnum.ADMIN.name()) ||
-                        role.getAuthority().equals(RoleEnum.ROOT.name())) ||
-                userRepository.existsByEmailAndProductsReference(authentication.getName(),
-                        productReference))) {
-            ProductEntity productEntity = productRepository.findByReference(productReference)
-                    .orElseThrow(() -> new ClientBackendException(ErrorCode.PRODUCT_NOT_FOUND));
+        if (Objects.nonNull(authentication) && authentication.isAuthenticated()){
+            if (authentication.getAuthorities().stream().anyMatch(role ->
+                    role.getAuthority().equals(RoleEnum.ADMIN.name()) ||
+                            role.getAuthority().equals(RoleEnum.ROOT.name())) ||
+                    userRepository.existsByEmailAndProductsReference(authentication.getName(),
+                            productReference)){
+                ProductEntity productEntity = productRepository.findByReference(productReference)
+                        .orElseThrow(() -> new ClientBackendException(ErrorCode.PRODUCT_NOT_FOUND));
 
-            productMapper.patchMerge(requestDto, productEntity);
+                productMapper.patchMerge(requestDto, productEntity);
 
-            return productMapper.toResponseDto(productRepository.save(productEntity),
-                    redisTemplate.opsForHash().hasKey(RAISE_AD_PREFIX,
-                            productEntity.getReference().toString()));
-        } else {
-            throw new ClientBackendException(ErrorCode.UNKNOWN_SERVER_ERROR);
-        }
+                return productMapper.toResponseDto(productRepository.save(productEntity),
+                        redisTemplate.opsForHash().hasKey(RAISE_AD_PREFIX,
+                                productEntity.getReference().toString()));
+            } else {throw new ClientBackendException(ErrorCode.USER_NOT_OWN_AD);}
+        } else {throw new ClientBackendException(ErrorCode.FORBIDDEN);}
     }
 
     @Override
@@ -89,25 +88,26 @@ public class UserProductServiceImpl implements UserProductService {
     public void deleteProduct(UUID productReference) {
         var authentication = SecurityContextHolder.getContext().getAuthentication();
 
-        if (Objects.nonNull(authentication) && authentication.isAuthenticated() &&
-                (authentication.getAuthorities().stream().anyMatch(role ->
-                        role.getAuthority().equals(RoleEnum.ADMIN.name()) ||
-                                role.getAuthority().equals(RoleEnum.ROOT.name())) ||
-                userRepository.existsByEmailAndProductsReference(authentication.getName(),
-                        productReference))) {
-            ProductEntity productEntity = productRepository.findByReference(productReference)
-                    .orElseThrow(() -> new ClientBackendException(ErrorCode.PRODUCT_NOT_FOUND));
+        if (Objects.nonNull(authentication) && authentication.isAuthenticated()){
+            if (authentication.getAuthorities().stream().anyMatch(role ->
+                    role.getAuthority().equals(RoleEnum.ADMIN.name()) ||
+                            role.getAuthority().equals(RoleEnum.ROOT.name())) ||
+                    userRepository.existsByEmailAndProductsReference(authentication.getName(),
+                            productReference)){
+                ProductEntity productEntity = productRepository.findByReference(productReference)
+                        .orElseThrow(() -> new ClientBackendException(ErrorCode.PRODUCT_NOT_FOUND));
 
-            userRepository.findByFavoriteProducts(productEntity).forEach(user ->
-                    user.getFavoriteProducts().remove(productEntity));
+                userRepository.findByFavoriteProducts(productEntity).forEach(user ->
+                        user.getFavoriteProducts().remove(productEntity));
 
-            productEntity.getImages().forEach(image -> productImageService.processDeleteImage(image.getId()));
+                productEntity.getImages().forEach(image -> productImageService.processDeleteImage(image.getId()));
 
-            redisTemplate.opsForHash().delete(RAISE_AD_PREFIX, productEntity.getReference().toString());
+                redisTemplate.opsForHash().delete(RAISE_AD_PREFIX, productEntity.getReference().toString());
 
-            productRepository.delete(productEntity);
+                productRepository.delete(productEntity);
+            } else { throw new ClientBackendException(ErrorCode.USER_NOT_OWN_AD);}
         } else {
-            throw new ClientBackendException(ErrorCode.UNKNOWN_SERVER_ERROR);
+            throw new ClientBackendException(ErrorCode.FORBIDDEN);
         }
     }
 
@@ -127,21 +127,23 @@ public class UserProductServiceImpl implements UserProductService {
     @Override
     public UserProductResponseDto changeStatusProduct(UUID productReference, ProductStatusEnum status, int period) {
         var authentication = SecurityContextHolder.getContext().getAuthentication();
-        if (Objects.nonNull(authentication) && authentication.isAuthenticated() &&
-                (authentication.getAuthorities().stream().anyMatch(role ->
-                        role.getAuthority().equals(RoleEnum.ADMIN.name()) ||
-                                role.getAuthority().equals(RoleEnum.ROOT.name())) ||
-                userRepository.existsByEmailAndProductsReference(authentication.getName(),
-                        productReference) && !status.equals(ProductStatusEnum.NEW))) {
+        if (Objects.nonNull(authentication) && authentication.isAuthenticated()){
+            if (authentication.getAuthorities().stream().anyMatch(role ->
+                    role.getAuthority().equals(RoleEnum.ADMIN.name()) ||
+                            role.getAuthority().equals(RoleEnum.ROOT.name())) ||
+                    userRepository.existsByEmailAndProductsReference(authentication.getName(),
+                            productReference)){
+                if (!status.equals(ProductStatusEnum.NEW)){
+                ProductEntity productEntity = productRepository.findByReference(productReference)
+                        .orElseThrow(() -> new ClientBackendException(ErrorCode.PRODUCT_NOT_FOUND));
 
-            ProductEntity productEntity = productRepository.findByReference(productReference)
-                    .orElseThrow(() -> new ClientBackendException(ErrorCode.PRODUCT_NOT_FOUND));
-
-            return productMapper.toResponseDto(getProductAndChangeStatus(productEntity, status,
-                    getCorrectPeriod(status)), redisTemplate.opsForHash().hasKey(RAISE_AD_PREFIX,
-                    productEntity.getReference().toString()));
+                return productMapper.toResponseDto(getProductAndChangeStatus(productEntity, status,
+                        getCorrectPeriod(status)), redisTemplate.opsForHash().hasKey(RAISE_AD_PREFIX,
+                        productEntity.getReference().toString()));
+                } else {throw  new ClientBackendException(ErrorCode.NOT_CHANGE_STATUS_TO_NEW);}
+            } else {throw new ClientBackendException(ErrorCode.USER_NOT_OWN_AD);}
         } else {
-            throw new ClientBackendException(ErrorCode.UNKNOWN_SERVER_ERROR);
+            throw new ClientBackendException(ErrorCode.FORBIDDEN);
         }
 
     }
@@ -156,14 +158,15 @@ public class UserProductServiceImpl implements UserProductService {
     @Override
     public void raiseAdProduct(UUID productReference) {
         var authentication = SecurityContextHolder.getContext().getAuthentication();
-        if (Objects.nonNull(authentication) &&
-                authentication.isAuthenticated() &&
-                userRepository.existsByEmailAndProductsReferenceAndProductsStatus(authentication.getName(),
-                        productReference, ProductStatusEnum.ACTIVE) &&
-                Boolean.FALSE.equals(redisTemplate.opsForHash().hasKey(RAISE_AD_PREFIX,
-                        productReference.toString()))) {
-            redisTemplate.opsForHash().increment(RAISE_AD_PREFIX, productReference.toString(), 1);
-        } else {throw  new ClientBackendException(ErrorCode.LIMIT_IS_EXHAUSTED);}
+        if (Objects.nonNull(authentication) && authentication.isAuthenticated()){
+            if (userRepository.existsByEmailAndProductsReferenceAndProductsStatus(authentication.getName(),
+                    productReference, ProductStatusEnum.ACTIVE)){
+                if (Boolean.FALSE.equals(redisTemplate.opsForHash().hasKey(RAISE_AD_PREFIX,
+                        productReference.toString()))){
+                    redisTemplate.opsForHash().increment(RAISE_AD_PREFIX, productReference.toString(), 1);
+                } else {throw new ClientBackendException(ErrorCode.LIMIT_IS_EXHAUSTED);}
+            } else {throw  new ClientBackendException(ErrorCode.PRODUCT_NOT_ACTIVE);}
+        } else {throw  new ClientBackendException(ErrorCode.FORBIDDEN);}
     }
 
     @Override
@@ -198,22 +201,23 @@ public class UserProductServiceImpl implements UserProductService {
      * @param userEntity User is authentication.
      */
     private ProductEntity getNewProduct(UserEntity userEntity) {
-        ProductEntity newProductEntity;
 
         ProductEntity firstActiveProduct = productRepository.findByOwnerAndStatus(userEntity,
                         ProductStatusEnum.ACTIVE, PageRequest.of(0, 6))
                 .stream().findFirst().orElse(null);
 
+        ProductEntity newProductEntity = new ProductEntity();
         if (firstActiveProduct != null) {
-            newProductEntity = productMapper.toNewEntity(firstActiveProduct);
+            newProductEntity.setCity(firstActiveProduct.getCity());
+            newProductEntity.setRegion(firstActiveProduct.getRegion());
         } else {
-            newProductEntity = new ProductEntity();
-            newProductEntity.setProductTitle("Title");
-            newProductEntity.setProductDescription("Description");
             newProductEntity.setCity("Київ");
-            newProductEntity.setCategoryName(ProductCategoriesEnum.OTHER);
-            newProductEntity.setState(ProductStateEnum.USED);
+            newProductEntity.setRegion("Київський");
         }
+        newProductEntity.setProductTitle("");
+        newProductEntity.setCategoryName(ProductCategoriesEnum.OTHER);
+        newProductEntity.setState(ProductStateEnum.USED);
+        newProductEntity.setProductDescription("");
         newProductEntity.setStatus(ProductStatusEnum.NEW);
         newProductEntity.setOwner(userEntity);
 
