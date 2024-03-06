@@ -11,6 +11,8 @@ import java.util.UUID;
 
 public interface UserProductService {
     String RAISE_AD_PREFIX = "raiseAd_";
+    String COMPLAINT_PREFIX = "Complaint_";
+
     /**
      * Get product with status NEW. If there is no product create new product.
      * Values of product is values of first product with status ACTIVE.
