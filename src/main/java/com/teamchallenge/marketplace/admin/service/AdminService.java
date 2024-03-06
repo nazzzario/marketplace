@@ -1,6 +1,6 @@
 package com.teamchallenge.marketplace.admin.service;
 
-import com.teamchallenge.marketplace.admin.dto.AdminReprotDto;
+import com.teamchallenge.marketplace.admin.dto.AdminReportDto;
 import com.teamchallenge.marketplace.user.persisit.entity.enums.RoleEnum;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -14,5 +14,5 @@ public interface AdminService {
 
     void changeUserRole(UUID userReference, RoleEnum role);
 
-    Page<AdminReprotDto> getReport(Pageable pageable);
+    Page<AdminReportDto> getReport(Pageable pageable);
 }
