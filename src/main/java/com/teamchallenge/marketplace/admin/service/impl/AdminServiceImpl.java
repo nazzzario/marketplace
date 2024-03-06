@@ -1,6 +1,6 @@
 package com.teamchallenge.marketplace.admin.service.impl;
 
-import com.teamchallenge.marketplace.admin.dto.AdminRepotDto;
+import com.teamchallenge.marketplace.admin.dto.AdminReprotDto;
 import com.teamchallenge.marketplace.admin.dto.ComplaintCounterDto;
 import com.teamchallenge.marketplace.admin.dto.CounterProductDto;
 import com.teamchallenge.marketplace.admin.service.AdminService;
@@ -76,7 +76,7 @@ public class AdminServiceImpl implements AdminService {
     }
 
     @Override
-    public Page<AdminRepotDto> getReport(Pageable pageable) {
+    public Page<AdminReprotDto> getReport(Pageable pageable) {
         var users = userRepository.findAll(pageable);
 
         List<CounterProductDto> products;
@@ -105,7 +105,7 @@ public class AdminServiceImpl implements AdminService {
                     .orElse(new CounterProductDto(user.getId().intValue(), ProductStatusEnum.ACTIVE,
                             0, 0, 0, 0));
 
-            return new AdminRepotDto(
+            return new AdminReprotDto(
                     user.getEmail(),
                     user.getRole(),
                     localActiveProduct.count(),

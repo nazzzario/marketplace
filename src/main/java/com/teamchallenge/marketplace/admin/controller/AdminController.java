@@ -1,6 +1,6 @@
 package com.teamchallenge.marketplace.admin.controller;
 
-import com.teamchallenge.marketplace.admin.dto.AdminRepotDto;
+import com.teamchallenge.marketplace.admin.dto.AdminReprotDto;
 import com.teamchallenge.marketplace.admin.service.AdminService;
 import com.teamchallenge.marketplace.common.exception.dto.ExceptionResponseDto;
 import com.teamchallenge.marketplace.user.persisit.entity.enums.RoleEnum;
@@ -39,11 +39,11 @@ public class AdminController {
     })
     @PreAuthorize("@userSecurity.checkAdminRights()")
     @PatchMapping("report")
-    public ResponseEntity<Page<AdminRepotDto>> summaryReport(
+    public ResponseEntity<Page<AdminReprotDto>> summaryReport(
             @RequestParam(defaultValue = "0") Integer page,
             @RequestParam(defaultValue = "10") Integer size
     ){
-        Page<AdminRepotDto> report = adminService.getReport(PageRequest.of(page, size));
+        Page<AdminReprotDto> report = adminService.getReport(PageRequest.of(page, size));
 
         return new ResponseEntity<>(report, HttpStatus.OK);
     }

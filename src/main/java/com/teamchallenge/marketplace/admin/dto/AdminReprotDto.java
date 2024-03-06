@@ -2,7 +2,7 @@ package com.teamchallenge.marketplace.admin.dto;
 
 import com.teamchallenge.marketplace.user.persisit.entity.enums.RoleEnum;
 
-public record AdminRepotDto(
+public record AdminReprotDto(
         String email,
         RoleEnum role,
         long countActiveAd,
