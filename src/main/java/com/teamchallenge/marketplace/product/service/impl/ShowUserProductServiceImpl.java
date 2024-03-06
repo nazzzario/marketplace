@@ -37,7 +37,8 @@ public class ShowUserProductServiceImpl implements ShowUserProductService {
                     .orElseThrow(() -> new ClientBackendException(ErrorCode.USER_NOT_FOUND));
             return productRepository.findByOwnerAndStatus(userEntity, status, pageable)
                     .map(product ->  productMapper.toResponseDto(product,
-                            redisTemplate.opsForHash().hasKey(UserProductService.RAISE_AD_PREFIX, product.getReference().toString())));
+                            redisTemplate.opsForHash().hasKey(UserProductService.RAISE_AD_PREFIX,
+                                    product.getReference().toString())));
         } else {
             throw new ClientBackendException(ErrorCode.FORBIDDEN);
         }

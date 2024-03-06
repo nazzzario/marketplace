@@ -32,7 +32,6 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class UserProductServiceImpl implements UserProductService {
 
-    private static final String COMPLAINT_PREFIX = "Complaint_";
     @Value("${product.active.periodsDeadline}")
     private int periodsActive;
     @Value("${product.delete.periodDeadline}")

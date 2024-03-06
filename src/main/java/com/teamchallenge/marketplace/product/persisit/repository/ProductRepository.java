@@ -1,5 +1,7 @@
 package com.teamchallenge.marketplace.product.persisit.repository;
 
+import com.teamchallenge.marketplace.admin.dto.ComplaintCounterDto;
+import com.teamchallenge.marketplace.admin.dto.CounterProductDto;
 import com.teamchallenge.marketplace.product.persisit.entity.ProductEntity;
 import com.teamchallenge.marketplace.product.persisit.entity.enums.ProductCategoriesEnum;
 import com.teamchallenge.marketplace.product.persisit.entity.enums.ProductStatusEnum;
@@ -32,6 +34,17 @@ public interface ProductRepository extends JpaRepository<ProductEntity, Long>,
             group by pd.owner having count(pd) > 0 and (count(pd) +
             (select count(pa) from ProductEntity pa where pa.owner = pd.owner and
             pa in :products group by pa.owner) - :size) > 0)
+            """;
+    String COUNTERS = """
+            select new com.teamchallenge.marketplace.admin.dto.CounterProductDto(p.owner.id,
+            p.status, count(p), sum(p.viewCount), sum(p.adRaiseCount), count(f.id))
+            from ProductEntity p left join p.favoritism f
+            where p.owner in :owners group by p.owner, p.status
+            """;
+    String GROUP = """
+            select new com.teamchallenge.marketplace.admin.dto.ComplaintCounterDto(
+            p.owner.id, count(p)) from ProductEntity p where p.reference in :complaints
+            group by p.owner
             """;
 
     void deleteByReference(UUID reference);
@@ -82,4 +95,10 @@ public interface ProductRepository extends JpaRepository<ProductEntity, Long>,
 
     @EntityGraph(attributePaths = "images")
     List<ProductEntity> findByOwner(UserEntity user);
+
+    @Query(COUNTERS)
+    List<CounterProductDto> getSumByUsers(@Param("owners") List<UserEntity> owners);
+
+    @Query(GROUP)
+    List<ComplaintCounterDto> getComplaintGroupByOwner(@Param("complaints") List<UUID> complaints);
 }
