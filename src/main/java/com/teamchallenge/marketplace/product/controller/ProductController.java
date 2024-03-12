@@ -76,8 +76,8 @@ public class ProductController {
     })
     @GetMapping("/products/search")
     public ResponseEntity<Page<ProductResponseDto>> getProductsByProductTitle(
-            @Parameter(description = "Product title for searching", required = true)
-            @RequestParam(name = "product-title") String productTitle,
+            @Parameter(description = "Product title for searching")
+            @RequestParam(name = "product-title", required = false) String productTitle,
             @RequestParam(name = "city", required = false) String city,
             Integer page,
             Integer size

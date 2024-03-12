@@ -12,6 +12,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
 
 import java.util.Collections;
+import java.util.List;
 
 @Configuration
 @Profile("!test")
@@ -26,7 +27,7 @@ public class SwaggerConfig {
                 .info(new Info()
                         .title("Marketplace APIs")
                         .version("v1.0.0"))
-                .servers(Collections.singletonList(new Server().url(serverURL)))
+                .servers(List.of(new Server().url(serverURL), new Server().url("http://localhost:8080")))
                 .addSecurityItem(new SecurityRequirement().addList("marketplace"))
                 .components(new Components()
                         .addSecuritySchemes("marketplace",

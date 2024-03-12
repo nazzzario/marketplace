@@ -83,7 +83,8 @@ public class ProductServiceImpl implements ProductService {
     @Override
     public Page<ProductResponseDto> getProductsByProductTitle(String productTitle, String city, Integer page, Integer size) {
         if (Objects.isNull(productTitle)) {
-            throw new ClientBackendException(ErrorCode.INVALID_SEARCH_INPUT);
+            return productRepository.findAll(getAllProducts(city), PageRequest.of(page, size))
+                    .map(p -> productMapper.toResponseDto(p, p.getOwner()));
         }
 
         return productRepository.findAll(searchProductsLikeTitleAndCity(productTitle, city), PageRequest.of(page, size))
@@ -135,6 +136,12 @@ public class ProductServiceImpl implements ProductService {
     private Specification<ProductEntity> searchProductsLikeTitleAndCity(String searchInput, String city) {
         return Specification.where((Specification<ProductEntity>) searchLikeString("productTitle", searchInput))
                 .and((Specification<ProductEntity>) fieldEqual("status", ProductStatusEnum.ACTIVE))
+                .and((r, rq, cb) -> Optional.ofNullable(city).map(c -> cb.equal(r.get("city"), city)).orElse(null));
+    }
+
+    @SuppressWarnings(value = "unchecked")
+    private Specification<ProductEntity> getAllProducts(String city) {
+        return Specification.where((Specification<ProductEntity>) fieldEqual("status", ProductStatusEnum.ACTIVE))
                 .and((r, rq, cb) -> Optional.ofNullable(city).map(c -> cb.equal(r.get("city"), city)).orElse(null));
     }
 
