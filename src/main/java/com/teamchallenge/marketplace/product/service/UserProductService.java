@@ -34,5 +34,9 @@ public interface UserProductService {
 
     List<ProductEntity> getAllProductByUser(UserEntity user);
 
-    String complaintProduct(UUID productReference, UUID userReference, String message);
+    String complaintProduct(UUID productReference, String message);
+
+    void changeDeleteProduct(ProductEntity product);
+
+    void changeToFakeDeleteProduct(ProductEntity product, UserEntity fakeUser);
 }

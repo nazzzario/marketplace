@@ -127,6 +127,23 @@ public class UserController {
         return new ResponseEntity<>(patchedUser, HttpStatus.OK);
     }
 
+    @Operation(summary = "Change user to fake", description = "Change email and phone user by adding the ad prefix:'Delete_'" +
+    " or delete user if fake user is exist ")
+
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Patched email and phone user"),
+            @ApiResponse(responseCode = "401", description = "Unauthenticated",
+                    content = {@Content(mediaType = "application/json", schema = @Schema(implementation = ExceptionResponseDto.class))}),
+            @ApiResponse(responseCode = "403", description = "Access denied",
+                    content = {@Content(mediaType = "application/json", schema = @Schema(implementation = ExceptionResponseDto.class))})
+    })
+    @DeleteMapping("private/users/delete")
+    public ResponseEntity<Void> changeUserToFake(){
+        userService.changeUserToFake();
+
+        return ResponseEntity.noContent().build();
+    }
+
     @Operation(summary = "Change password", description = "Change user password")
 
     @ApiResponses(value = {

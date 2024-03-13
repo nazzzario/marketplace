@@ -8,7 +8,7 @@ public record AdminReportDto(
         long countActiveAd,
         long countViewActiveAd,
         long raiseActiveAd,
-        long countComplaintAd,
+        int countComplaintAd,
         long countDisabledAd,
         boolean isExistNewAd,
         long countFavoriteAd,

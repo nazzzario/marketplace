@@ -8,6 +8,7 @@ import org.springframework.data.domain.Pageable;
 import java.util.UUID;
 
 public interface AdminService {
+    long ONE_USER = 1L;
     void blockUser(UUID userReference);
 
     void deleteUser(UUID userReference);

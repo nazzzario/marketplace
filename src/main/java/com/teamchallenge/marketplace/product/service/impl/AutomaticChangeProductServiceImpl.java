@@ -108,7 +108,7 @@ public class AutomaticChangeProductServiceImpl implements AutomaticChangeProduct
                     .append(UL);
             products.stream().sorted(Comparator.comparing(ProductEntity::getPublishDate))
                     .limit(sizeDeleteEntity).forEach(product -> {
-                        productService.processDeleteProduct(product);
+                        productService.changeDeleteProduct(product);
                         message.append(LI).append(product.getProductDescription()).append(LI_CLOSE);
                     });
             message.append("<h3>Це потрібно для внесення в архів нових повідомлень</h3>");
@@ -143,7 +143,7 @@ public class AutomaticChangeProductServiceImpl implements AutomaticChangeProduct
         message.append("<h2>Ми видалили з архіву ваші старі повідомлення:</h2>")
                 .append(UL);
         disabledProducts.forEach(product -> {
-            productService.processDeleteProduct(product);
+            productService.changeDeleteProduct(product);
             message.append(LI).append(product.getProductDescription()).append(LI_CLOSE);
         });
         message.append(UL_CLOSE).append(CONDITIONS);
