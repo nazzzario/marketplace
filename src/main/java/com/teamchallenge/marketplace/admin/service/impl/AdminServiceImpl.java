@@ -21,12 +21,11 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
 public class AdminServiceImpl implements AdminService {
-
-    private static final long ONE_USER = 1L;
 
     private final UserRepository userRepository;
     private final ProductRepository productRepository;
@@ -92,11 +91,17 @@ public class AdminServiceImpl implements AdminService {
                 .stream().map(e -> UUID.fromString(
                         e.replace(UserProductService.COMPLAINT_PREFIX, "")))
                 .toList();
-        List<ComplaintCounterDto> groupComplaints;
+        Map<Long, Integer> complaintsUser;
         if (complaints.isEmpty()) {
-            groupComplaints = List.of();
+            complaintsUser = Map.of();
         } else {
-            groupComplaints = productRepository.getComplaintGroupByOwner(complaints);
+            complaintsUser = productRepository.getComplaintGroupByOwner(complaints)
+                    .stream().collect(Collectors.toMap(
+                            ComplaintCounterDto::userId,
+                            e -> redisTemplate.opsForHash().values(
+                                    UserProductService.COMPLAINT_PREFIX +
+                                            e.productReference()).size(),
+                            Integer::sum));
         }
 
         return users.map(user -> {
@@ -111,8 +116,7 @@ public class AdminServiceImpl implements AdminService {
                     localActiveProduct.count(),
                     localActiveProduct.view(),
                     localActiveProduct.raise(),
-                    groupComplaints.stream().filter(e -> e.userId() == user.getId())
-                            .mapToLong(ComplaintCounterDto::count).sum(),
+                    Optional.ofNullable(complaintsUser.get(user.getId())).orElse(0),
                     products.stream().filter(e1 -> e1.ownerId() == user.getId() &&
                                     e1.status().equals(ProductStatusEnum.DISABLED))
                             .mapToLong(CounterProductDto::count).sum(),

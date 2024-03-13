@@ -26,4 +26,6 @@ public interface UserService {
     void patchPassword(UserPasswordRequestDto requestDto);
 
     void sendVerificationCode(String email, String ip);
+
+    void changeUserToFake();
 }

@@ -138,18 +138,14 @@ public class UserProductController {
             @ApiResponse(responseCode = "401", description = "User is not authenticated",
                     content = {@Content(mediaType = "application/json", schema = @Schema(implementation = ExceptionResponseDto.class))})
     })
-    @PostMapping("/{productReference}/complaint/{userReference}")
-    @PreAuthorize("isAuthenticated()")
+    @PostMapping("/{productReference}/complaint")
     public ResponseEntity<String> complaintProduct(
             @Parameter(description = "Product reference", required = true)
             @PathVariable(name = "productReference") UUID productReference,
-            @Parameter(description = "User reference", required = true)
-            @PathVariable(name = "userReference") UUID userReference,
             @Parameter(description = "Message about complaint", required = true)
             @RequestBody String message
     ) {
-        String response = productService.complaintProduct(productReference,
-                userReference, message);
+        String response = productService.complaintProduct(productReference,message);
 
         return new ResponseEntity<>(response, HttpStatus.CREATED);
     }

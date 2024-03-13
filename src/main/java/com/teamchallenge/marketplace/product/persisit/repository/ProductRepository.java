@@ -43,8 +43,8 @@ public interface ProductRepository extends JpaRepository<ProductEntity, Long>,
             """;
     String GROUP = """
             select new com.teamchallenge.marketplace.admin.dto.ComplaintCounterDto(
-            p.owner.id, count(p)) from ProductEntity p where p.reference in :complaints
-            group by p.owner
+            p.owner.id, p.reference) from ProductEntity p where p.reference in :complaints
+            group by p.owner, p.reference
             """;
 
     void deleteByReference(UUID reference);

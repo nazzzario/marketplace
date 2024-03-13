@@ -63,17 +63,17 @@ public class AdminProductServiceImpl implements AdminProductService {
         if (keys != null) {
             return keys.stream()
                     .map(key -> new FolderComplaintDto(
-                            productMapper.toResponseDto(
-                                    productRepository.findByReference(
-                                            UUID.fromString(key.replace(COMPLAINT_PREFIX, "")))
-                                            .orElseThrow(() -> new ClientBackendException(
-                                                    ErrorCode.PRODUCT_NOT_FOUND)),
-                                    userRepository.findByProductsReference(UUID.fromString(key.replace(
-                                            COMPLAINT_PREFIX, ""))).orElseThrow(() ->
-                                            new ClientBackendException(ErrorCode.USER_NOT_FOUND))),
+                                    productMapper.toResponseDto(
+                                            productRepository.findByReference(
+                                                            UUID.fromString(key.replace(COMPLAINT_PREFIX, "")))
+                                                    .orElseThrow(() -> new ClientBackendException(
+                                                            ErrorCode.PRODUCT_NOT_FOUND)),
+                                            userRepository.findByProductsReference(UUID.fromString(key.replace(
+                                                    COMPLAINT_PREFIX, ""))).orElseThrow(() ->
+                                                    new ClientBackendException(ErrorCode.USER_NOT_FOUND))),
                                     redisTemplate.opsForHash().entries(key).entrySet().stream()
                                             .map(complaint -> new ComplaintDto(
-                                                    UUID.fromString((String) complaint.getKey()),
+                                                    (String) complaint.getKey(),
                                                     (String) complaint.getValue())
                                             ).toList()
                             )

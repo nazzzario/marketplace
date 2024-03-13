@@ -1,10 +1,12 @@
 package com.teamchallenge.marketplace.user.service.impl;
 
+import com.teamchallenge.marketplace.admin.service.AdminService;
 import com.teamchallenge.marketplace.common.email.service.EmailService;
 import com.teamchallenge.marketplace.common.exception.ClientBackendException;
 import com.teamchallenge.marketplace.common.exception.ErrorCode;
 import com.teamchallenge.marketplace.common.security.service.SecurityAttempts;
 import com.teamchallenge.marketplace.product.persisit.entity.enums.ProductStatusEnum;
+import com.teamchallenge.marketplace.product.service.UserProductService;
 import com.teamchallenge.marketplace.user.dto.request.UserPasswordRequestDto;
 import com.teamchallenge.marketplace.user.dto.request.UserPatchRequestDto;
 import com.teamchallenge.marketplace.user.dto.request.UserRequestDto;
@@ -37,7 +39,8 @@ public class UserServiceImpl implements UserService {
     private static final String EXCEPTION_VERIFICATION_PREFIX = "ExceptionVerification_";
     private static final String LIMIT_VERIFICATION_PREFIX = "LimitVerification_";
     private static final String LIMIT_REGISTRATION_PREFIX = "LimitRegistration_";
-    public static final String VERIFICATION_CODE = "VerificationCode_";
+    private static final String VERIFICATION_CODE = "VerificationCode_";
+    private static final String DELETE_PREFIX = "Delete_";
 
     @Value("${user.max.value}")
     private int maxValue;
@@ -53,11 +56,12 @@ public class UserServiceImpl implements UserService {
     private final SecurityAttempts attempts;
     private final PasswordEncoder passwordEncoder;
     private final EmailService emailService;
+    private final UserProductService productService;
 
     @Override
     @Transactional
     public UserResponseDto userRegistration(UserRequestDto requestDto) {
-        if (attempts.isAttemptExhausted(LIMIT_REGISTRATION_PREFIX, requestDto.email())){
+        if (attempts.isAttemptExhausted(LIMIT_REGISTRATION_PREFIX, requestDto.email())) {
             throw new ClientBackendException(ErrorCode.ATTEMPTS_IS_EXHAUSTED);
         }
 
@@ -66,7 +70,7 @@ public class UserServiceImpl implements UserService {
         }
 
         if (attempts.isNotVerificationCode(VERIFICATION_CODE + requestDto.email(),
-                requestDto.verificationCode())){
+                requestDto.verificationCode())) {
             attempts.incrementCounterAttempt(LIMIT_REGISTRATION_PREFIX, EXCEPTION_VERIFICATION_PREFIX,
                     requestDto.email(), limitation, timeout);
             throw new ClientBackendException(ErrorCode.IS_NOT_VERIFICATION);
@@ -135,7 +139,7 @@ public class UserServiceImpl implements UserService {
         String code = getVerificationCode();
         attempts.setVerificationCode(VERIFICATION_CODE + email, code, timeout);
         emailService.sendEmail(email, emailService.buildMsgForUser(userTemplatePath,
-                getMessageAboutVerificationCode(code)),
+                        getMessageAboutVerificationCode(code)),
                 "Веріфікаційний код для підтвердження пошти.");
     }
 
@@ -149,6 +153,37 @@ public class UserServiceImpl implements UserService {
         int randomNumber = ThreadLocalRandom.current().nextInt(maxValue);
         String format = "%0" + String.valueOf(maxValue).length() + "d";
         return String.format(format, randomNumber);
+    }
+
+    @Override
+    public void changeUserToFake() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication == null || !authentication.isAuthenticated()) {
+            throw new ClientBackendException(ErrorCode.FORBIDDEN);
+        }
+
+        var fakeUser = userRepository.findByEmail(DELETE_PREFIX + authentication.getName())
+                .orElse(null);
+        var user = userRepository.findByEmail(authentication.getName())
+                .orElseThrow(() -> new ClientBackendException(ErrorCode.USER_NOT_FOUND));
+
+        if (user.getRole().equals(RoleEnum.ROOT) &&
+                userRepository.countByRole(RoleEnum.ROOT) == AdminService.ONE_USER){
+            throw new ClientBackendException(ErrorCode.NOT_ONE_ROOT);
+        }
+
+        if (fakeUser == null) {
+            productService.getAllProductByUser(user).forEach(productService::changeDeleteProduct);
+            user.setEmail(DELETE_PREFIX + user.getEmail());
+            user.setPhoneNumber(DELETE_PREFIX + user.getPhoneNumber());
+            user.setNonLocked(false);
+
+            userRepository.save(user);
+        } else {
+            productService.getAllProductByUser(user).forEach(product ->
+                    productService.changeToFakeDeleteProduct(product, fakeUser));
+            userRepository.delete(user);
+        }
     }
 
     @Override

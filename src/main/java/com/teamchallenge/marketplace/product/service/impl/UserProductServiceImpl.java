@@ -24,6 +24,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
@@ -64,12 +65,12 @@ public class UserProductServiceImpl implements UserProductService {
     public UserProductResponseDto patchProduct(ProductRequestDto requestDto, UUID productReference) {
         var authentication = SecurityContextHolder.getContext().getAuthentication();
 
-        if (Objects.nonNull(authentication) && authentication.isAuthenticated()){
+        if (Objects.nonNull(authentication) && authentication.isAuthenticated()) {
             if (authentication.getAuthorities().stream().anyMatch(role ->
                     role.getAuthority().equals(RoleEnum.ADMIN.name()) ||
                             role.getAuthority().equals(RoleEnum.ROOT.name())) ||
                     userRepository.existsByEmailAndProductsReference(authentication.getName(),
-                            productReference)){
+                            productReference)) {
                 ProductEntity productEntity = productRepository.findByReference(productReference)
                         .orElseThrow(() -> new ClientBackendException(ErrorCode.PRODUCT_NOT_FOUND));
 
@@ -78,8 +79,12 @@ public class UserProductServiceImpl implements UserProductService {
                 return productMapper.toResponseDto(productRepository.save(productEntity),
                         redisTemplate.opsForHash().hasKey(RAISE_AD_PREFIX,
                                 productEntity.getReference().toString()));
-            } else {throw new ClientBackendException(ErrorCode.USER_NOT_OWN_AD);}
-        } else {throw new ClientBackendException(ErrorCode.FORBIDDEN);}
+            } else {
+                throw new ClientBackendException(ErrorCode.USER_NOT_OWN_AD);
+            }
+        } else {
+            throw new ClientBackendException(ErrorCode.FORBIDDEN);
+        }
     }
 
     @Override
@@ -87,68 +92,82 @@ public class UserProductServiceImpl implements UserProductService {
     public void deleteProduct(UUID productReference) {
         var authentication = SecurityContextHolder.getContext().getAuthentication();
 
-        if (Objects.nonNull(authentication) && authentication.isAuthenticated()){
+        if (Objects.nonNull(authentication) && authentication.isAuthenticated()) {
             if (authentication.getAuthorities().stream().anyMatch(role ->
                     role.getAuthority().equals(RoleEnum.ADMIN.name()) ||
                             role.getAuthority().equals(RoleEnum.ROOT.name())) ||
                     userRepository.existsByEmailAndProductsReference(authentication.getName(),
-                            productReference)){
+                            productReference)) {
                 ProductEntity productEntity = productRepository.findByReference(productReference)
                         .orElseThrow(() -> new ClientBackendException(ErrorCode.PRODUCT_NOT_FOUND));
 
-                userRepository.findByFavoriteProducts(productEntity).forEach(user ->
-                        user.getFavoriteProducts().remove(productEntity));
-
-                productEntity.getImages().forEach(image -> productImageService.processDeleteImage(image.getId()));
-
-                redisTemplate.opsForHash().delete(RAISE_AD_PREFIX, productEntity.getReference().toString());
+                deleteConnections(productEntity);
 
                 productRepository.delete(productEntity);
-            } else { throw new ClientBackendException(ErrorCode.USER_NOT_OWN_AD);}
+            } else {
+                throw new ClientBackendException(ErrorCode.USER_NOT_OWN_AD);
+            }
         } else {
             throw new ClientBackendException(ErrorCode.FORBIDDEN);
         }
     }
 
-    @Override
-    @Transactional
-    public void processDeleteProduct(ProductEntity productEntity) {
+    private void deleteConnections(ProductEntity productEntity) {
         userRepository.findByFavoriteProducts(productEntity).forEach(user ->
                 user.getFavoriteProducts().remove(productEntity));
 
         productEntity.getImages().forEach(image -> productImageService.processDeleteImage(image.getId()));
 
         redisTemplate.opsForHash().delete(RAISE_AD_PREFIX, productEntity.getReference().toString());
+    }
+
+    @Override
+    @Transactional
+    public void processDeleteProduct(ProductEntity productEntity) {
+        deleteConnections(productEntity);
 
         productRepository.delete(productEntity);
     }
 
     @Override
+    @Transactional
     public UserProductResponseDto changeStatusProduct(UUID productReference, ProductStatusEnum status, int period) {
-        var authentication = SecurityContextHolder.getContext().getAuthentication();
-        if (Objects.nonNull(authentication) && authentication.isAuthenticated()){
-            if (authentication.getAuthorities().stream().anyMatch(role ->
-                    role.getAuthority().equals(RoleEnum.ADMIN.name()) ||
-                            role.getAuthority().equals(RoleEnum.ROOT.name())) ||
-                    userRepository.existsByEmailAndProductsReference(authentication.getName(),
-                            productReference)){
-                if (!status.equals(ProductStatusEnum.NEW)){
-                ProductEntity productEntity = productRepository.findByReference(productReference)
-                        .orElseThrow(() -> new ClientBackendException(ErrorCode.PRODUCT_NOT_FOUND));
+        if (status.equals(ProductStatusEnum.NEW)) {
+            throw new ClientBackendException(ErrorCode.NOT_CHANGE_STATUS_TO_NEW);
+        }
 
-                return productMapper.toResponseDto(getProductAndChangeStatus(productEntity, status,
-                        getCorrectPeriod(status)), redisTemplate.opsForHash().hasKey(RAISE_AD_PREFIX,
-                        productEntity.getReference().toString()));
-                } else {throw  new ClientBackendException(ErrorCode.NOT_CHANGE_STATUS_TO_NEW);}
-            } else {throw new ClientBackendException(ErrorCode.USER_NOT_OWN_AD);}
-        } else {
+        var authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication == null || !authentication.isAuthenticated()) {
             throw new ClientBackendException(ErrorCode.FORBIDDEN);
         }
+
+        if (authentication.getAuthorities().stream().anyMatch(role ->
+                role.getAuthority().equals(RoleEnum.ADMIN.name()) ||
+                        role.getAuthority().equals(RoleEnum.ROOT.name())) ||
+                userRepository.existsByEmailAndProductsReference(authentication.getName(),
+                        productReference)) {
+
+            ProductEntity productEntity = productRepository.findByReference(productReference)
+                    .orElseThrow(() -> new ClientBackendException(ErrorCode.PRODUCT_NOT_FOUND));
+
+            if (!productEntity.getStatus().equals(ProductStatusEnum.DELETE) &&
+                    status.equals(ProductStatusEnum.DELETE)) {
+                deleteConnections(productEntity);
+            }
+
+            return productMapper.toResponseDto(getProductAndChangeStatus(productEntity, status,
+                    getCorrectPeriod(status)), redisTemplate.opsForHash().hasKey(RAISE_AD_PREFIX,
+                    productEntity.getReference().toString()));
+        } else {
+            throw new ClientBackendException(ErrorCode.USER_NOT_OWN_AD);
+        }
+
 
     }
 
     @Override
     public ProductEntity getProductAndChangeStatus(ProductEntity product, ProductStatusEnum status, int period) {
+        product.setPublishDate(LocalDate.now());
         product.setTimePeriod(period);
         product.setStatus(status);
         return productRepository.save(product);
@@ -157,22 +176,50 @@ public class UserProductServiceImpl implements UserProductService {
     @Override
     public void raiseAdProduct(UUID productReference) {
         var authentication = SecurityContextHolder.getContext().getAuthentication();
-        if (Objects.nonNull(authentication) && authentication.isAuthenticated()){
+        if (Objects.nonNull(authentication) && authentication.isAuthenticated()) {
             if (userRepository.existsByEmailAndProductsReferenceAndProductsStatus(authentication.getName(),
-                    productReference, ProductStatusEnum.ACTIVE)){
+                    productReference, ProductStatusEnum.ACTIVE)) {
                 if (Boolean.FALSE.equals(redisTemplate.opsForHash().hasKey(RAISE_AD_PREFIX,
-                        productReference.toString()))){
+                        productReference.toString()))) {
                     redisTemplate.opsForHash().increment(RAISE_AD_PREFIX, productReference.toString(), 1);
-                } else {throw new ClientBackendException(ErrorCode.LIMIT_IS_EXHAUSTED);}
-            } else {throw  new ClientBackendException(ErrorCode.PRODUCT_NOT_ACTIVE);}
-        } else {throw  new ClientBackendException(ErrorCode.FORBIDDEN);}
+                } else {
+                    throw new ClientBackendException(ErrorCode.LIMIT_IS_EXHAUSTED);
+                }
+            } else {
+                throw new ClientBackendException(ErrorCode.PRODUCT_NOT_ACTIVE);
+            }
+        } else {
+            throw new ClientBackendException(ErrorCode.FORBIDDEN);
+        }
     }
 
     @Override
-    public String complaintProduct(UUID productReference, UUID userReference, String message) {
-        redisTemplate.opsForHash().put(COMPLAINT_PREFIX + productReference.toString(),
-                userReference.toString(), message);
-        return "Дякуємо за звернення. Ми розлянемо вашу скаргу";
+    @Transactional
+    public void changeToFakeDeleteProduct(ProductEntity product, UserEntity fakeUser) {
+        deleteConnections(product);
+        product.setStatus(ProductStatusEnum.DELETE);
+        product.setOwner(fakeUser);
+        productRepository.save(product);
+    }
+
+    @Override
+    @Transactional
+    public void changeDeleteProduct(ProductEntity product) {
+        deleteConnections(product);
+        product.setStatus(ProductStatusEnum.DELETE);
+        productRepository.save(product);
+    }
+
+    @Override
+    public String complaintProduct(UUID productReference, String message) {
+        var authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (Objects.nonNull(authentication) && authentication.isAuthenticated()) {
+            redisTemplate.opsForHash().put(COMPLAINT_PREFIX + productReference.toString(),
+                    authentication.getName(), message);
+            return "Дякуємо за звернення. Ми розлянемо вашу скаргу";
+        } else {
+            throw new ClientBackendException(ErrorCode.FORBIDDEN);
+        }
     }
 
     @Override
