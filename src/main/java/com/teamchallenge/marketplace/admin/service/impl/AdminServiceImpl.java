@@ -112,6 +112,7 @@ public class AdminServiceImpl implements AdminService {
 
             return new AdminReportDto(
                     user.getEmail(),
+                    user.getReference(),
                     user.getRole(),
                     localActiveProduct.count(),
                     localActiveProduct.view(),
