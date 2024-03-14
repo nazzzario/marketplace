@@ -1,6 +1,7 @@
 package com.teamchallenge.marketplace.admin.controller;
 
 import com.teamchallenge.marketplace.admin.dto.AdminReportDto;
+import com.teamchallenge.marketplace.admin.dto.ComplaintDto;
 import com.teamchallenge.marketplace.admin.service.AdminService;
 import com.teamchallenge.marketplace.common.exception.dto.ExceptionResponseDto;
 import com.teamchallenge.marketplace.user.persisit.entity.enums.RoleEnum;
@@ -18,6 +19,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.UUID;
 
 @RestController
@@ -38,7 +40,7 @@ public class AdminController {
                     content = {@Content(mediaType = "application/json", schema = @Schema(implementation = ExceptionResponseDto.class))})
     })
     @PreAuthorize("@userSecurity.checkAdminRights()")
-    @PatchMapping("report")
+    @GetMapping("report")
     public ResponseEntity<Page<AdminReportDto>> summaryReport(
             @RequestParam(defaultValue = "0") Integer page,
             @RequestParam(defaultValue = "10") Integer size
@@ -97,6 +99,61 @@ public class AdminController {
     @DeleteMapping("{userReference}/delete")
     public ResponseEntity<Void> deleteUser(@PathVariable UUID userReference){
         adminService.deleteUser(userReference);
+
+        return ResponseEntity.noContent().build();
+    }
+
+    @Operation(summary = "Get list of feedback", description = "Get list of feedback", responses = {
+            @ApiResponse(responseCode = "200", description = "Get list of feedback"),
+            @ApiResponse(responseCode = "401", description = "Unauthenticated",
+                    content = {@Content(mediaType = "application/json", schema = @Schema(implementation = ExceptionResponseDto.class))}),
+            @ApiResponse(responseCode = "403", description = "Access denied",
+                    content = {@Content(mediaType = "application/json", schema = @Schema(implementation = ExceptionResponseDto.class))}),
+            @ApiResponse(responseCode = "404", description = "User not found",
+                    content = {@Content(mediaType = "application/json", schema = @Schema(implementation = ExceptionResponseDto.class))})
+
+    })
+    @PreAuthorize("@userSecurity.checkAdminRights()")
+    @GetMapping("feedback/users")
+    public ResponseEntity<List<ComplaintDto>> getComplaintProducts() {
+        List<ComplaintDto> feedbackUsers = adminService.getFeedbackUsers();
+
+        return new ResponseEntity<>(feedbackUsers, HttpStatus.OK);
+    }
+
+    @Operation(summary = "Delete feedback", description = "Admin can delete  feedback user", responses = {
+            @ApiResponse(responseCode = "204", description = "Delete feedback user"),
+            @ApiResponse(responseCode = "401", description = "Unauthenticated",
+                    content = {@Content(mediaType = "application/json", schema = @Schema(implementation = ExceptionResponseDto.class))}),
+            @ApiResponse(responseCode = "403", description = "Access denied",
+                    content = {@Content(mediaType = "application/json", schema = @Schema(implementation = ExceptionResponseDto.class))}),
+            @ApiResponse(responseCode = "404", description = "Product not found",
+                    content = {@Content(mediaType = "application/json", schema = @Schema(implementation = ExceptionResponseDto.class))})
+
+    })
+    @PreAuthorize("@userSecurity.checkAdminRights()")
+    @DeleteMapping("feedback/{userReference}/delete")
+    public ResponseEntity<Void> deleteFeedbackProduct(
+            @PathVariable UUID userReference
+    ) {
+        adminService.deleteFeedback(userReference);
+
+        return ResponseEntity.noContent().build();
+    }
+
+    @Operation(summary = "Change user to fake by the admin", description = "Change user to fake by the admin")
+
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Patched user"),
+            @ApiResponse(responseCode = "401", description = "Unauthenticated",
+                    content = {@Content(mediaType = "application/json", schema = @Schema(implementation = ExceptionResponseDto.class))}),
+            @ApiResponse(responseCode = "403", description = "Access denied",
+                    content = {@Content(mediaType = "application/json", schema = @Schema(implementation = ExceptionResponseDto.class))})
+    })
+    @PreAuthorize("@userSecurity.checkAdminRights()")
+    @DeleteMapping("{userReference}/fake")
+    public ResponseEntity<Void> changeUserToFake(@PathVariable UUID userReference){
+        adminService.changeUserToFake(userReference);
 
         return ResponseEntity.noContent().build();
     }

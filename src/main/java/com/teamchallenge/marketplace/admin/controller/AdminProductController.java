@@ -27,7 +27,7 @@ import java.util.UUID;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/v1/private/")
-@Tag(name = "Admin")
+@Tag(name = "Admin product")
 public class AdminProductController {
 
     private final AdminProductService productService;

@@ -2,6 +2,7 @@ package com.teamchallenge.marketplace.admin.service.impl;
 
 import com.teamchallenge.marketplace.admin.dto.AdminReportDto;
 import com.teamchallenge.marketplace.admin.dto.ComplaintCounterDto;
+import com.teamchallenge.marketplace.admin.dto.ComplaintDto;
 import com.teamchallenge.marketplace.admin.dto.CounterProductDto;
 import com.teamchallenge.marketplace.admin.service.AdminService;
 import com.teamchallenge.marketplace.common.exception.ClientBackendException;
@@ -13,6 +14,7 @@ import com.teamchallenge.marketplace.product.service.UserProductService;
 import com.teamchallenge.marketplace.user.persisit.entity.UserEntity;
 import com.teamchallenge.marketplace.user.persisit.entity.enums.RoleEnum;
 import com.teamchallenge.marketplace.user.persisit.repository.UserRepository;
+import com.teamchallenge.marketplace.user.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -31,6 +33,7 @@ public class AdminServiceImpl implements AdminService {
     private final ProductRepository productRepository;
     private final UserProductService productService;
     private final RedisTemplate<String, String> redisTemplate;
+    private final UserService userService;
 
     @Override
     public void blockUser(UUID userReference) {
@@ -132,5 +135,30 @@ public class AdminServiceImpl implements AdminService {
     private boolean isNotOneUserWithRoleRoot(UserEntity user) {
         return !(user.getRole().equals(RoleEnum.ROOT) &&
                 userRepository.countByRole(RoleEnum.ROOT) == ONE_USER);
+    }
+
+    @Override
+    public List<ComplaintDto> getFeedbackUsers() {
+        return Optional.ofNullable(redisTemplate.keys(UserService.FEEDBACK_PREFIX + "*"))
+                .orElse(Set.of()).stream().map(key ->
+                        new ComplaintDto(key.replace(UserService.FEEDBACK_PREFIX, ""),
+                                redisTemplate.opsForValue().get(key))
+                ).toList();
+    }
+
+    @Override
+    public void deleteFeedback(UUID userReference) {
+        var user = userRepository.findByReference(userReference).orElseThrow(
+                () -> new ClientBackendException(ErrorCode.USER_NOT_FOUND));
+        redisTemplate.delete(UserService.FEEDBACK_PREFIX + user.getEmail());
+
+    }
+
+    @Override
+    public void changeUserToFake(UUID userReference) {
+        userService.processChangeUserToFake(
+                userRepository.findByReference(userReference).orElseThrow(
+                        () -> new ClientBackendException(ErrorCode.USER_NOT_FOUND))
+        );
     }
 }

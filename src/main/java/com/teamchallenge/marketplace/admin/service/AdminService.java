@@ -1,10 +1,12 @@
 package com.teamchallenge.marketplace.admin.service;
 
 import com.teamchallenge.marketplace.admin.dto.AdminReportDto;
+import com.teamchallenge.marketplace.admin.dto.ComplaintDto;
 import com.teamchallenge.marketplace.user.persisit.entity.enums.RoleEnum;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
+import java.util.List;
 import java.util.UUID;
 
 public interface AdminService {
@@ -16,4 +18,10 @@ public interface AdminService {
     void changeUserRole(UUID userReference, RoleEnum role);
 
     Page<AdminReportDto> getReport(Pageable pageable);
+
+    List<ComplaintDto> getFeedbackUsers();
+
+    void deleteFeedback(UUID userReference);
+
+    void changeUserToFake(UUID userReference);
 }

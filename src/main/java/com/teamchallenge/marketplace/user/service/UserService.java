@@ -5,12 +5,14 @@ import com.teamchallenge.marketplace.user.dto.request.UserPasswordRequestDto;
 import com.teamchallenge.marketplace.user.dto.request.UserPatchRequestDto;
 import com.teamchallenge.marketplace.user.dto.request.UserRequestDto;
 import com.teamchallenge.marketplace.user.dto.response.UserResponseDto;
+import com.teamchallenge.marketplace.user.persisit.entity.UserEntity;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
 import java.util.UUID;
 
 public interface UserService {
+    String FEEDBACK_PREFIX = "Feedback_";
     UserResponseDto userRegistration(UserRequestDto requestDto);
 
     UserResponseDto getUserByReference(UUID reference);
@@ -28,4 +30,8 @@ public interface UserService {
     void sendVerificationCode(String email, String ip);
 
     void changeUserToFake();
+
+    String sendFeedBack(String message);
+
+    void processChangeUserToFake(UserEntity user);
 }
