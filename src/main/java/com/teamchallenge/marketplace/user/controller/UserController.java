@@ -161,5 +161,23 @@ public class UserController {
         return ResponseEntity.noContent().build();
     }
 
+    @Operation(summary = "Send feedback", description = "Send feedback")
+
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Send feedback"),
+            @ApiResponse(responseCode = "401", description = "Unauthenticated",
+                    content = {@Content(mediaType = "application/json", schema = @Schema(implementation = ExceptionResponseDto.class))}),
+            @ApiResponse(responseCode = "403", description = "Access denied",
+                    content = {@Content(mediaType = "application/json", schema = @Schema(implementation = ExceptionResponseDto.class))})
+    })
+    @PreAuthorize("@userSecurity.checkReference(#userReference)")
+    @PostMapping("private/users/feedback")
+    public ResponseEntity<String> feedback(
+             @RequestBody String message){
+        String feedBack = userService.sendFeedBack(message);
+
+        return new ResponseEntity<>(feedBack, HttpStatus.OK);
+    }
+
 
 }

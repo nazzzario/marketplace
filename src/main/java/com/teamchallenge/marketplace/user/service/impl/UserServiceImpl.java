@@ -22,6 +22,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -57,6 +58,7 @@ public class UserServiceImpl implements UserService {
     private final PasswordEncoder passwordEncoder;
     private final EmailService emailService;
     private final UserProductService productService;
+    private final RedisTemplate<String, String> redisTemplate;
 
     @Override
     @Transactional
@@ -163,13 +165,19 @@ public class UserServiceImpl implements UserService {
             throw new ClientBackendException(ErrorCode.FORBIDDEN);
         }
 
-        var fakeUser = userRepository.findByEmail(DELETE_PREFIX + authentication.getName())
-                .orElse(null);
         var user = userRepository.findByEmail(authentication.getName())
                 .orElseThrow(() -> new ClientBackendException(ErrorCode.USER_NOT_FOUND));
 
+        processChangeUserToFake(user);
+    }
+
+    @Override
+    public void processChangeUserToFake(UserEntity user) {
+        var fakeUser = userRepository.findByEmail(DELETE_PREFIX + user.getEmail())
+                .orElse(null);
+
         if (user.getRole().equals(RoleEnum.ROOT) &&
-                userRepository.countByRole(RoleEnum.ROOT) == AdminService.ONE_USER){
+                userRepository.countByRole(RoleEnum.ROOT) == AdminService.ONE_USER) {
             throw new ClientBackendException(ErrorCode.NOT_ONE_ROOT);
         }
 
@@ -185,6 +193,17 @@ public class UserServiceImpl implements UserService {
                     productService.changeToFakeDeleteProduct(product, fakeUser));
             userRepository.delete(user);
         }
+    }
+
+    @Override
+    public String sendFeedBack(String message) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication == null || !authentication.isAuthenticated()) {
+            throw new ClientBackendException(ErrorCode.FORBIDDEN);
+        }
+
+        redisTemplate.opsForValue().set(FEEDBACK_PREFIX + authentication.getName(), message);
+        return "Дякуемо за ваш відгук. Ваша думка нам важлива.";
     }
 
     @Override
