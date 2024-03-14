@@ -81,6 +81,7 @@ public class UserServiceImpl implements UserService {
         UserEntity userEntity = userMapper.toEntity(requestDto);
         userEntity.setPassword(passwordEncoder.encode(requestDto.password()));
         userEntity.setRole(RoleEnum.USER);
+        userEntity.setNonLocked(true);
         UserEntity savedUser = userRepository.save(userEntity);
 
         attempts.delete(LIMIT_REGISTRATION_PREFIX, requestDto.email());
