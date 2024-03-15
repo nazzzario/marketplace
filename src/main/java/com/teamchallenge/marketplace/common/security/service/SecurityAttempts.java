@@ -17,7 +17,7 @@ public class SecurityAttempts {
     private final RedisTemplate<String, String> redisTemplate;
 
     public void incrementCounterAttempt(String blockedPrefix, String exceptionPrefix, String key,
-                                        int limitation, long timeout){
+                                        int limitation, long timeout) {
 
         redisTemplate.opsForHash().increment(exceptionPrefix, key, 1);
 
@@ -29,7 +29,7 @@ public class SecurityAttempts {
         }
     }
 
-    public boolean isAttemptExhausted(String blockedPrefix, String key){
+    public boolean isAttemptExhausted(String blockedPrefix, String key) {
         return Boolean.parseBoolean(redisTemplate.opsForValue().get(blockedPrefix + key));
     }
 
@@ -53,6 +53,9 @@ public class SecurityAttempts {
     }
 
     public boolean isNotVerificationCode(String key, String code) {
+        if (code == null) {
+            return true;
+        }
         return !Objects.equals(redisTemplate.opsForValue().get(key), code);
     }
 

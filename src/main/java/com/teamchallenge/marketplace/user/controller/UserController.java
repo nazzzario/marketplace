@@ -170,7 +170,6 @@ public class UserController {
             @ApiResponse(responseCode = "403", description = "Access denied",
                     content = {@Content(mediaType = "application/json", schema = @Schema(implementation = ExceptionResponseDto.class))})
     })
-    @PreAuthorize("@userSecurity.checkReference(#userReference)")
     @PostMapping("private/users/feedback")
     public ResponseEntity<String> feedback(
              @RequestBody String message){

@@ -14,6 +14,7 @@ public record UserPatchRequestDto(@NotBlank(message = "Username cannot be empty"
                                   @Email(regexp = Constants.EMAIL_REGEXP,
                                           flags = Pattern.Flag.CASE_INSENSITIVE, message = "Invalid email")
                                   String email,
+                                  String verificationCode,
                                   @ValidUkrainianPhoneNumber
                                   String phoneNumber) {
 }

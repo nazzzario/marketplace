@@ -117,6 +117,14 @@ public class UserServiceImpl implements UserService {
     public UserResponseDto patchUser(UUID userReference, @Valid UserPatchRequestDto requestDto) {
         UserEntity userByReference = userRepository.findByReference(userReference)
                 .orElseThrow(() -> new ClientBackendException(ErrorCode.USER_NOT_FOUND));
+
+        if (!userByReference.getEmail().equals(requestDto.email()) &&
+                attempts.isNotVerificationCode(VERIFICATION_CODE + requestDto.email(),
+                        requestDto.verificationCode())) {
+            throw new ClientBackendException(
+                    ErrorCode.IS_NOT_VERIFICATION);
+        }
+
         userMapper.patchMerge(requestDto, userByReference);
 
         return userMapper.toResponseDto(userByReference);
